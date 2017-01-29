@@ -1,0 +1,12 @@
+node_modules
+.dep
+*.lst
+*.o
+*.elf
+*.hex
+*.lss
+*.map
+*.sym
+*.eep
+*.d
+*.bin
