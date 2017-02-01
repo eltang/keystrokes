@@ -41,9 +41,6 @@
 
 		#include "Descriptors.h"
 
-		#include <LUFA/Drivers/Board/Joystick.h>
-		#include <LUFA/Drivers/Board/LEDs.h>
-		#include <LUFA/Drivers/Board/Buttons.h>
 		#include <LUFA/Drivers/USB/USB.h>
 		#include <LUFA/Platform/Platform.h>
 
@@ -80,5 +77,9 @@
 		                                          const void* ReportData,
 		                                          const uint16_t ReportSize);
 
-#endif
+        void usb_wait_until_keyboard_report_sent(void);
+        void usb_wait_until_mouse_report_sent(void);
 
+        extern USB_ClassInfo_HID_Device_t Keyboard_HID_Interface;
+        extern USB_ClassInfo_HID_Device_t Mouse_HID_Interface;
+#endif

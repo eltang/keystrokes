@@ -35,12 +35,20 @@
  */
 
 #include "KeyboardMouse.h"
+#include "keys.h"
+#include "modifiers.h"
+#include "matrix.h"
+#include "TWI_Master.h"
+#include "actions.h"
+#include "layout.h"
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
 
 /** Buffer to hold the previously generated Mouse HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
+
+static volatile uint8_t usb_keyboard_report_counter, usb_mouse_report_counter;
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -84,7 +92,6 @@ USB_ClassInfo_HID_Device_t Mouse_HID_Interface =
 			},
 	};
 
-
 /** Main program entry point. This routine contains the overall program flow, including initial
  *  setup of all components and the main program loop.
  */
@@ -92,14 +99,20 @@ int main(void)
 {
 	SetupHardware();
 
-	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
 	GlobalInterruptEnable();
 
 	for (;;)
 	{
-		HID_Device_USBTask(&Keyboard_HID_Interface);
-		HID_Device_USBTask(&Mouse_HID_Interface);
-		USB_USBTask();
+        keystroke_t *keystroke;
+
+        if ((keystroke = matrix_scan())) {
+            if (USB_DeviceState == DEVICE_STATE_Suspended)
+	            if (USB_Device_RemoteWakeupEnabled)
+		            USB_Device_SendRemoteWakeup();
+            action_t action = layout[0][keystroke->keyswitch.row][keystroke->keyswitch.column];
+            if (action.fcn)
+                action.fcn(*keystroke, action.arg);
+        }
 	}
 }
 
@@ -113,6 +126,10 @@ void SetupHardware()
 
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
+#if defined(__AVR_AT90USB1286__) || defined(__AVR_AT90USB1287__) || defined(__AVR_ATmega32U4__)
+    MCUCR |= 1 << JTD;
+    MCUCR |= 1 << JTD;
+#endif
 #elif (ARCH == ARCH_XMEGA)
 	/* Start the PLL to multiply the 2MHz RC oscillator to 32MHz and switch the CPU core to run from it */
 	XMEGACLK_StartPLL(CLOCK_SRC_INT_RC2MHZ, 2000000, F_CPU);
@@ -124,23 +141,23 @@ void SetupHardware()
 
 	PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
 #endif
-
 	/* Hardware Initialization */
-	Joystick_Init();
-	LEDs_Init();
+    timer_init();
+    matrix_init();
+#ifdef USING_TWI
+    TWI_Master_Initialise();
+#endif
 	USB_Init();
 }
 
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void)
 {
-    LEDs_SetAllLEDs(LEDMASK_USB_ENUMERATING);
 }
 
 /** Event handler for the library USB Disconnection event. */
 void EVENT_USB_Device_Disconnect(void)
 {
-    LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
 }
 
 /** Event handler for the library USB Configuration Changed event. */
@@ -152,8 +169,6 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
 
 	USB_Device_EnableSOFEvents();
-
-	LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
 }
 
 /** Event handler for the library USB Control Request reception event. */
@@ -186,56 +201,22 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
                                          void* ReportData,
                                          uint16_t* const ReportSize)
 {
-	uint8_t JoyStatus_LCL    = Joystick_GetStatus();
-	uint8_t ButtonStatus_LCL = Buttons_GetStatus();
 
 	/* Determine which interface must have its report generated */
 	if (HIDInterfaceInfo == &Keyboard_HID_Interface)
 	{
+        ++usb_keyboard_report_counter;
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
-		/* If first board button not being held down, no keyboard report */
-		if (!(ButtonStatus_LCL & BUTTONS_BUTTON1))
-		  return 0;
-
-		KeyboardReport->Modifier = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
-
-		if (JoyStatus_LCL & JOY_UP)
-		  KeyboardReport->KeyCode[0] = HID_KEYBOARD_SC_A;
-		else if (JoyStatus_LCL & JOY_DOWN)
-		  KeyboardReport->KeyCode[0] = HID_KEYBOARD_SC_B;
-
-		if (JoyStatus_LCL & JOY_LEFT)
-		  KeyboardReport->KeyCode[0] = HID_KEYBOARD_SC_C;
-		else if (JoyStatus_LCL & JOY_RIGHT)
-		  KeyboardReport->KeyCode[0] = HID_KEYBOARD_SC_D;
-
-		if (JoyStatus_LCL & JOY_PRESS)
-		  KeyboardReport->KeyCode[0] = HID_KEYBOARD_SC_E;
-
+        modifiers_create_report(&(KeyboardReport->Modifier));
+        keys_create_report(KeyboardReport->KeyCode);
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
 		return false;
 	}
 	else
 	{
+        ++usb_mouse_report_counter;
 		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
-
-		/* If first board button being held down, no mouse report */
-		if (ButtonStatus_LCL & BUTTONS_BUTTON1)
-		  return 0;
-
-		if (JoyStatus_LCL & JOY_UP)
-		  MouseReport->Y = -1;
-		else if (JoyStatus_LCL & JOY_DOWN)
-		  MouseReport->Y =  1;
-
-		if (JoyStatus_LCL & JOY_LEFT)
-		  MouseReport->X = -1;
-		else if (JoyStatus_LCL & JOY_RIGHT)
-		  MouseReport->X =  1;
-
-		if (JoyStatus_LCL & JOY_PRESS)
-		  MouseReport->Button |= (1 << 0);
 
 		*ReportSize = sizeof(USB_MouseReport_Data_t);
 		return true;
@@ -258,19 +239,22 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 {
 	if (HIDInterfaceInfo == &Keyboard_HID_Interface)
 	{
-		uint8_t  LEDMask   = LEDS_NO_LEDS;
 		uint8_t* LEDReport = (uint8_t*)ReportData;
-
-		if (*LEDReport & HID_KEYBOARD_LED_NUMLOCK)
-		  LEDMask |= LEDS_LED1;
-
-		if (*LEDReport & HID_KEYBOARD_LED_CAPSLOCK)
-		  LEDMask |= LEDS_LED3;
-
-		if (*LEDReport & HID_KEYBOARD_LED_SCROLLLOCK)
-		  LEDMask |= LEDS_LED4;
-
-		LEDs_SetAllLEDs(LEDMask);
 	}
 }
 
+void usb_wait_until_keyboard_report_sent(void)
+{
+    uint8_t saved_usb_keyboard_report_counter = usb_keyboard_report_counter;
+
+    while (saved_usb_keyboard_report_counter == usb_keyboard_report_counter)
+        ;
+}
+
+void usb_wait_until_mouse_report_sent(void)
+{
+    uint8_t saved_usb_mouse_report_counter = usb_mouse_report_counter;
+
+    while (saved_usb_mouse_report_counter == usb_mouse_report_counter)
+        ;
+}
