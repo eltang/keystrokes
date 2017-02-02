@@ -20,7 +20,6 @@ void modifiers_add_temporary(uint8_t modifiers, keyswitch_t keyswitch)
 {
     temporary_modifier_set_t new_set = { keyswitch, modifiers };
     temporary_modifiers.sets[temporary_modifiers.index++] = new_set;
-    usb_wait_until_keyboard_report_sent();
 }
 
 void modifiers_delete_temporary(uint8_t modifiers, keyswitch_t keyswitch)
@@ -34,14 +33,12 @@ void modifiers_delete_temporary(uint8_t modifiers, keyswitch_t keyswitch)
     }
     for (; i != temporary_modifiers.index; ++i)
         temporary_modifiers.sets[i] = temporary_modifiers.sets[i + 1];
-    usb_wait_until_keyboard_report_sent();
 }
 
 void modifiers_add_permanent(uint8_t modifiers)
 {
     for (uint8_t i = 8; i--;)
         permanent_modifiers.modifiers[i] += !!(modifiers & 1 << i);
-    usb_wait_until_keyboard_report_sent();
 }
 
 void modifiers_delete_permanent(uint8_t modifiers)
@@ -50,7 +47,6 @@ void modifiers_delete_permanent(uint8_t modifiers)
         bool temp = permanent_modifiers.modifiers[i] && modifiers & 1 << i;
         permanent_modifiers.modifiers[i] -= temp;
     }
-    usb_wait_until_keyboard_report_sent();
 }
 
 void modifiers_create_report(uint8_t *buffer)

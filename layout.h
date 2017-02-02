@@ -26,7 +26,8 @@ enum {
 extern const __flash action_t layout[][ROWS][COLUMNS];
 
 #define NO_ACTION { 0 }
-#define LAYOUT const __flash action_t layout[][ROWS][COLUMNS] =
+#define LAYOUT(...) \
+const __flash action_t layout[][ROWS][COLUMNS] = { __VA_ARGS__ }
 #define LEADER_KEY { key_leader_start }
 #define TRANSPARENT { keyswitch_transparent }
 
@@ -397,22 +398,24 @@ US_PRINTING_CODE_TO_SCANCODE(code)) | (code & ~0xFFFFFFFFULL))
 US_PRINTING_CODE_TO_SCANCODE(code)) | (code & ~0xFFFFFFFFULL))
 
 #define K_CREATE_FCN(code) \
-(CODE_GET_MODIFIER(code) && CODE_GET_SCANCODE(code) ? actions_modifier_and_scancode_wrapper : \
-CODE_GET_SCANCODE(code) ? actions_scancode_wrapper : \
-CODE_GET_MODIFIER(code) ? actions_modifiers_wrapper : 0)
+(code >> 8 && code & 0xFF ? actions_modifier_and_scancode_wrapper : \
+code & 0xFF ? actions_scancode_wrapper : \
+code >> 8 ? actions_modifiers_wrapper : 0)
 
 #define K_CREATE_ARG(code) \
-(CODE_GET_MODIFIER(code) && CODE_GET_SCANCODE(code) ? (const __flash void *)&(const __flash uint16_t){ (CODE_GET_SCANCODE(code) | CODE_GET_MODIFIER(code) << 8) } : \
-CODE_GET_SCANCODE(code) ? (const __flash void *)&(const __flash uint8_t){ CODE_GET_SCANCODE(code) } : (const __flash void *)&(const __flash uint8_t){ CODE_GET_MODIFIER(code) })
+(code >> 8 && code & 0xFF ? (const __flash void *)&(const __flash uint16_t){ code } : \
+code & 0xFF ? (const __flash void *)&(const __flash uint8_t){ code & 0xFF } : (const __flash void *)&(const __flash uint8_t){ code >> 8 })
 
-#define K(country, code) \
+#define K(code) \
 { \
-    K_CREATE_FCN(K_CREATE_SCANCODE(country, code)), \
-    K_CREATE_ARG(K_CREATE_SCANCODE(country, code)) \
+    K_CREATE_FCN(code), \
+    K_CREATE_ARG(code) \
 }
 
-#define K_CREATE_SCANCODE(country, code) \
-(country == US ? US_CODE_TO_SCANCODE(code) : \
-country == US_DVORAK ? US_DVORAK_CODE_TO_SCANCODE(code) : 0)
+#define SC(country, code) \
+SC_ASSEMBLE((country == US ? US_CODE_TO_SCANCODE(code) : \
+country == US_DVORAK ? US_DVORAK_CODE_TO_SCANCODE(code) : 0))
+
+#define SC_ASSEMBLE(code) (CODE_GET_MODIFIER(code) << 8 | CODE_GET_SCANCODE(code))
 
 #endif

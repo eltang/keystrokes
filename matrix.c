@@ -1,10 +1,22 @@
 #include "matrix.h"
+#include "timer.h"
+#include "pins.h"
+
+#ifdef BACKWARDS_DIODES
+
+#define INPUTS ROWS
+#define OUTPUTS COLUMNS
+#define INPUT_PINS ROW_PINS
+#define OUTPUT_PINS COLUMN_PINS
+
+#else
 
 #define INPUTS COLUMNS
 #define OUTPUTS ROWS
 #define INPUT_PINS COLUMN_PINS
 #define OUTPUT_PINS ROW_PINS
 
+#endif
 
 static const __flash pin_t output_pins[OUTPUTS] = OUTPUT_PINS;
 static const __flash pin_t input_pins[INPUTS] = INPUT_PINS;
@@ -20,11 +32,10 @@ void matrix_init_output(uint8_t output)
 }
 
 __attribute__((weak))
-void matrix_init_input(uint8_t input)
+void matrix_init_input(uint8_t input, uint8_t output)
 {
     pin_t pin = input_pins[input];
 
-    PIN_DDRx(pin) &= ~PIN_MASK(pin);
     PIN_PORTx(pin) |= PIN_MASK(pin);
 }
 
@@ -64,24 +75,30 @@ void matrix_init(void)
 keystroke_t *matrix_scan(void)
 {
     static keystroke_t keystroke;
-    uint8_t keyswitch_state;
+    volatile uint8_t *keyswitch_state;
     bool keyswitch_is_open;
-    uint8_t new_keyswitch_state;
 
     for (uint8_t i = OUTPUTS; i--;) {
         matrix_activate_output(i);
         for (uint8_t j = INPUTS; j--;) {
-            keyswitch_state = matrix_keyswitch_states[i][j];
-            keyswitch_is_open = matrix_read_input(j);
-            if (!(keyswitch_state & 0x80) == keyswitch_is_open || keyswitch_state & 0x7F)
+#ifdef BACKWARDS_DIODES
+            keyswitch_state = &matrix_keyswitch_states[j][i];
+#else
+            keyswitch_state = &matrix_keyswitch_states[i][j];
+#endif
+            keyswitch_is_open = matrix_read_input(j, i);
+            if (!(*keyswitch_state & 0x80) == keyswitch_is_open || *keyswitch_state & 0x7F)
                 continue;
             matrix_deactivate_output(i);
             if (KEYSWITCH_BOUNCE_TIME)
-                new_keyswitch_state = KEYSWITCH_BOUNCE_TIME + 1;
+                *keyswitch_state = KEYSWITCH_BOUNCE_TIME + 1;
             if (!keyswitch_is_open)
-                new_keyswitch_state |= 0x80;
-            matrix_keyswitch_states[i][j] = new_keyswitch_state;
+                *keyswitch_state |= 0x80;
+#ifdef BACKWARDS_DIODES
+            keystroke.keyswitch = (keyswitch_t){ j, i };
+#else
             keystroke.keyswitch = (keyswitch_t){ i, j };
+#endif
             keystroke.stage = keyswitch_is_open;
             return &keystroke;
         }
