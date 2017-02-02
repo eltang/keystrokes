@@ -5,35 +5,22 @@
 
 static uint8_t OLATA_state, OLATB_state, GPIOB_state;
 
-static void matrix_init_mcp23018(void)
+bool matrix_read_input(uint8_t input, output)
 {
-    uint8_t transmission[4];
+    uint8_t transmission[2];
 
-    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
-    transmission[1] = IODIRA;
-    transmission[2] = 0;
-    transmission[3] = (uint8_t)~(1 << 6 | 1 << 7);
-    TWI_Start_Transceiver_With_Data(transmission, 4);
-    transmission[1] = GPPUA;
-    TWI_Start_Transceiver_With_Data(transmission, 4);
-}
-
-static void matrix_init_teensy(void)
-{
-    DDRB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
-    PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
-    DDRD |= 1 << 3 | 1 << 2;
-    PORTD |= 1 << 3 | 1 << 2;
-    DDRC |= 1 << 6;
-    PORTC |= 1 << 6;
-    PORTF |= ~(1 << 3 | 1 << 2);
-}
-
-static bool matrix_read_teensy_input(uint8_t input)
-{
+    if (output < 7) {
+        transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
+        transmission[1] = GPIOB;
+        TWI_Start_Transceiver_With_Data(transmission, 2);
+        transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | TRUE << TWI_READ_BIT;
+        TWI_Start_Transceiver_With_Data(transmission, 1);
+        TWI_Get_Data_From_Transceiver(&GPIOB_state, 1);
+        return GPIOB_state & 1 << input;
+    }
     switch (input) {
     case 0:
-        return PINF & 1 << 0;
+        return PINF & 1;
     case 1:
         return PINF & 1 << 1;
     case 2:
@@ -47,30 +34,13 @@ static bool matrix_read_teensy_input(uint8_t input)
     }
 }
 
-bool matrix_read_input(uint8_t input, output)
-{
-    uint8_t transmission[2];
-
-    if (output > 6)
-        return matrix_read_teensy_input(input);
-    else {
-        transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
-        transmission[1] = GPIOB;
-        TWI_Start_Transceiver_With_Data(transmission, 2);
-        transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | TRUE << TWI_READ_BIT;
-        TWI_Start_Transceiver_With_Data(transmission, 1);
-        TWI_Get_Data_From_Transceiver(&GPIOB_state, 1);
-        return GPIOB_state & 1 << input;
-    }
-}
-
 void matrix_activate_output(uint8_t output)
 {
     uint8_t transmission[3];
 
     switch (output) {
     case 7:
-        PORTB &= ~(1 << 0);
+        PORTB &= ~1;
         break;
     case 8:
         PORTB &= ~(1 << 1);
@@ -105,7 +75,7 @@ void matrix_deactivate_output(uint8_t output)
 
     switch (output) {
     case 7 ... 10:
-        PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1 << 0;
+        PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
         break;
     case 11 ... 12:
         PORTD |= 1 << 3 | 1 << 2;
@@ -127,6 +97,21 @@ void matrix_deactivate_output(uint8_t output)
 
 void matrix_init(void)
 {
-    matrix_init_teensy();
-    matrix_init_mcp23018();
+    uint8_t transmission[4];
+
+    DDRB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
+    PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
+    DDRD |= 1 << 3 | 1 << 2;
+    PORTD |= 1 << 3 | 1 << 2;
+    DDRC |= 1 << 6;
+    PORTC |= 1 << 6;
+    PORTF |= ~(1 << 3 | 1 << 2);
+    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
+    transmission[1] = IODIRA;
+    transmission[2] = 0;
+    transmission[3] = (uint8_t)~(1 << 6 | 1 << 7);
+    TWI_Start_Transceiver_With_Data(transmission, 4);
+    transmission[1] = GPPUB;
+    transmission[2] = transmission[3];
+    TWI_Start_Transceiver_With_Data(transmission, 3);
 }

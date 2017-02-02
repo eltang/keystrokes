@@ -6,9 +6,9 @@
 
 #define PIN(port, pin) { &PIN ## port, 1 << pin }
 #define PIN_MASK(pin) (pin.mask)
-#define PIN_PINx(pin) (pin.addr[0])
-#define PIN_DDRx(pin) (pin.addr[1])
-#define PIN_PORTx(pin) (pin.addr[2])
+#define PIN_PIN(pin) (pin.addr[0])
+#define PIN_DDR(pin) (pin.addr[1])
+#define PIN_PORT(pin) (pin.addr[2])
 
 typedef struct {
     volatile uint8_t *addr;
