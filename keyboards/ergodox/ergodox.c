@@ -112,6 +112,6 @@ void matrix_init(void)
     transmission[3] = (uint8_t)~(1 << 6 | 1 << 7);
     TWI_Start_Transceiver_With_Data(transmission, 4);
     transmission[1] = GPPUB;
-    transmission[2] = transmission[3];
+    transmission[2] = (uint8_t)~(1 << 6 | 1 << 7);
     TWI_Start_Transceiver_With_Data(transmission, 3);
 }

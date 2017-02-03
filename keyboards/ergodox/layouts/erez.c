@@ -176,7 +176,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
-LEADER_EXTERNS();
+
+tyedefstruct {
+    uint64_t sequence;
+    action_t action;
+} leader_key_dictionary_entry_t;
+
+#define LEADER_KEY_DICTIONARY(...) \
+const __flash leader_key_dictionary_entry_t leader_key_dictionary = { \
+    __VA_ARGS__ \
+}
+
+LEADER_KEY_DICTIONARY(
+    LEADER_KEY_DICTIONARY_ENTRY(
+        LEADER_KEY_SEQUENCE(SC(US, 'w'), 0, 0, 0),
+        K(SC(US, L_A(NP(F4))))
+    ),
+    LEADER_KEY_DICTIONARY_ENTRY(
+        LEADER_KEY_SEQUENCE(SC(US, 'o'), 0, 0, 0),
+        K(SC(US, L_C('O')))
+    )
+);
+
+#define LEADER_KEY_DICTIONARY_ENTRY(sequence, action) \
+{ \
+    sequence, \
+    action \
+}
+
+#define LEADER_KEY_SEQUENCE(one, two, three, four) \
+(one << 48 | two << 32 | three << 16 | four) \
 
 // Runs constantly in the background, in a loop.
 void matrix_scan_user(void) {

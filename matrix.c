@@ -32,7 +32,7 @@ void matrix_init_output(uint8_t output)
 }
 
 __attribute__((weak))
-void matrix_init_input(uint8_t input, uint8_t output)
+void matrix_init_input(uint8_t input)
 {
     pin_t pin = input_pins[input];
 
@@ -56,7 +56,7 @@ void matrix_deactivate_output(uint8_t output)
 }
 
 __attribute__((weak))
-bool matrix_read_input(uint8_t input)
+bool matrix_read_input(uint8_t input, uint8_t output)
 {
     pin_t pin = input_pins[input];
 

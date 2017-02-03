@@ -1,6 +1,11 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/atomic.h>
 #include "timer.h"
 #include "matrix.h"
 #include "KeyboardMouse.h"
+
+static volatile uint32_t count;
 
 void timer_init(void)
 {
@@ -10,8 +15,16 @@ void timer_init(void)
     OCR0A = 249;
 }
 
+uint32_t timer_read(void)
+{
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        return count;
+    }
+}
+
 ISR(TIMER0_COMPA_vect)
 {
+    ++count;
     HID_Device_USBTask(&Keyboard_HID_Interface);
     HID_Device_USBTask(&Mouse_HID_Interface);
     USB_USBTask();

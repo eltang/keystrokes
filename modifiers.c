@@ -1,9 +1,9 @@
 #include "modifiers.h"
 #include "KeyboardMouse.h"
 
-static union {
+static struct {
     uint8_t modifiers[8];
-    uint64_t raw;
+    uint8_t set;
 } permanent_modifiers;
 
 typedef struct {
@@ -37,24 +37,26 @@ void modifiers_delete_temporary(uint8_t modifiers, keyswitch_t keyswitch)
 
 void modifiers_add_permanent(uint8_t modifiers)
 {
+    permanent_modifiers.set |= modifiers;
+
     for (uint8_t i = 8; i--;)
-        permanent_modifiers.modifiers[i] += !!(modifiers & 1 << i);
+        if (modifiers & 1 << i)
+            ++permanent_modifiers.modifiers[i];
 }
 
 void modifiers_delete_permanent(uint8_t modifiers)
 {
     for (uint8_t i = 8; i--;) {
-        bool temp = permanent_modifiers.modifiers[i] && modifiers & 1 << i;
-        permanent_modifiers.modifiers[i] -= temp;
+        if (modifiers & 1 << i)
+            if (!--permanent_modifiers.modifiers[i])
+                permanent_modifiers.set &= ~1 << i;
     }
 }
 
 void modifiers_create_report(uint8_t *buffer)
 {
-    if (temporary_modifiers.index)
-        *buffer = temporary_modifiers.sets[temporary_modifiers.index - 1].modifiers;
-    for (uint8_t i = 8; i--;) {
-        if (permanent_modifiers.modifiers[i])
-            *buffer |= 1 << i;
-    }
+    *buffer = permanent_modifiers.set;
+    if (!temporary_modifiers.index)
+        return;
+    *buffer |= temporary_modifiers.sets[temporary_modifiers.index - 1].modifiers;
 }

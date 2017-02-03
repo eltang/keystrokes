@@ -41,6 +41,8 @@
 #include "TWI_Master.h"
 #include "actions.h"
 #include "layout.h"
+#include "power.h"
+#include "timer.h"
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
@@ -126,10 +128,8 @@ void SetupHardware()
 
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
-#if defined(__AVR_AT90USB1286__) || defined(__AVR_AT90USB1287__) || defined(__AVR_ATmega32U4__)
     MCUCR |= 1 << JTD;
     MCUCR |= 1 << JTD;
-#endif
 #elif (ARCH == ARCH_XMEGA)
 	/* Start the PLL to multiply the 2MHz RC oscillator to 32MHz and switch the CPU core to run from it */
 	XMEGACLK_StartPLL(CLOCK_SRC_INT_RC2MHZ, 2000000, F_CPU);
