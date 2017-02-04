@@ -24,8 +24,6 @@ enum {
     KEYSTROKE_FINISH
 };
 
-extern volatile uint8_t matrix_keyswitch_states[ROWS][COLUMNS];
-
 void matrix_init_output(uint8_t output);
 void matrix_init_input(uint8_t input);
 void matrix_activate_output(uint8_t output);
