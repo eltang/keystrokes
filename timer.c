@@ -27,7 +27,4 @@ uint32_t timer_read(void)
 ISR(TIMER0_COMPA_vect)
 {
     ++count;
-    HID_Device_USBTask(&Keyboard_HID_Interface);
-    HID_Device_USBTask(&Mouse_HID_Interface);
-    USB_USBTask();
 }

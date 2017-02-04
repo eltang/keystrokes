@@ -50,7 +50,7 @@ static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
 /** Buffer to hold the previously generated Mouse HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
 
-static volatile uint8_t usb_keyboard_report_counter, usb_mouse_report_counter;
+static uint8_t usb_keyboard_report_counter, usb_mouse_report_counter;
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -115,6 +115,8 @@ int main(void)
             if (action.fcn)
                 action.fcn(*keystroke, action.arg);
         }
+        HID_Device_USBTask(&Keyboard_HID_Interface);
+        HID_Device_USBTask(&Mouse_HID_Interface);
 	}
 }
 
@@ -248,7 +250,7 @@ void usb_wait_until_keyboard_report_sent(void)
     uint8_t saved_usb_keyboard_report_counter = usb_keyboard_report_counter;
 
     while (saved_usb_keyboard_report_counter == usb_keyboard_report_counter)
-        ;
+        HID_Device_USBTask(&Keyboard_HID_Interface);
 }
 
 void usb_wait_until_mouse_report_sent(void)
@@ -256,5 +258,5 @@ void usb_wait_until_mouse_report_sent(void)
     uint8_t saved_usb_mouse_report_counter = usb_mouse_report_counter;
 
     while (saved_usb_mouse_report_counter == usb_mouse_report_counter)
-        ;
+        HID_Device_USBTask(&Mouse_HID_Interface);
 }
