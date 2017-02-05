@@ -77,8 +77,8 @@
 		                                          const void* ReportData,
 		                                          const uint16_t ReportSize);
 
-        void usb_wait_until_keyboard_report_sent(void);
-        void usb_wait_until_mouse_report_sent(void);
+        void usb_wait_until_previous_keyboard_report_sent(void);
+        void usb_wait_until_previous_mouse_report_sent(void);
 
         extern USB_ClassInfo_HID_Device_t Keyboard_HID_Interface;
         extern USB_ClassInfo_HID_Device_t Mouse_HID_Interface;

@@ -1,14 +1,6 @@
 #include "layout.h"
-#include "../ergodox.h"
 
 LAYOUT(
-    {
-        { K(SC(US, NP(TAB))), K(SC(US, '\'')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, 'p')), K(SC(US, 'y')), K(SC(US, 'f')), K(SC(US, 'g')), K(SC(US, 'c')), K(SC(US, 'r')), K(SC(US, 'l')), K(SC(US, '/')) },
-        { K(SC(US, NP(CAPS_LOCK))), K(SC(US, 'a')), K(SC(US, 'o')), K(SC(US, 'e')), K(SC(US, 'u')), K(SC(US, 'i')), K(SC(US, 'd')), K(SC(US, 'h')), K(SC(US, 't')), K(SC(US, 'n')), K(SC(US, 's')), K(SC(US, '-')) },
-        { K(SC(US, NP(L_SHIFT))), K(SC(US, ';')), K(SC(US, 'q')), K(SC(US, 'j')), K(SC(US, 'k')), K(SC(US, 'x')), K(SC(US, 'b')), K(SC(US, 'm')), K(SC(US, 'w')), K(SC(US, 'v')), K(SC(US, 'z')), K(SC(US, NP(R_SHIFT))) },
-        { RESET, NO_ACTION, K(SC(US, NP(L_CTRL))), K(SC(US, NP(L_ALT))), K(SC(US, NP(L_GUI))), K(SC(US, ' ')), K(SC(US, ' ')), K(SC(US, NP(R_GUI))), K(SC(US, NP(R_ALT))), K(SC(US, NP(R_CTRL))), NO_ACTION, NO_ACTION }
-    }
-#if 0
     LAYER(
         K(SC(US, '`')), K(SC(US, '1')), K(SC(US, '2')), K(SC(US, '3')), K(SC(US, '4')), K(SC(US, '5')), NO_ACTION,
         K(SC(US, NP(TAB))), K(SC(US, '\'')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, 'p')), K(SC(US, 'y')), K(SC(US, '[')),
@@ -27,7 +19,8 @@ LAYOUT(
         K(SC(US, NP(LEFT))), K(SC(US, NP(RIGHT))),
         K(SC(US, NP(UP))),
         K(SC(US, NP(DOWN))), K(SC(US, NP(ENTER))), K(SC(US, ' '))
-    )),
+    ),
+#if 0
     LAYER(
         NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION,
         NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION,
@@ -65,6 +58,6 @@ LAYOUT(
         NO_ACTION, NO_ACTION,
         NO_ACTION,
         NO_ACTION, NO_ACTION, M(PRESS)
-    )),
+    ))
 #endif
 );

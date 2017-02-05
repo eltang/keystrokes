@@ -60,19 +60,17 @@ const __flash action_t layout[][ROWS][COLUMNS] = { __VA_ARGS__ }
 
 enum layer_operations {
     VISIT,
-    TOGGLE,
     GOTO
 };
 
 #define L_CREATE_FCN(operation) \
-(operation == VISIT ? actions_layer_visit_wrapper : \
-operation == TOGGLE ? actions_layer_toggle_wrapper : \
-operation == GOTO ? actions_layer_goto_wrapper : 0)
+(operation == VISIT ? actions_layers_visit : \
+operation == GOTO ? actions_layers_goto : 0)
 
-#define L(operation, ...) \
+#define L(operation, layer) \
 { \
     L_CREATE_FCN(operation), \
-    (const __flash uint8_t []){ __VA_ARGS__ } \
+    (const __flash uint8_t []){ layer } \
 }
 
 #define RESET \
@@ -110,8 +108,8 @@ code == CLICK_END ?
 enum {
     SCANCODE_OFFSET = 0,
     CHARACTER_OFFSET = 0,
-    MODIFIER_OFFSET = 32,
-    DISAMBIGUATION_OFFSET = 40
+    MODIFIER_OFFSET = 40,
+    DISAMBIGUATION_OFFSET = 48
 };
 
 enum {
@@ -140,7 +138,7 @@ enum {
 #define R_G(code) ((code) | ((uint64_t)HID_KEYBOARD_MODIFIER_RIGHTGUI << MODIFIER_OFFSET))
 
 enum english_nonprinting_codes {
-    BKSP = 1,
+    BKSP = 0x100000000,
     ENTER,
     HOME,
     END,
@@ -165,6 +163,7 @@ enum english_nonprinting_codes {
     DOWN,
     LEFT,
     RIGHT,
+    ESC,
     F1,
     F2,
     F3,
@@ -200,55 +199,56 @@ enum input_sources {
 #define US_CODE_TO_SCANCODE(code) (CODE_GET_DISAMBIGUATION(code) & NP_VALUE ? US_NONPRINTING_CODE_TO_SCANCODE(code) : US_PRINTING_CODE_TO_SCANCODE(code))
 
 #define US_NONPRINTING_CODE_TO_SCANCODE(code) \
-(((code & 0xFFFFFFFF) == BKSP ? HID_KEYBOARD_SC_BACKSPACE : \
-(code & 0xFFFFFFFF) == ENTER ? CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_ENTER : HID_KEYBOARD_SC_KEYPAD_ENTER : \
-(code & 0xFFFFFFFF) == HOME ? HID_KEYBOARD_SC_HOME : \
-(code & 0xFFFFFFFF) == END ? HID_KEYBOARD_SC_END : \
-(code & 0xFFFFFFFF) == PG_UP ? HID_KEYBOARD_SC_PAGE_UP : \
-(code & 0xFFFFFFFF) == PG_DN ? HID_KEYBOARD_SC_PAGE_DOWN : \
-(code & 0xFFFFFFFF) == INSERT ? HID_KEYBOARD_SC_INSERT : \
-(code & 0xFFFFFFFF) == DELETE ? HID_KEYBOARD_SC_DELETE : \
-(code & 0xFFFFFFFF) == TAB ? HID_KEYBOARD_SC_TAB : \
-(code & 0xFFFFFFFF) == CAPS_LOCK ? HID_KEYBOARD_SC_CAPS_LOCK : \
-(code & 0xFFFFFFFF) == NUM_LOCK ? HID_KEYBOARD_SC_NUM_LOCK : \
-(code & 0xFFFFFFFF) == SCROLL_LOCK ? HID_KEYBOARD_SC_SCROLL_LOCK : \
-(code & 0xFFFFFFFF) == PRINT_SCREEN ? HID_KEYBOARD_SC_PRINT_SCREEN : \
-(code & 0xFFFFFFFF) == L_SHIFT ? L_S(0) : \
-(code & 0xFFFFFFFF) == R_SHIFT ? R_S(0) : \
-(code & 0xFFFFFFFF) == L_CTRL ? L_C(0) : \
-(code & 0xFFFFFFFF) == R_CTRL ? R_C(0) : \
-(code & 0xFFFFFFFF) == L_ALT ? L_A(0) : \
-(code & 0xFFFFFFFF) == R_ALT ? R_A(0) : \
-(code & 0xFFFFFFFF) == L_GUI ? L_G(0) : \
-(code & 0xFFFFFFFF) == R_GUI ? R_G(0) : \
-(code & 0xFFFFFFFF) == UP ? HID_KEYBOARD_SC_UP_ARROW : \
-(code & 0xFFFFFFFF) == DOWN ? HID_KEYBOARD_SC_DOWN_ARROW : \
-(code & 0xFFFFFFFF) == LEFT ? HID_KEYBOARD_SC_LEFT_ARROW : \
-(code & 0xFFFFFFFF) == RIGHT ? HID_KEYBOARD_SC_RIGHT_ARROW : \
-(code & 0xFFFFFFFF) == F1 ? HID_KEYBOARD_SC_F1 : \
-(code & 0xFFFFFFFF) == F2 ? HID_KEYBOARD_SC_F2 : \
-(code & 0xFFFFFFFF) == F3 ? HID_KEYBOARD_SC_F3 : \
-(code & 0xFFFFFFFF) == F4 ? HID_KEYBOARD_SC_F4 : \
-(code & 0xFFFFFFFF) == F5 ? HID_KEYBOARD_SC_F5 : \
-(code & 0xFFFFFFFF) == F6 ? HID_KEYBOARD_SC_F6 : \
-(code & 0xFFFFFFFF) == F7 ? HID_KEYBOARD_SC_F7 : \
-(code & 0xFFFFFFFF) == F8 ? HID_KEYBOARD_SC_F8 : \
-(code & 0xFFFFFFFF) == F9 ? HID_KEYBOARD_SC_F9 : \
-(code & 0xFFFFFFFF) == F10 ? HID_KEYBOARD_SC_F10 : \
-(code & 0xFFFFFFFF) == F11 ? HID_KEYBOARD_SC_F11 : \
-(code & 0xFFFFFFFF) == F12 ? HID_KEYBOARD_SC_F12 : \
-(code & 0xFFFFFFFF) == F13 ? HID_KEYBOARD_SC_F13 : \
-(code & 0xFFFFFFFF) == F14 ? HID_KEYBOARD_SC_F14 : \
-(code & 0xFFFFFFFF) == F15 ? HID_KEYBOARD_SC_F15 : \
-(code & 0xFFFFFFFF) == F16 ? HID_KEYBOARD_SC_F16 : \
-(code & 0xFFFFFFFF) == F17 ? HID_KEYBOARD_SC_F17 : \
-(code & 0xFFFFFFFF) == F18 ? HID_KEYBOARD_SC_F18 : \
-(code & 0xFFFFFFFF) == F19 ? HID_KEYBOARD_SC_F19 : \
-(code & 0xFFFFFFFF) == F20 ? HID_KEYBOARD_SC_F20 : \
-(code & 0xFFFFFFFF) == F21 ? HID_KEYBOARD_SC_F21 : \
-(code & 0xFFFFFFFF) == F22 ? HID_KEYBOARD_SC_F22 : \
-(code & 0xFFFFFFFF) == F23 ? HID_KEYBOARD_SC_F23 : \
-(code & 0xFFFFFFFF) == F24 ? HID_KEYBOARD_SC_F24 : 0) | (code & ~0xFFFFFFFFULL))
+(((code >> 32 & 0xFFFFFFFF) == BKSP ? HID_KEYBOARD_SC_BACKSPACE : \
+(code >> 32 & 0xFFFFFFFF) == ENTER ? CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_ENTER : HID_KEYBOARD_SC_KEYPAD_ENTER : \
+(code >> 32 & 0xFFFFFFFF) == HOME ? HID_KEYBOARD_SC_HOME : \
+(code >> 32 & 0xFFFFFFFF) == END ? HID_KEYBOARD_SC_END : \
+(code >> 32 & 0xFFFFFFFF) == PG_UP ? HID_KEYBOARD_SC_PAGE_UP : \
+(code >> 32 & 0xFFFFFFFF) == PG_DN ? HID_KEYBOARD_SC_PAGE_DOWN : \
+(code >> 32 & 0xFFFFFFFF) == INSERT ? HID_KEYBOARD_SC_INSERT : \
+(code >> 32 & 0xFFFFFFFF) == DELETE ? HID_KEYBOARD_SC_DELETE : \
+(code >> 32 & 0xFFFFFFFF) == TAB ? HID_KEYBOARD_SC_TAB : \
+(code >> 32 & 0xFFFFFFFF) == CAPS_LOCK ? HID_KEYBOARD_SC_CAPS_LOCK : \
+(code >> 32 & 0xFFFFFFFF) == NUM_LOCK ? HID_KEYBOARD_SC_NUM_LOCK : \
+(code >> 32 & 0xFFFFFFFF) == SCROLL_LOCK ? HID_KEYBOARD_SC_SCROLL_LOCK : \
+(code >> 32 & 0xFFFFFFFF) == PRINT_SCREEN ? HID_KEYBOARD_SC_PRINT_SCREEN : \
+(code >> 32 & 0xFFFFFFFF) == L_SHIFT ? L_S(0) : \
+(code >> 32 & 0xFFFFFFFF) == R_SHIFT ? R_S(0) : \
+(code >> 32 & 0xFFFFFFFF) == L_CTRL ? L_C(0) : \
+(code >> 32 & 0xFFFFFFFF) == R_CTRL ? R_C(0) : \
+(code >> 32 & 0xFFFFFFFF) == L_ALT ? L_A(0) : \
+(code >> 32 & 0xFFFFFFFF) == R_ALT ? R_A(0) : \
+(code >> 32 & 0xFFFFFFFF) == L_GUI ? L_G(0) : \
+(code >> 32 & 0xFFFFFFFF) == R_GUI ? R_G(0) : \
+(code >> 32 & 0xFFFFFFFF) == UP ? HID_KEYBOARD_SC_UP_ARROW : \
+(code >> 32 & 0xFFFFFFFF) == DOWN ? HID_KEYBOARD_SC_DOWN_ARROW : \
+(code >> 32 & 0xFFFFFFFF) == LEFT ? HID_KEYBOARD_SC_LEFT_ARROW : \
+(code >> 32 & 0xFFFFFFFF) == RIGHT ? HID_KEYBOARD_SC_RIGHT_ARROW : \
+(code >> 32 & 0xFFFFFFFF) == ESC ? HID_KEYBOARD_SC_ESCAPE : \
+(code >> 32 & 0xFFFFFFFF) == F1 ? HID_KEYBOARD_SC_F1 : \
+(code >> 32 & 0xFFFFFFFF) == F2 ? HID_KEYBOARD_SC_F2 : \
+(code >> 32 & 0xFFFFFFFF) == F3 ? HID_KEYBOARD_SC_F3 : \
+(code >> 32 & 0xFFFFFFFF) == F4 ? HID_KEYBOARD_SC_F4 : \
+(code >> 32 & 0xFFFFFFFF) == F5 ? HID_KEYBOARD_SC_F5 : \
+(code >> 32 & 0xFFFFFFFF) == F6 ? HID_KEYBOARD_SC_F6 : \
+(code >> 32 & 0xFFFFFFFF) == F7 ? HID_KEYBOARD_SC_F7 : \
+(code >> 32 & 0xFFFFFFFF) == F8 ? HID_KEYBOARD_SC_F8 : \
+(code >> 32 & 0xFFFFFFFF) == F9 ? HID_KEYBOARD_SC_F9 : \
+(code >> 32 & 0xFFFFFFFF) == F10 ? HID_KEYBOARD_SC_F10 : \
+(code >> 32 & 0xFFFFFFFF) == F11 ? HID_KEYBOARD_SC_F11 : \
+(code >> 32 & 0xFFFFFFFF) == F12 ? HID_KEYBOARD_SC_F12 : \
+(code >> 32 & 0xFFFFFFFF) == F13 ? HID_KEYBOARD_SC_F13 : \
+(code >> 32 & 0xFFFFFFFF) == F14 ? HID_KEYBOARD_SC_F14 : \
+(code >> 32 & 0xFFFFFFFF) == F15 ? HID_KEYBOARD_SC_F15 : \
+(code >> 32 & 0xFFFFFFFF) == F16 ? HID_KEYBOARD_SC_F16 : \
+(code >> 32 & 0xFFFFFFFF) == F17 ? HID_KEYBOARD_SC_F17 : \
+(code >> 32 & 0xFFFFFFFF) == F18 ? HID_KEYBOARD_SC_F18 : \
+(code >> 32 & 0xFFFFFFFF) == F19 ? HID_KEYBOARD_SC_F19 : \
+(code >> 32 & 0xFFFFFFFF) == F20 ? HID_KEYBOARD_SC_F20 : \
+(code >> 32 & 0xFFFFFFFF) == F21 ? HID_KEYBOARD_SC_F21 : \
+(code >> 32 & 0xFFFFFFFF) == F22 ? HID_KEYBOARD_SC_F22 : \
+(code >> 32 & 0xFFFFFFFF) == F23 ? HID_KEYBOARD_SC_F23 : \
+(code >> 32 & 0xFFFFFFFF) == F24 ? HID_KEYBOARD_SC_F24 : 0) | (code & ~0xFFFFFFFFULL))
 
 #define US_PRINTING_CODE_TO_SCANCODE(code) \
 (((code & 0xFFFFFFFF) == ' ' ? HID_KEYBOARD_SC_SPACE : \
@@ -398,9 +398,9 @@ US_PRINTING_CODE_TO_SCANCODE(code)) | (code & ~0xFFFFFFFFULL))
 US_PRINTING_CODE_TO_SCANCODE(code)) | (code & ~0xFFFFFFFFULL))
 
 #define K_CREATE_FCN(code) \
-(code >> 8 && code & 0xFF ? actions_modifier_and_scancode_wrapper : \
-code & 0xFF ? actions_scancode_wrapper : \
-code >> 8 ? actions_modifiers_wrapper : 0)
+(code >> 8 && code & 0xFF ? actions_modifiers_and_scancode : \
+code & 0xFF ? actions_scancode : \
+code >> 8 ? actions_modifiers : 0)
 
 #define K_CREATE_ARG(code) \
 (code >> 8 && code & 0xFF ? (const __flash void *)&(const __flash uint16_t){ code } : \

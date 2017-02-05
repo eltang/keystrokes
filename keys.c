@@ -22,14 +22,14 @@
 static uint8_t keys[6];
 static keyswitch_t keyswitches[6];
 
-void keys_add(uint8_t code, keyswitch_t keyswitch)
+void keys_add(uint8_t code, keyswitch_t *keyswitch)
 {
     uint8_t empty_slot_index = -1;
 
 	for (uint8_t i = 6; i--;) {
         if (keys[i] == code) {
+            usb_wait_until_previous_keyboard_report_sent();
             keys[i] = 0;
-            usb_wait_until_keyboard_report_sent();
         }
         if (!keys[i]) {
             empty_slot_index = i;
@@ -38,19 +38,19 @@ void keys_add(uint8_t code, keyswitch_t keyswitch)
     }
     if (empty_slot_index == -1)
         return;
+    usb_wait_until_previous_keyboard_report_sent();
     keys[empty_slot_index] = code;
-    keyswitches[empty_slot_index] = keyswitch;
-    usb_wait_until_keyboard_report_sent();
+    keyswitches[empty_slot_index] = *keyswitch;
 }
 
-void keys_delete(uint8_t code, keyswitch_t keyswitch)
+void keys_delete(uint8_t code, keyswitch_t *keyswitch)
 {
 	for (uint8_t i = 6; i--;)
         if (keys[i] == code)
-            if (keyswitches[i].column == keyswitch.column)
-                if (keyswitches[i].row == keyswitch.row) {
+            if (keyswitches[i].column == keyswitch->column)
+                if (keyswitches[i].row == keyswitch->row) {
+                    usb_wait_until_previous_keyboard_report_sent();
                     keys[i] = 0;
-                    usb_wait_until_keyboard_report_sent();
                     break;
                 }
 }

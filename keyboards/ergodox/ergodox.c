@@ -3,35 +3,34 @@
 // The address of the slave which controls the left LED strip is 0x42.
 // There are 15 leds connected to pin D7.
 
-static uint8_t OLATA_state, OLATB_state, GPIOB_state;
+static uint8_t OLATA_state, OLATB_state, GPIOB_state = 0xFF;;
 
 bool matrix_read_input(uint8_t input, output)
 {
     uint8_t transmission[2];
 
-    if (output < 7) {
-        transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
-        transmission[1] = GPIOB;
-        TWI_Start_Transceiver_With_Data(transmission, 2);
-        transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | TRUE << TWI_READ_BIT;
-        TWI_Start_Transceiver_With_Data(transmission, 1);
-        TWI_Get_Data_From_Transceiver(&GPIOB_state, 1);
-        return GPIOB_state & 1 << input;
-    }
-    switch (input) {
-    case 0:
-        return PINF & 1;
-    case 1:
-        return PINF & 1 << 1;
-    case 2:
-        return PINF & 1 << 4;
-    case 3:
-        return PINF & 1 << 5;
-    case 4:
-        return PINF & 1 << 6;
-    case 5:
-        return PINF & 1 << 7;
-    }
+    if (output > 6)
+        switch (input) {
+        case 0:
+            return PINF & 1;
+        case 1:
+            return PINF & 1 << 1;
+        case 2:
+            return PINF & 1 << 4;
+        case 3:
+            return PINF & 1 << 5;
+        case 4:
+            return PINF & 1 << 6;
+        case 5:
+            return PINF & 1 << 7;
+        }
+    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
+    transmission[1] = GPIOB;
+    TWI_Start_Transceiver_With_Data(transmission, 2);
+    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | TRUE << TWI_READ_BIT;
+    TWI_Start_Transceiver_With_Data(transmission, 1);
+    TWI_Get_Data_From_Transceiver(&GPIOB_state, 1);
+    return GPIOB_state & 1 << input;
 }
 
 void matrix_activate_output(uint8_t output)

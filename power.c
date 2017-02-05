@@ -14,4 +14,8 @@ void power_init(void)
         PIN_DDR(pin) |= PIN_MASK(pin);
     }
 #ifndef USING_TWI
+    PRR0 |= 1 << PRTWI;
+#endif
+#ifndef USING_BACKLIGHT
+    PPR0 |= 1 << PRTIM1;
 }

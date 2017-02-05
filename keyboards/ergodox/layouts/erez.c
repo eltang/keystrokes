@@ -1,19 +1,10 @@
-#include <keymap_extras/keymap_colemak.h>
-#include "ergodox.h"
-#include "debug.h"
-#include "action_layer.h"
+#include "layout.h"
 
 #define BASE 0 // default layer
 #define SYMB 1 // symbols
 #define MDIA 2 // media keys
 
-enum custom_keycodes {
-  PLACEHOLDER = SAFE_RANGE, // can always be here
-  RGB_FF00BB // always start with RGB_
-};
-
-
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+LAYOUT(
 /* Keymap 0: Basic layer
  *
  * ,--------------------------------------------------.           ,--------------------------------------------------.
@@ -57,6 +48,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
              KC_PGUP,
              KC_PGDN,LT(SYMB, KC_TAB), KC_ENT
     ),
+
+
+K(SC(US, NP(TAB))), K(SC(US, '\'')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, 'p')), K(SC(US, 'y')), K(SC(US, 'f')), K(SC(US, 'g')), K(SC(US, 'c')), K(SC(US, 'r')), K(SC(US, 'l')), K(SC(US, '/')) 
+K(SC(US, NP(CAPS_LOCK))), K(SC(US, 'a')), K(SC(US, 'o')), K(SC(US, 'e')), K(SC(US, 'u')), K(SC(US, 'i')), K(SC(US, 'd')), K(SC(US, 'h')), K(SC(US, 't')), K(SC(US, 'n')), K(SC(US, 's')), K(SC(US, '-')) 
+K(SC(US, NP(L_SHIFT))), K(SC(US, ';')), K(SC(US, 'q')), K(SC(US, 'j')), K(SC(US, 'k')), K(SC(US, 'x')), K(SC(US, 'b')), K(SC(US, 'm')), K(SC(US, 'w')), K(SC(US, 'v')), K(SC(US, 'z')), K(SC(US, NP(R_SHIFT))) 
+RESET, NO_ACTION, K(SC(US, NP(L_CTRL))), K(SC(US, NP(L_ALT))), K(SC(US, NP(L_GUI))), K(SC(US, ' ')), K(SC(US, ' ')), K(SC(US, NP(R_GUI))), K(SC(US, NP(R_ALT))), K(SC(US, NP(R_CTRL))), NO_ACTION, NO_ACTION
+
 /* Keymap 1: Symbol Layer
  *
  * ,--------------------------------------------------.           ,--------------------------------------------------.
@@ -177,7 +175,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 
-tyedefstruct {
+typedef struct {
     uint64_t sequence;
     action_t action;
 } leader_key_dictionary_entry_t;
