@@ -4,6 +4,7 @@
 #include "reset.h"
 #include "layers.h"
 #include "callbacks.h"
+#include "leader_key.h"
 
 void actions_modifiers_and_scancode(keystroke_t *keystroke, const __flash void *arg)
 {
@@ -67,7 +68,7 @@ void actions_reset(keystroke_t *keystroke, const __flash void *arg)
     reset();
 }
 
-void layout_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
+void actions_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash action_t *action = arg;
 
@@ -75,7 +76,7 @@ void layout_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
         action->fcn(keystroke, action->arg);
 }
 
-// void layout_tap_dance(keystroke_t *keystroke, const __flash void *arg)
+// void actions_tap_dance(keystroke_t *keystroke, const __flash void *arg)
 // {
 //     const __flash action_t *actions = arg;
 //     uint8_t action_count = 0;
@@ -83,24 +84,24 @@ void layout_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
 //     while (actions[action_count].fcn) {
 //         ++action_count;
 //     }
-//     uint8_t tap_count = callback_tap_count_get(&keystroke->keyswitch);
+//     uint8_t tap_count = callbacks_tap_count_get(&keystroke->keyswitch);
 //     switch (keystroke->stage) {
 //     case KEYSTROKE_START:
 //         if (tap_count <= action_count) {
-//             callback_set_action(&keystroke->keyswitch, &actions[tap_count]);
-//             callback_set_mode(&keystroke->keyswitch, CALL_START | CALL_ON_KEYSTROKE | CALL_ON_TIMEOUT);
-//             callback_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
+//             callbacks_set_action(&keystroke->keyswitch, &actions[tap_count]);
+//             callbacks_set_mode(&keystroke->keyswitch, CALL_START | CALL_ON_KEYSTROKE | CALL_ON_TIMEOUT);
+//             callbacks_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
 //         } else {
-//             callback_cancel(&keystroke->keyswitch);
+//             callbacks_cancel(&keystroke->keyswitch);
 //         }
 //         break;
 //     case KEYSTROKE_FINISH:
 //         if (callback_called_on_timeout(&keystroke->keyswitch)) {
 //             actions[tap_count].fcn(keystroke, actions[tap_count].arg);
-//             callback_tap_count_clear(&keystroke->keyswitch);
+//             callbacks_tap_count_clear(&keystroke->keyswitch);
 //         } else {
-//             callback_tap_count_increment(&keystroke->keyswitch);
-//             callback_set_mode(&keystroke->keyswitch, CALL_FINISH);
+//             callbacks_tap_count_increment(&keystroke->keyswitch);
+//             callbacks_set_mode(&keystroke->keyswitch, CALL_FINISH);
 //         }
 //         break;
 //     }
@@ -109,27 +110,55 @@ void layout_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
 //     //if on the release the action has not been triggered, set the action to start as well as finish with the same conditions
 // }
 
-void layout_hold_tap(keystroke_t *keystroke, const __flash void *arg)
+void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash action_t *actions = arg;
 
     switch (keystroke->stage) {
     case KEYSTROKE_START:
         actions[0].fcn(keystroke, actions[0].arg);
-        callback_set_mode(&keystroke->keyswitch, CALL_ON_TIMEOUT | CALL_ON_KEYSTROKE_START);
-        callback_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
+        callbacks_set_mode(&keystroke->keyswitch, CALL_ON_TIMEOUT | CALL_ON_KEYSTROKE_START);
+        callbacks_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
         break;
     case KEYSTROKE_FINISH:
         actions[0].fcn(keystroke, actions[0].arg);
-        if (!callback_get_mode(&keystroke->keyswitch))
+        if (!callbacks_get_mode(&keystroke->keyswitch))
             return;
+        callbacks_cancel(&keystroke->keyswitch);
         keystroke->stage = KEYSTROKE_START;
         actions[1].fcn(keystroke, actions[1].arg);
         keystroke->stage = KEYSTROKE_FINISH;
         actions[1].fcn(keystroke, actions[1].arg);
         break;
     }
-    //when pressed, tell callback mechanism to hold key down after timer up
-    // if released and the timer is not up, tap key down up
-    // if released and timer is up, hold key up
+}
+
+void actions_tap_hold(keystroke_t *keystroke, const __flash void *arg)
+{
+    const __flash action_t *actions = arg;
+
+    switch (keystroke->stage) {
+    case KEYSTROKE_START:
+        callbacks_set_action(&keystroke->keyswitch, &actions[1]);
+        callbacks_set_mode(&keystroke->keyswitch, CALL_START | CALL_ON_TIMEOUT);
+        callbacks_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
+        break;
+    case KEYSTROKE_FINISH:
+        if (callbacks_get_mode(&keystroke->keyswitch)) {
+            callbacks_cancel(&keystroke->keyswitch);
+            keystroke->stage = KEYSTROKE_START;
+            actions[0].fcn(keystroke, actions[0].arg);
+            keystroke->stage = KEYSTROKE_FINISH;
+            actions[0].fcn(keystroke, actions[0].arg);
+        } else
+            actions[1].fcn(keystroke, actions[1].arg);
+        break;
+    }
+}
+
+void actions_leader_key_start(keystroke_t *keystroke, const __flash void *arg)
+{
+    if (keystroke->stage == KEYSTROKE_FINISH)
+        return;
+    leader_key_start(&keystroke->keyswitch);
 }

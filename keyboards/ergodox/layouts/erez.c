@@ -50,9 +50,9 @@ LAYOUT(
     ),
 
 
-K(SC(US, NP(TAB))), K(SC(US, '\'')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, 'p')), K(SC(US, 'y')), K(SC(US, 'f')), K(SC(US, 'g')), K(SC(US, 'c')), K(SC(US, 'r')), K(SC(US, 'l')), K(SC(US, '/')) 
-K(SC(US, NP(CAPS_LOCK))), K(SC(US, 'a')), K(SC(US, 'o')), K(SC(US, 'e')), K(SC(US, 'u')), K(SC(US, 'i')), K(SC(US, 'd')), K(SC(US, 'h')), K(SC(US, 't')), K(SC(US, 'n')), K(SC(US, 's')), K(SC(US, '-')) 
-K(SC(US, NP(L_SHIFT))), K(SC(US, ';')), K(SC(US, 'q')), K(SC(US, 'j')), K(SC(US, 'k')), K(SC(US, 'x')), K(SC(US, 'b')), K(SC(US, 'm')), K(SC(US, 'w')), K(SC(US, 'v')), K(SC(US, 'z')), K(SC(US, NP(R_SHIFT))) 
+K(SC(US, NP(TAB))), K(SC(US, '\'')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, 'p')), K(SC(US, 'y')), K(SC(US, 'f')), K(SC(US, 'g')), K(SC(US, 'c')), K(SC(US, 'r')), K(SC(US, 'l')), K(SC(US, '/'))
+K(SC(US, NP(CAPS_LOCK))), K(SC(US, 'a')), K(SC(US, 'o')), K(SC(US, 'e')), K(SC(US, 'u')), K(SC(US, 'i')), K(SC(US, 'd')), K(SC(US, 'h')), K(SC(US, 't')), K(SC(US, 'n')), K(SC(US, 's')), K(SC(US, '-'))
+K(SC(US, NP(L_SHIFT))), K(SC(US, ';')), K(SC(US, 'q')), K(SC(US, 'j')), K(SC(US, 'k')), K(SC(US, 'x')), K(SC(US, 'b')), K(SC(US, 'm')), K(SC(US, 'w')), K(SC(US, 'v')), K(SC(US, 'z')), K(SC(US, NP(R_SHIFT)))
 RESET, NO_ACTION, K(SC(US, NP(L_CTRL))), K(SC(US, NP(L_ALT))), K(SC(US, NP(L_GUI))), K(SC(US, ' ')), K(SC(US, ' ')), K(SC(US, NP(R_GUI))), K(SC(US, NP(R_ALT))), K(SC(US, NP(R_CTRL))), NO_ACTION, NO_ACTION
 
 /* Keymap 1: Symbol Layer
@@ -175,35 +175,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 
-typedef struct {
-    uint64_t sequence;
-    action_t action;
-} leader_key_dictionary_entry_t;
 
-#define LEADER_KEY_DICTIONARY(...) \
-const __flash leader_key_dictionary_entry_t leader_key_dictionary = { \
-    __VA_ARGS__ \
-}
 
-LEADER_KEY_DICTIONARY(
-    LEADER_KEY_DICTIONARY_ENTRY(
-        LEADER_KEY_SEQUENCE(SC(US, 'w'), 0, 0, 0),
-        K(SC(US, L_A(NP(F4))))
-    ),
-    LEADER_KEY_DICTIONARY_ENTRY(
-        LEADER_KEY_SEQUENCE(SC(US, 'o'), 0, 0, 0),
-        K(SC(US, L_C('O')))
-    )
-);
-
-#define LEADER_KEY_DICTIONARY_ENTRY(sequence, action) \
-{ \
-    sequence, \
-    action \
-}
-
-#define LEADER_KEY_SEQUENCE(one, two, three, four) \
-(one << 48 | two << 32 | three << 16 | four) \
 
 // Runs constantly in the background, in a loop.
 void matrix_scan_user(void) {

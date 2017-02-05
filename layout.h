@@ -5,6 +5,7 @@
 #include "matrix.h"
 #include "actions.h"
 #include <LUFA/Drivers/USB/USB.h>
+#include "leader_key.h"
 
 
 /*
@@ -24,37 +25,55 @@ enum {
 };
 
 extern const __flash action_t layout[][ROWS][COLUMNS];
+extern const __flash leader_key_dictionary_entry_t leader_key_dictionary[];
 
 #define NO_ACTION { 0 }
 #define LAYOUT(...) \
 const __flash action_t layout[][ROWS][COLUMNS] = { __VA_ARGS__ }
-#define LEADER_KEY { key_leader_start }
+#define LEADER_KEY { actions_leader_key_start }
 #define TRANSPARENT { keyswitch_transparent }
 
-#define LEADER_KEY_SEQUENCE(...) { __VA_ARGS__, { 0 } }
+
+#define LEADER_KEY_DICTIONARY(...) \
+const __flash leader_key_dictionary_entry_t leader_key_dictionary[] = { \
+    __VA_ARGS__, \
+    LEADER_KEY_DICTIONARY_ENTRY( \
+        LEADER_KEY_SEQUENCE(0, 0, 0, 0), \
+        NO_ACTION \
+    ) \
+}
+
+#define LEADER_KEY_DICTIONARY_ENTRY(sequence, action) \
+{ \
+    sequence, \
+    action \
+}
+
+#define LEADER_KEY_SEQUENCE(one, two, three, four) \
+((uint64_t)four << 48 | (uint64_t)three << 32 | (uint64_t)two << 16 | one)
 
 
 #define HT(hold_action, tap_action) \
 { \
-    key_hold_tap, \
+    actions_hold_tap, \
     (const __flash action_t []){ hold_action, tap_action } \
 }
 
 #define TH(tap_action, hold_action) \
 { \
-    key_tap_hold, \
+    actions_tap_hold, \
     (const __flash action_t []){ tap_action, hold_action } \
 }
 
 #define MA(...) \
 { \
-    key_multiple_actions, \
+    actions_multiple_actions, \
     (const __flash action_t []){ __VA_ARGS__, { 0 } } \
 }
 
 #define CC(case_number) \
 { \
-    key_custom_code, \
+    actions_custom_code, \
     (const __flash uint8_t){ case_number } \
 }
 
@@ -244,7 +263,7 @@ enum input_sources {
 (code & 0xFFFFFFFFFF) == '>' ? R_S(HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN) : \
 (code & 0xFFFFFFFFFF) == '\?' ? R_S(HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK) : \
 (code & 0xFFFFFFFFFF) == '@' ? R_S(HID_KEYBOARD_SC_2_AND_AT) : \
-(code & 0xFFFFFFFFFF) >= 'A' && code <= 'Z' ? R_S(code - 'A' + HID_KEYBOARD_SC_A) : \
+(code & 0xFFFFFFFFFF) >= 'A' && (code & 0xFFFFFFFFFF) <= 'Z' ? R_S(code - 'A' + HID_KEYBOARD_SC_A) : \
 (code & 0xFFFFFFFFFF) == '[' ? HID_KEYBOARD_SC_OPENING_BRACKET_AND_OPENING_BRACE : \
 (code & 0xFFFFFFFFFF) == '\\' ? HID_KEYBOARD_SC_BACKSLASH_AND_PIPE : \
 (code & 0xFFFFFFFFFF) == ']' ? HID_KEYBOARD_SC_CLOSING_BRACKET_AND_CLOSING_BRACE : \

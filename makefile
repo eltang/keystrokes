@@ -31,7 +31,8 @@ SRC          = $(TARGET).c \
 			   keyboards/planck/layouts/default.c \
 			   reset.c \
 			   layers.c \
-			   callbacks.c
+			   callbacks.c \
+			   leader_key.c
 
 LUFA_PATH    = lufa/LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -ITWI_Master -include config.h

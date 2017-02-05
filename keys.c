@@ -27,10 +27,10 @@ void keys_add(uint8_t code, keyswitch_t *keyswitch)
 {
     uint8_t empty_slot_index = -1;
 
-    // if (leader_key_is_active()) {
-    //     leader_key_process(code);
-    //     return;
-    // }
+    if (leader_key_is_active()) {
+        leader_key_process(code);
+        return;
+    }
 	for (uint8_t i = 6; i--;) {
         if (keys[i] == code) {
             usb_wait_until_previous_keyboard_report_sent();
