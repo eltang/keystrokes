@@ -30,7 +30,8 @@ SRC          = $(TARGET).c \
 			   TWI_Master/TWI_Master.c \
 			   keyboards/planck/layouts/default.c \
 			   reset.c \
-			   layers.c
+			   layers.c \
+			   callbacks.c
 
 LUFA_PATH    = lufa/LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -ITWI_Master -include config.h

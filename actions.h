@@ -17,5 +17,8 @@ void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg);
 void actions_layers_goto(keystroke_t *keystroke, const __flash void *arg);
 void actions_layers_visit(keystroke_t *keystroke, const __flash void *arg);
 void actions_reset(keystroke_t *keystroke, const __flash void *arg);
+void layout_multiple_actions(keystroke_t *keystroke, const __flash void *arg);
+void layout_tap_dance(keystroke_t *keystroke, const __flash void *arg);
+void layout_hold_tap(keystroke_t *keystroke, const __flash void *arg);
 
 #endif
