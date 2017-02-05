@@ -44,14 +44,15 @@
 #include "power.h"
 #include "timer.h"
 #include "layers.h"
+#include "callbacks.h"
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
 
 /** Buffer to hold the previously generated Mouse HID report, for comparison purposes inside the HID class driver. */
-static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
+static uint8_t PrevExtrakeyHIDReportBuffer[sizeof(USB_ExtrakeyReport_Data_t)];
 
-static uint8_t keyboard_report_counter, mouse_report_counter;
+static uint8_t keyboard_report_counter, extrakey_report_counter;
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -79,19 +80,19 @@ USB_ClassInfo_HID_Device_t Keyboard_HID_Interface =
  *  within a device can be differentiated from one another. This is for the mouse HID
  *  interface within the device.
  */
-USB_ClassInfo_HID_Device_t Mouse_HID_Interface =
+USB_ClassInfo_HID_Device_t Extrakey_HID_Interface =
 	{
 		.Config =
 			{
-				.InterfaceNumber              = INTERFACE_ID_Mouse,
+				.InterfaceNumber              = INTERFACE_ID_Extrakey,
 				.ReportINEndpoint             =
 					{
-						.Address              = MOUSE_IN_EPADDR,
+						.Address              = EXTRAKEY_IN_EPADDR,
 						.Size                 = HID_EPSIZE,
 						.Banks                = 1,
 					},
-				.PrevReportINBuffer           = PrevMouseHIDReportBuffer,
-				.PrevReportINBufferSize       = sizeof(PrevMouseHIDReportBuffer),
+				.PrevReportINBuffer           = PrevExtrakeyHIDReportBuffer,
+				.PrevReportINBufferSize       = sizeof(PrevExtrakeyHIDReportBuffer),
 			},
 	};
 
@@ -111,13 +112,14 @@ int main(void)
 	for (;;)
 	{
         HID_Device_USBTask(&Keyboard_HID_Interface);
-        HID_Device_USBTask(&Mouse_HID_Interface);
-        if (!(keystroke = matrix_scan()))
+        HID_Device_USBTask(&Extrakey_HID_Interface);
+        keystroke = matrix_scan();
+        callback_task(keystroke);
+        if (!keystroke)
             continue;
         if (USB_DeviceState == DEVICE_STATE_Suspended)
             if (USB_Device_RemoteWakeupEnabled)
 	            USB_Device_SendRemoteWakeup();
-        // callback event handler goes here
         layer = layers_get_source_layer(keystroke);
         row = keystroke->keyswitch.row;
         column = keystroke->keyswitch.column;
@@ -176,7 +178,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 	bool ConfigSuccess = true;
 
 	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
-	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
+	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Extrakey_HID_Interface);
 
 	USB_Device_EnableSOFEvents();
 }
@@ -185,14 +187,14 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 void EVENT_USB_Device_ControlRequest(void)
 {
 	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
-	HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
+	HID_Device_ProcessControlRequest(&Extrakey_HID_Interface);
 }
 
 /** Event handler for the USB device Start Of Frame event. */
 void EVENT_USB_Device_StartOfFrame(void)
 {
 	HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
-	HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
+	HID_Device_MillisecondElapsed(&Extrakey_HID_Interface);
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
@@ -218,19 +220,18 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         ++keyboard_report_counter;
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
-        modifiers_create_report(&(KeyboardReport->Modifier));
-        keys_create_report(KeyboardReport->KeyCode);
+        KeyboardReport->Modifier = modifiers_get();
+        memcpy(KeyboardReport->KeyCode, keys_get(), 6);
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
-		return false;
 	}
 	else
 	{
-        ++mouse_report_counter;
-		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
+        ++extrakey_report_counter;
+		USB_ExtrakeyReport_Data_t* ExtrakeyReport = (USB_ExtrakeyReport_Data_t*)ReportData;
 
-		*ReportSize = sizeof(USB_MouseReport_Data_t);
-		return true;
+		*ReportSize = sizeof(USB_ExtrakeyReport_Data_t);
 	}
+    return false;
 }
 
 /** HID class driver callback function for the processing of HID reports from the host.
@@ -262,11 +263,11 @@ void usb_wait_until_previous_keyboard_report_sent(void)
     saved_keyboard_report_counter = keyboard_report_counter;
 }
 
-void usb_wait_until_previous_mouse_report_sent(void)
+void usb_wait_until_previous_extrakey_report_sent(void)
 {
-    static uint8_t saved_mouse_report_counter;
+    static uint8_t saved_extrakey_report_counter;
 
-    while (saved_mouse_report_counter == mouse_report_counter)
-        HID_Device_USBTask(&Mouse_HID_Interface);
-    saved_mouse_report_counter = mouse_report_counter;
+    while (saved_extrakey_report_counter == extrakey_report_counter)
+        HID_Device_USBTask(&Extrakey_HID_Interface);
+    saved_extrakey_report_counter = extrakey_report_counter;
 }

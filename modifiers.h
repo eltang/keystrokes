@@ -8,6 +8,6 @@ void modifiers_add_temporary(uint8_t modifiers, keyswitch_t *keyswitch);
 void modifiers_delete_temporary(uint8_t modifiers, keyswitch_t *keyswitch);
 void modifiers_add_permanent(uint8_t modifiers);
 void modifiers_delete_permanent(uint8_t modifiers);
-void modifiers_create_report(uint8_t *buffer);
+uint8_t modifiers_get(void);
 
 #endif

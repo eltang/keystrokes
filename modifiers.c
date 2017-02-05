@@ -53,10 +53,11 @@ void modifiers_delete_permanent(uint8_t modifiers)
     }
 }
 
-void modifiers_create_report(uint8_t *buffer)
+uint8_t modifiers_get(void)
 {
-    *buffer = permanent_modifiers.set;
-    if (!temporary_modifiers.index)
-        return;
-    *buffer |= temporary_modifiers.sets[temporary_modifiers.index - 1].modifiers;
+    uint8_t modifiers = permanent_modifiers.set;
+
+    if (temporary_modifiers.index)
+        modifiers |= temporary_modifiers.sets[temporary_modifiers.index - 1].modifiers;
+    return modifiers;
 }
