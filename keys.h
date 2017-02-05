@@ -6,6 +6,6 @@
 
 void keys_add(uint8_t code, keyswitch_t *keyswitch);
 void keys_delete(uint8_t code, keyswitch_t *keyswitch);
-void keys_create_report(uint8_t *buffer);
+uint8_t *keys_get(void);
 
 #endif
