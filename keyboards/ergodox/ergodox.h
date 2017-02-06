@@ -1,41 +1,6 @@
 #ifndef ERGODOX_H
 #define ERGODOX_H
 
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <avr/io.h>
-#include "TWI_Master/TWI_Master.h"
-#include "matrix.h"
-#include "layout.h"
-
-#define MCP23018_ADDR 0b0100000
-#define IODIRA 0x00
-#define IODIRB 0x01
-#define IPOLA 0x02
-#define IPOLB 0x03
-#define GPINTENA 0x04
-#define GPINTENB 0x05
-#define DEFVALA 0x06
-#define DEFVALB 0x07
-#define INTCONA 0x08
-#define INTCONB 0x09
-#define IOCON 0x0A
-#define GPPUA 0x0C
-#define GPPUB 0x0D
-#define INTFA 0x0E
-#define INTFB 0x0F
-#define INTCAPA 0x10
-#define INTCAPB 0x11
-#define GPIOA 0x12
-#define GPIOB 0x13
-#define OLATA 0x14
-#define OLATB 0x15
-
-#define LEFT_LED_1_SHIFT        7       // in MCP23018 port B
-#define LEFT_LED_2_SHIFT        6       // in MCP23018 port B
-#define LEFT_LED_3_SHIFT        7       // in MCP23018 port A
-
 #if 0
 inline void ergodox_board_led_on(void)      { DDRD |=  (1<<6); PORTD |=  (1<<6); }
 inline void ergodox_right_led_1_on(void)    { DDRB |=  (1<<5); PORTB |=  (1<<5); }
@@ -54,8 +19,7 @@ inline void ergodox_left_led_2_off(void)    { ergodox_left_led_2 = 0; }
 inline void ergodox_left_led_3_off(void)    { ergodox_left_led_3 = 0; }
 #endif
 
-#define \
-LAYER( \
+#define LAYER( \
 k00, k01, k02, k03, k04, k05, k06, \
 k10, k11, k12, k13, k14, k15, k16, \
 k20, k21, k22, k23, k24, k25, \
