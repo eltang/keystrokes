@@ -1,11 +1,64 @@
 #include "ergodox.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <avr/io.h>
+#include "TWI_Master/TWI_Master.h"
+#include "layout.h"
+#include "matrix.h"
 
+#define MCP23018_ADDR 0b0100000
+#define IODIRA 0x00
+#define IODIRB 0x01
+#define IPOLA 0x02
+#define IPOLB 0x03
+#define GPINTENA 0x04
+#define GPINTENB 0x05
+#define DEFVALA 0x06
+#define DEFVALB 0x07
+#define INTCONA 0x08
+#define INTCONB 0x09
+#define IOCON 0x0A
+#define GPPUA 0x0C
+#define GPPUB 0x0D
+#define INTFA 0x0E
+#define INTFB 0x0F
+#define INTCAPA 0x10
+#define INTCAPB 0x11
+#define GPIOA 0x12
+#define GPIOB 0x13
+#define OLATA 0x14
+#define OLATB 0x15
+
+#define LEFT_LED_1_SHIFT        7       // in MCP23018 port B
+#define LEFT_LED_2_SHIFT        6       // in MCP23018 port B
+#define LEFT_LED_3_SHIFT        7       // in MCP23018 port A
 // The address of the slave which controls the left LED strip is 0x42.
 // There are 15 leds connected to pin D7.
 
-static uint8_t OLATA_state, OLATB_state, GPIOB_state = 0xFF;;
+static uint8_t OLATA_state, OLATB_state, GPIOB_state = 0xFF;
 
-bool matrix_read_input(uint8_t input, output)
+void matrix_init(void)
+{
+    uint8_t transmission[4];
+
+    DDRB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
+    PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
+    DDRD |= 1 << 3 | 1 << 2;
+    PORTD |= 1 << 3 | 1 << 2;
+    DDRC |= 1 << 6;
+    PORTC |= 1 << 6;
+    PORTF |= ~(1 << 3 | 1 << 2);
+    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
+    transmission[1] = IODIRA;
+    transmission[2] = 0;
+    transmission[3] = (uint8_t)~(1 << 6 | 1 << 7);
+    TWI_Start_Transceiver_With_Data(transmission, 4);
+    transmission[1] = GPPUB;
+    transmission[2] = (uint8_t)~(1 << 6 | 1 << 7);
+    TWI_Start_Transceiver_With_Data(transmission, 3);
+}
+
+bool matrix_read_input(uint8_t input, uint8_t output)
 {
     uint8_t transmission[2];
 
@@ -92,25 +145,4 @@ void matrix_deactivate_output(uint8_t output)
         TWI_Start_Transceiver_With_Data(transmission, 3);
         break;
     }
-}
-
-void matrix_init(void)
-{
-    uint8_t transmission[4];
-
-    DDRB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
-    PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
-    DDRD |= 1 << 3 | 1 << 2;
-    PORTD |= 1 << 3 | 1 << 2;
-    DDRC |= 1 << 6;
-    PORTC |= 1 << 6;
-    PORTF |= ~(1 << 3 | 1 << 2);
-    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
-    transmission[1] = IODIRA;
-    transmission[2] = 0;
-    transmission[3] = (uint8_t)~(1 << 6 | 1 << 7);
-    TWI_Start_Transceiver_With_Data(transmission, 4);
-    transmission[1] = GPPUB;
-    transmission[2] = (uint8_t)~(1 << 6 | 1 << 7);
-    TWI_Start_Transceiver_With_Data(transmission, 3);
 }

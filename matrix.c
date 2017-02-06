@@ -30,9 +30,9 @@ enum {
     KEYSWITCH_IS_BOUNCING = 1 << 1
 };
 
+static keyswitch_state_t keyswitch_states[ROWS][COLUMNS];
 static const __flash pin_t output_pins[OUTPUTS] = OUTPUT_PINS;
 static const __flash pin_t input_pins[INPUTS] = INPUT_PINS;
-static keyswitch_state_t keyswitch_states[ROWS][COLUMNS];
 
 __attribute__((weak))
 void matrix_init_output(uint8_t output)

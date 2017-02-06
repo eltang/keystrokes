@@ -28,7 +28,8 @@ SRC          = $(TARGET).c \
 			   modifiers.c \
 			   timer.c \
 			   TWI_Master/TWI_Master.c \
-			   keyboards/planck/layouts/default.c \
+			   keyboards/ergodox/layouts/erez.c \
+			   keyboards/ergodox/ergodox.c \
 			   reset.c \
 			   layers.c \
 			   callbacks.c \

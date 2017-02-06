@@ -178,7 +178,8 @@ enum english_nonprinting_codes {
     F21,
     F22,
     F23,
-    F24
+    F24,
+    APP
 };
 
 enum input_sources {
@@ -238,6 +239,7 @@ enum input_sources {
 (code & 0xFFFFFFFFFF) == F22 ? HID_KEYBOARD_SC_F22 : \
 (code & 0xFFFFFFFFFF) == F23 ? HID_KEYBOARD_SC_F23 : \
 (code & 0xFFFFFFFFFF) == F24 ? HID_KEYBOARD_SC_F24 : \
+(code & 0xFFFFFFFFFF) == APP ? HID_KEYBOARD_SC_APPLICATION : \
 (code & 0xFFFFFFFFFF) == ' ' ? HID_KEYBOARD_SC_SPACE : \
 (code & 0xFFFFFFFFFF) == '!' ? R_S(HID_KEYBOARD_SC_1_AND_EXCLAMATION) : \
 (code & 0xFFFFFFFFFF) == '\"' ? R_S(HID_KEYBOARD_SC_APOSTROPHE_AND_QUOTE) : \
