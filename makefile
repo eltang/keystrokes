@@ -23,6 +23,7 @@ SRC          = $(TARGET).c \
                $(LUFA_SRC_USB) \
                $(LUFA_SRC_USBCLASS) \
 			   keys.c \
+			   i2cmaster/twimaster.c \
 			   actions.c \
 			   matrix.c \
 			   modifiers.c \
