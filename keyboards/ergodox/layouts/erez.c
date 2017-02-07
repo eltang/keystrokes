@@ -17,7 +17,7 @@ LAYOUT(
                                               K(SC(US, ' ')), LEADER_KEY, K(SC(US, END)),
         K(SC(US, R_C('='))), K(SC(US, '6')), K(SC(US, '7')), K(SC(US, '8')), K(SC(US, '9')), K(SC(US, '0')), K(SC(US, '-')),
         L(GOTO, SYMB), K(SC(US, 'y')), K(SC(US, 'u')), K(SC(US, 'i')), K(SC(US, 'o')), K(SC(US, 'p')), K(SC(US, '\\')),
-                     K(SC(US, 'h')), TH(K(SC(US, 'j')), K(SC(US, R_ALT))), K(SC(US, 'k')), K(SC(US, 'l')), K(SC(US, ';')), HT(K(SC(US, R_GUI)), K(SC(US, '\''))),
+                     K(SC(US, 'h')), TH(K(SC(US, 'j')), K(SC(US, R_ALT))), K(SC(US, 'k')), K(SC(US, 'l')), K(SC(US, ';')), TH(K(SC(US, R_GUI)), K(SC(US, '\''))),
         HT(K(SC(US, R_C(R_S(R_A(0))))), K(SC(US, '['))), K(SC(US, 'n')), K(SC(US, 'm')), K(SC(US, ',')), K(SC(US, '.')), TH(K(SC(US, '/')), K(SC(US, R_CTRL))), HT(K(SC(US, R_SHIFT)), K(SC(US, ')'))),
                     K(SC(US, UP)), K(SC(US, DOWN)), K(SC(US, '[')), K(SC(US, ']')), HT(L(VISIT, SYMB), K(SC(US, '-'))),
         K(SC(US, R_ALT)), HT(K(SC(US, R_CTRL)), K(SC(US, ESC))),
