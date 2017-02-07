@@ -38,7 +38,7 @@
 #include "keys.h"
 #include "modifiers.h"
 #include "matrix.h"
-#include "TWI_Master.h"
+#include "i2cmaster/i2cmaster.h"
 #include "actions.h"
 #include "layout.h"
 #include "power.h"
@@ -157,7 +157,8 @@ void SetupHardware()
     timer_init();
     matrix_init();
 #ifdef USING_TWI
-    // TWI_Master_Initialise();
+    i2c_init();
+    _delay_ms(1000);
 #endif
 	USB_Init();
 }
