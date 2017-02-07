@@ -157,7 +157,7 @@ void SetupHardware()
     timer_init();
     matrix_init();
 #ifdef USING_TWI
-    TWI_Master_Initialise();
+    // TWI_Master_Initialise();
 #endif
 	USB_Init();
 }

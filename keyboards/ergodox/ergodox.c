@@ -52,10 +52,10 @@ void matrix_init(void)
     transmission[1] = IODIRA;
     transmission[2] = 0;
     transmission[3] = (uint8_t)~(1 << 6 | 1 << 7);
-    TWI_Start_Transceiver_With_Data(transmission, 4);
+    // TWI_Start_Transceiver_With_Data(transmission, 4);
     transmission[1] = GPPUB;
     transmission[2] = (uint8_t)~(1 << 6 | 1 << 7);
-    TWI_Start_Transceiver_With_Data(transmission, 3);
+    // TWI_Start_Transceiver_With_Data(transmission, 3);
 }
 
 bool matrix_read_input(uint8_t input, uint8_t output)
@@ -79,10 +79,10 @@ bool matrix_read_input(uint8_t input, uint8_t output)
         }
     transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
     transmission[1] = GPIOB;
-    TWI_Start_Transceiver_With_Data(transmission, 2);
+    // TWI_Start_Transceiver_With_Data(transmission, 2);
     transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | TRUE << TWI_READ_BIT;
-    TWI_Start_Transceiver_With_Data(transmission, 1);
-    TWI_Get_Data_From_Transceiver(&GPIOB_state, 1);
+    // TWI_Start_Transceiver_With_Data(transmission, 1);
+    // TWI_Get_Data_From_Transceiver(&GPIOB_state, 1);
     return GPIOB_state & 1 << input;
 }
 
@@ -116,7 +116,7 @@ void matrix_activate_output(uint8_t output)
         transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
         transmission[1] = OLATA;
         transmission[2] = OLATA_state &= 1 << output;
-        TWI_Start_Transceiver_With_Data(transmission, 3);
+        // TWI_Start_Transceiver_With_Data(transmission, 3);
         break;
     }
 }
@@ -142,7 +142,7 @@ void matrix_deactivate_output(uint8_t output)
         transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
         transmission[1] = OLATA;
         transmission[2] = OLATA_state;
-        TWI_Start_Transceiver_With_Data(transmission, 3);
+        // TWI_Start_Transceiver_With_Data(transmission, 3);
         break;
     }
 }
