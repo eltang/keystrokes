@@ -49,7 +49,7 @@ void modifiers_delete_permanent(uint8_t modifiers)
     for (uint8_t i = 8; i--;) {
         if (modifiers & 1 << i)
             if (!--permanent_modifiers.modifiers[i])
-                permanent_modifiers.set &= ~1 << i;
+                permanent_modifiers.set &= ~(1 << i);
     }
 }
 
