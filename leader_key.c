@@ -12,24 +12,20 @@ static struct {
     uint8_t index;
 } sequence;
 static keyswitch_t leader_key_keyswitch;
-const __flash action_t foo = { leader_key_end };
+const __flash action_t leader_key_end_action = { leader_key_end };
 
 void leader_key_end(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash leader_key_dictionary_entry_t *entry;
-    keystroke_t leader_key_keystroke;
 
-    if (keystroke->stage == KEYSTROKE_FINISH)
-        return;
     leader_key_active = 0;
     entry = leader_key_dictionary;
     while (entry->sequence) {
         if (entry->sequence == sequence.raw) {
-            leader_key_keystroke.keyswitch = leader_key_keyswitch;
-            leader_key_keystroke.stage = KEYSTROKE_START;
-            entry->action.fcn(&leader_key_keystroke, entry->action.arg);
-            leader_key_keystroke.stage = KEYSTROKE_FINISH;
-            entry->action.fcn(&leader_key_keystroke, entry->action.arg);
+            keystroke->stage = KEYSTROKE_START;
+            entry->action.fcn(keystroke, entry->action.arg);
+            keystroke->stage = KEYSTROKE_FINISH;
+            entry->action.fcn(keystroke, entry->action.arg);
             break;
         }
         entry++;
@@ -43,7 +39,7 @@ void leader_key_start(keyswitch_t *keyswitch)
     leader_key_active = 1;
     leader_key_keyswitch = *keyswitch;
     callbacks_set_mode(keyswitch, CALL_START | CALL_ON_TIMEOUT);
-    callbacks_set_action(keyswitch, &foo);
+    callbacks_set_action(keyswitch, &leader_key_end_action);
     callbacks_set_timer(keyswitch, 1000);
 }
 
