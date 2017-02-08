@@ -155,11 +155,10 @@ void SetupHardware()
 #endif
 	/* Hardware Initialization */
     timer_init();
-    matrix_init();
 #ifdef USING_TWI
     i2c_init();
-    _delay_ms(1000);
 #endif
+    matrix_init();
 	USB_Init();
 }
 

@@ -27,7 +27,7 @@ enum {
 void matrix_init_output(uint8_t output);
 void matrix_init_input(uint8_t input);
 void matrix_activate_output(uint8_t output);
-void matrix_deactivate_output(uint8_t output);
+void matrix_deactivate_output(uint8_t output, bool keystroke_detected);
 bool matrix_read_input(uint8_t input, uint8_t output);
 void matrix_init(void);
 keystroke_t *matrix_scan(void);

@@ -115,7 +115,7 @@ void matrix_activate_output(uint8_t output)
     }
 }
 
-void matrix_deactivate_output(uint8_t output)
+void matrix_deactivate_output(uint8_t output, bool keystroke_detected)
 {
     switch (output) {
     case 7 ... 10:
@@ -129,7 +129,7 @@ void matrix_deactivate_output(uint8_t output)
         break;
     default:
         OLATA_state |= ~(1 << 7);
-        if (output)
+        if (output && !keystroke_detected)
             break;
         i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
         i2c_write(OLATA);

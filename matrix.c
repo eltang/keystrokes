@@ -60,7 +60,7 @@ void matrix_activate_output(uint8_t output)
 }
 
 __attribute__((weak))
-void matrix_deactivate_output(uint8_t output)
+void matrix_deactivate_output(uint8_t output, bool keystroke_detected)
 {
     pin_t pin = output_pins[output];
 
@@ -110,7 +110,7 @@ keystroke_t *matrix_scan(void)
             keyswitch_is_open = matrix_read_input(j, i);
             if (!(keyswitch_state->state & KEYSWITCH_IS_CLOSED) == keyswitch_is_open)
                 continue;
-            matrix_deactivate_output(i);
+            matrix_deactivate_output(i, 1);
             keyswitch_state->state = !keyswitch_is_open;
 #if KEYSWITCH_BOUNCE_TIME
             keyswitch_state->state |= KEYSWITCH_IS_BOUNCING;
@@ -124,7 +124,7 @@ keystroke_t *matrix_scan(void)
             keystroke.stage = keyswitch_is_open;
             return &keystroke;
         }
-        matrix_deactivate_output(i);
+        matrix_deactivate_output(i, 0);
     }
     return 0;
 }
