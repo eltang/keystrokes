@@ -74,11 +74,6 @@ bool matrix_read_input(uint8_t input, uint8_t output)
         case 5:
             return PINF & 1 << 7;
         }
-    i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
-    i2c_write(GPIOB);
-    i2c_start(MCP23018_ADDR << 1 | I2C_READ);
-    GPIOB_state = i2c_readNak();
-    i2c_stop();
     return GPIOB_state & 1 << input;
 }
 
@@ -110,6 +105,11 @@ void matrix_activate_output(uint8_t output)
         i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
         i2c_write(OLATA);
         i2c_write(OLATA_state &= ~(1 << output));
+        i2c_stop();
+        i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
+        i2c_write(GPIOB);
+        i2c_start(MCP23018_ADDR << 1 | I2C_READ);
+        GPIOB_state = i2c_readNak();
         i2c_stop();
         break;
     }
