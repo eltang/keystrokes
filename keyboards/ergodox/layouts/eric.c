@@ -6,7 +6,7 @@ LAYOUT(
         K(SC(US, '`')), K(SC(US, '1')), K(SC(US, '2')), K(SC(US, '3')), K(SC(US, '4')), K(SC(US, '5')), NO_ACTION,
         K(SC(US, TAB)), K(SC(US, '\'')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, 'p')), K(SC(US, 'y')), K(SC(US, '[')),
         K(SC(US, CAPS_LOCK)), K(SC(US, 'a')), K(SC(US, 'o')), K(SC(US, 'e')), K(SC(US, 'u')), K(SC(US, 'i')),
-        K(SC(US, R_SHIFT)), K(SC(US, ';')), K(SC(US, 'q')), K(SC(US, 'j')), K(SC(US, 'k')), K(SC(US, 'x')), NO_ACTION,
+        K(SC(US, L_SHIFT)), K(SC(US, ';')), K(SC(US, 'q')), K(SC(US, 'j')), K(SC(US, 'k')), K(SC(US, 'x')), NO_ACTION,
         NO_ACTION, NO_ACTION, K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)),
                                                                 K(SC(US, HOME)), K(SC(US, END)),
                                                                           K(SC(US, PG_UP)),
