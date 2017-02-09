@@ -28,7 +28,7 @@ SRC          = $(TARGET).c \
 			   matrix.c \
 			   modifiers.c \
 			   timer.c \
-			   keyboards/ergodox/layouts/erez.c \
+			   keyboards/ergodox/layouts/eric.c \
 			   keyboards/ergodox/ergodox.c \
 			   reset.c \
 			   layers.c \
