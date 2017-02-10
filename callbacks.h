@@ -14,6 +14,9 @@ enum {
     CALL_ON_KEYSTROKE_FINISH = 1 << 3,
     CALL_ON_KEYSTROKE = CALL_ON_KEYSTROKE_START | CALL_ON_KEYSTROKE_FINISH,
     CALL_ON_TIMEOUT = 1 << 4,
+    CALLED_ON_KEYSTROKE_START = 1 << 5,
+    CALLED_ON_KEYSTROKE_FINISH = 1 << 6,
+    CALLED_ON_TIMEOUT = 1 << 7
 };
 
 void callback_task(keystroke_t *keystroke);
@@ -25,6 +28,5 @@ void callbacks_set_timer(keyswitch_t *keyswitch, uint16_t wait);
 void callbacks_tap_count_increment(keyswitch_t *keyswitch);
 uint8_t callbacks_tap_count_get(keyswitch_t *keyswitch);
 void callbacks_tap_count_clear(keyswitch_t *keyswitch);
-void callbacks_cancel(keyswitch_t *keyswitch);
 
 #endif
