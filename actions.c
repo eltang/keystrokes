@@ -113,6 +113,7 @@ void actions_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
 void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash action_t *actions = arg;
+    uint8_t callback_mode;
 
     switch (keystroke->stage) {
     case KEYSTROKE_START:
@@ -122,9 +123,9 @@ void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
         break;
     case KEYSTROKE_FINISH:
         actions[0].fcn(keystroke, actions[0].arg);
-        if (!callbacks_get_mode(&keystroke->keyswitch))
+        callback_mode = callbacks_get_mode(&keystroke->keyswitch);
+        if ((callback_mode & (CALL_ON_TIMEOUT | CALL_ON_KEYSTROKE_START)) != (CALL_ON_TIMEOUT | CALL_ON_KEYSTROKE_START))
             return;
-        callbacks_cancel(&keystroke->keyswitch);
         keystroke->stage = KEYSTROKE_START;
         actions[1].fcn(keystroke, actions[1].arg);
         keystroke->stage = KEYSTROKE_FINISH;
@@ -136,22 +137,33 @@ void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
 void actions_tap_hold(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash action_t *actions = arg;
+    uint8_t callback_mode;
 
     switch (keystroke->stage) {
     case KEYSTROKE_START:
-        callbacks_set_action(&keystroke->keyswitch, &actions[1]);
-        callbacks_set_mode(&keystroke->keyswitch, CALL_START | CALL_ON_TIMEOUT);
+        callbacks_set_keystroke_action(&keystroke->keyswitch, actions);
+        callbacks_set_timeout_action(&keystroke->keyswitch, &actions[1]);
+        callbacks_set_mode(&keystroke->keyswitch, CALL_START | CALL_ON_KEYSTROKE_START | CALL_ON_TIMEOUT);
         callbacks_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
         break;
     case KEYSTROKE_FINISH:
-        if (callbacks_get_mode(&keystroke->keyswitch)) {
-            callbacks_cancel(&keystroke->keyswitch);
-            keystroke->stage = KEYSTROKE_START;
-            actions[0].fcn(keystroke, actions[0].arg);
-            keystroke->stage = KEYSTROKE_FINISH;
-            actions[0].fcn(keystroke, actions[0].arg);
-        } else
-            actions[1].fcn(keystroke, actions[1].arg);
+        callback_mode = callbacks_get_mode(&keystroke->keyswitch);
+        callbacks_cancel(&keystroke->keyswitch);
+        switch (callback_mode & (CALL_ON_KEYSTROKE_START | CALL_ON_TIMEOUT)) {
+            case 0:
+            case CALL_ON_TIMEOUT:
+                actions[0].fcn(keystroke, actions[0].arg);
+                break;
+            case CALL_ON_TIMEOUT | CALL_ON_KEYSTROKE_START:
+                keystroke->stage = KEYSTROKE_START;
+                actions[0].fcn(keystroke, actions[0].arg);
+                keystroke->stage = KEYSTROKE_FINISH;
+                actions[0].fcn(keystroke, actions[0].arg);
+                break;
+            case CALL_ON_KEYSTROKE_START:
+                actions[1].fcn(keystroke, actions[1].arg);
+                break;
+        }
         break;
     }
 }

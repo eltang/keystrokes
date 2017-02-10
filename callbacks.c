@@ -1,7 +1,15 @@
 #include "callbacks.h"
 #include "timer.h"
 
-const __flash action_t *callback_actions[ROWS][COLUMNS];
+enum {
+    CALLBACK_SOURCE_TIMEOUT,
+    CALLBACK_SOURCE_KEYSTROKE
+};
+
+static struct {
+    const __flash action_t *keystroke_action;
+    const __flash action_t *timeout_action;
+} callback_actions[ROWS][COLUMNS];
 static uint8_t callback_modes[ROWS][COLUMNS];
 typedef struct {
     uint16_t timestamp;
@@ -11,9 +19,14 @@ typedef struct {
 static callback_timer_t callback_timers[ROWS][COLUMNS];
 static uint8_t tap_count[ROWS][COLUMNS];
 
-void callbacks_set_action(keyswitch_t *keyswitch, const __flash action_t *action)
+void callbacks_set_timeout_action(keyswitch_t *keyswitch, const __flash action_t *action)
 {
-    callback_actions[keyswitch->row][keyswitch->column] = action;
+    callback_actions[keyswitch->row][keyswitch->column].timeout_action = action;
+}
+
+void callbacks_set_keystroke_action(keyswitch_t *keyswitch, const __flash action_t *action)
+{
+    callback_actions[keyswitch->row][keyswitch->column].keystroke_action = action;
 }
 
 void callbacks_set_mode(keyswitch_t *keyswitch, uint8_t mode)
@@ -52,47 +65,61 @@ void callbacks_cancel(keyswitch_t *keyswitch)
     callback_modes[keyswitch->row][keyswitch->column] = 0;
 }
 
-void callbacks_execute(keyswitch_t *keyswitch)
+void callbacks_execute(keyswitch_t *keyswitch, uint8_t source)
 {
-    uint8_t callback_mode = callback_modes[keyswitch->row][keyswitch->column];
-    action_t action = *callback_actions[keyswitch->row][keyswitch->column];
+    uint8_t *callback_mode = &callback_modes[keyswitch->row][keyswitch->column];
+    action_t action;
     keystroke_t keystroke = { .keyswitch = *keyswitch };
 
-    if (callback_mode & CALL_START) {
+    if (source == CALLBACK_SOURCE_TIMEOUT)
+        action = *callback_actions[keyswitch->row][keyswitch->column].timeout_action;
+    else
+        action = *callback_actions[keyswitch->row][keyswitch->column].keystroke_action;
+    if (*callback_mode & CALL_START) {
         keystroke.stage = KEYSTROKE_START;
         action.fcn(&keystroke, action.arg);
+        *callback_mode &= ~CALL_START;
     }
-    if (callback_mode & CALL_FINISH) {
+    if (*callback_mode & CALL_FINISH) {
         keystroke.stage = KEYSTROKE_FINISH;
         action.fcn(&keystroke, action.arg);
+        *callback_mode &= ~CALL_FINISH;
     }
-    callbacks_cancel(keyswitch);
 }
 
 void callback_task(keystroke_t *keystroke)
 {
-    uint8_t callback_mode;
+    uint8_t *callback_mode;
     callback_timer_t *callback_timer;
+    uint8_t source;
 
     for (uint8_t i = ROWS; i--;)
         for (uint8_t j = COLUMNS; j--;) {
-            callback_mode = callback_modes[i][j];
-
-            if (callback_mode & CALL_ON_TIMEOUT) {
-                callback_timer = &callback_timers[i][j];
-                if ((uint16_t)(timer_read() - callback_timer->timestamp) > callback_timer->wait)
-                    goto execute_callback;
+            callback_mode = &callback_modes[i][j];
+            if (keystroke) {
+                if (keystroke->stage == KEYSTROKE_START) {
+                    if (*callback_mode & CALL_ON_KEYSTROKE_START) {
+                        source = CALLBACK_SOURCE_KEYSTROKE;
+                        *callback_mode &= ~CALL_ON_KEYSTROKE_START;
+                        goto execute_callback;
+                    }
+                } else
+                    if (*callback_mode & CALL_ON_KEYSTROKE_FINISH) {
+                        source = CALLBACK_SOURCE_KEYSTROKE;
+                        *callback_mode &= ~CALL_ON_KEYSTROKE_FINISH;
+                        goto execute_callback;
+                    }
             }
-            if (!keystroke)
-                continue;
-            if (keystroke->stage == KEYSTROKE_START) {
-                if (callback_mode & CALL_ON_KEYSTROKE_START)
+            if (*callback_mode & CALL_ON_TIMEOUT) {
+                callback_timer = &callback_timers[i][j];
+                if ((uint16_t)timer_read() - callback_timer->timestamp > callback_timer->wait) {
+                    source = CALLBACK_SOURCE_TIMEOUT;
+                    *callback_mode &= ~CALL_ON_TIMEOUT;
                     goto execute_callback;
-            } else
-                if (callback_mode & CALL_ON_KEYSTROKE_FINISH)
-                    goto execute_callback;
+                }
+            }
             continue;
         execute_callback:
-            callbacks_execute(&(keyswitch_t){ i, j });
+            callbacks_execute(&(keyswitch_t){ i, j }, source);
         }
 }

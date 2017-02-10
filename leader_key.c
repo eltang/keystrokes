@@ -39,7 +39,7 @@ void leader_key_start(keyswitch_t *keyswitch)
     leader_key_active = 1;
     leader_key_keyswitch = *keyswitch;
     callbacks_set_mode(keyswitch, CALL_START | CALL_ON_TIMEOUT);
-    callbacks_set_action(keyswitch, &leader_key_end_action);
+    callbacks_set_timeout_action(keyswitch, &leader_key_end_action);
     callbacks_set_timer(keyswitch, 1000);
 }
 
