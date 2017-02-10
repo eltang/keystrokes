@@ -20,3 +20,14 @@ LAYOUT(
         { NO_ACTION, K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)), L(VISIT, 1), K(SC(US, ' ')), K(SC(US, ' ')), L(VISIT, 2), NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION }
     }
 );
+
+LEADER_KEY_DICTIONARY(
+    LEADER_KEY_DICTIONARY_ENTRY(
+        LEADER_KEY_SEQUENCE(SC(US, 'w'), 0, 0, 0),
+        K(SC(US, L_A(F4)))
+    ),
+    LEADER_KEY_DICTIONARY_ENTRY(
+        LEADER_KEY_SEQUENCE(SC(US, 'o'), 0, 0, 0),
+        K(SC(US, L_C('O')))
+    )
+);
