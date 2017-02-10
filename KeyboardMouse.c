@@ -103,7 +103,7 @@ int main(void)
 {
     action_t action;
     keystroke_t *keystroke;
-    uint8_t layer, row, column;
+    uint8_t layer;
 
 	SetupHardware();
 
@@ -121,9 +121,7 @@ int main(void)
             if (USB_Device_RemoteWakeupEnabled)
 	            USB_Device_SendRemoteWakeup();
         layer = layers_get_source_layer(keystroke);
-        row = keystroke->keyswitch.row;
-        column = keystroke->keyswitch.column;
-        action = layout[layer][row][column];
+        action = layout[layer][keystroke->keyswitch];
         if (!action.fcn)
             continue;
         action.fcn(keystroke, action.arg);

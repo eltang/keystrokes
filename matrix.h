@@ -10,12 +10,7 @@
 #endif
 
 typedef struct {
-    uint8_t row;
-    uint8_t column;
-} keyswitch_t;
-
-typedef struct {
-    keyswitch_t keyswitch;
+    uint8_t keyswitch;
     bool stage;
 } keystroke_t;
 

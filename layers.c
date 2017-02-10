@@ -1,16 +1,13 @@
 #include "layers.h"
 
-static uint8_t primary_layer, secondary_layer, source_layers[ROWS][COLUMNS];
+static uint8_t primary_layer, secondary_layer, source_layers[ROWS * COLUMNS];
 static uint8_t using_secondary_layer;
 
 uint8_t layers_get_source_layer(keystroke_t *keystroke)
 {
-    uint8_t row = keystroke->keyswitch.row;
-    uint8_t column = keystroke->keyswitch.column;
-
     if (keystroke->stage == KEYSTROKE_FINISH)
-        return source_layers[row][column];
-    return source_layers[row][column] = layers_get_active_layer();
+        return source_layers[keystroke->keyswitch];
+    return source_layers[keystroke->keyswitch] = layers_get_active_layer();
 }
 
 uint8_t layers_get_active_layer(void)

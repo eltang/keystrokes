@@ -24,14 +24,14 @@ enum {
     KEY_TRANSPARENT
 };
 
-extern const __flash action_t layout[][ROWS][COLUMNS];
+extern const __flash action_t layout[][ROWS * COLUMNS];
 extern const __flash leader_key_dictionary_entry_t leader_key_dictionary[];
 
 #define NO_ACTION { 0 }
 #define LAYOUT(...) \
-const __flash action_t layout[][ROWS][COLUMNS] = { __VA_ARGS__ }
+const __flash action_t layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
 #define LEADER_KEY { actions_leader_key_start }
-#define TRANSPARENT { keyswitch_transparent }
+#define TRANSPARENT { uint8_transparent }
 
 
 #define LEADER_KEY_DICTIONARY(...) \

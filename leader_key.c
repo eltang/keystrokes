@@ -11,7 +11,7 @@ static struct {
     };
     uint8_t index;
 } sequence;
-static keyswitch_t leader_key_keyswitch;
+static uint8_t leader_key_keyswitch;
 const __flash action_t leader_key_end_action = { leader_key_end };
 
 void leader_key_end(keystroke_t *keystroke, const __flash void *arg)
@@ -34,10 +34,10 @@ void leader_key_end(keystroke_t *keystroke, const __flash void *arg)
     sequence.index = 0;
 }
 
-void leader_key_start(keyswitch_t *keyswitch)
+void leader_key_start(uint8_t keyswitch)
 {
     leader_key_active = 1;
-    leader_key_keyswitch = *keyswitch;
+    leader_key_keyswitch = keyswitch;
     callbacks_set_mode(keyswitch, CALL_START | CALL_ON_TIMEOUT);
     callbacks_set_timeout_action(keyswitch, &leader_key_end_action);
     callbacks_set_timer(keyswitch, 1000);
@@ -53,5 +53,5 @@ void leader_key_process(uint8_t code)
     if (sequence.index == 4)
         return;
     sequence.codes[sequence.index++] = code | modifiers_get() << 8;
-    callbacks_set_timer(&leader_key_keyswitch, 1000);
+    callbacks_set_timer(leader_key_keyswitch, 1000);
 }

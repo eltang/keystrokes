@@ -9,67 +9,67 @@ enum {
 static struct {
     const __flash action_t *keystroke_action;
     const __flash action_t *timeout_action;
-} callback_actions[ROWS][COLUMNS];
-static uint8_t callback_modes[ROWS][COLUMNS];
+} callback_actions[ROWS * COLUMNS];
+static uint8_t callback_modes[ROWS * COLUMNS];
 typedef struct {
     uint16_t timestamp;
     uint16_t wait;
 } callback_timer_t;
 
-static callback_timer_t callback_timers[ROWS][COLUMNS];
-static uint8_t tap_count[ROWS][COLUMNS];
+static callback_timer_t callback_timers[ROWS * COLUMNS];
+static uint8_t tap_count[ROWS * COLUMNS];
 
-void callbacks_set_timeout_action(keyswitch_t *keyswitch, const __flash action_t *action)
+void callbacks_set_timeout_action(uint8_t keyswitch, const __flash action_t *action)
 {
-    callback_actions[keyswitch->row][keyswitch->column].timeout_action = action;
+    callback_actions[keyswitch].timeout_action = action;
 }
 
-void callbacks_set_keystroke_action(keyswitch_t *keyswitch, const __flash action_t *action)
+void callbacks_set_keystroke_action(uint8_t keyswitch, const __flash action_t *action)
 {
-    callback_actions[keyswitch->row][keyswitch->column].keystroke_action = action;
+    callback_actions[keyswitch].keystroke_action = action;
 }
 
-void callbacks_set_mode(keyswitch_t *keyswitch, uint8_t mode)
+void callbacks_set_mode(uint8_t keyswitch, uint8_t mode)
 {
-    callback_modes[keyswitch->row][keyswitch->column] = mode;
+    callback_modes[keyswitch] = mode;
 }
 
-uint8_t callbacks_get_mode(keyswitch_t *keyswitch)
+uint8_t callbacks_get_mode(uint8_t keyswitch)
 {
-    return callback_modes[keyswitch->row][keyswitch->column];
+    return callback_modes[keyswitch];
 }
 
-void callbacks_set_timer(keyswitch_t *keyswitch, uint16_t wait)
+void callbacks_set_timer(uint8_t keyswitch, uint16_t wait)
 {
-    callback_timers[keyswitch->row][keyswitch->column].timestamp = timer_read();
-    callback_timers[keyswitch->row][keyswitch->column].wait = wait;
+    callback_timers[keyswitch].timestamp = timer_read();
+    callback_timers[keyswitch].wait = wait;
 }
 
-void callbacks_tap_count_increment(keyswitch_t *keyswitch)
+void callbacks_tap_count_increment(uint8_t keyswitch)
 {
-    ++tap_count[keyswitch->row][keyswitch->column];
+    ++tap_count[keyswitch];
 }
 
-uint8_t callbacks_tap_count_get(keyswitch_t *keyswitch)
+uint8_t callbacks_tap_count_get(uint8_t keyswitch)
 {
-    return tap_count[keyswitch->row][keyswitch->column];
+    return tap_count[keyswitch];
 }
 
-void callbacks_tap_count_clear(keyswitch_t *keyswitch)
+void callbacks_tap_count_clear(uint8_t keyswitch)
 {
-    tap_count[keyswitch->row][keyswitch->column] = 0;
+    tap_count[keyswitch] = 0;
 }
 
-void callbacks_execute(keyswitch_t *keyswitch)
+void callbacks_execute(uint8_t keyswitch)
 {
-    uint8_t *callback_mode = &callback_modes[keyswitch->row][keyswitch->column];
+    uint8_t *callback_mode = &callback_modes[keyswitch];
     action_t action;
-    keystroke_t keystroke = { .keyswitch = *keyswitch };
+    keystroke_t keystroke = { .keyswitch = keyswitch };
 
     if (*callback_mode & CALLED_ON_TIMEOUT)
-        action = *callback_actions[keyswitch->row][keyswitch->column].timeout_action;
+        action = *callback_actions[keyswitch].timeout_action;
     else
-        action = *callback_actions[keyswitch->row][keyswitch->column].keystroke_action;
+        action = *callback_actions[keyswitch].keystroke_action;
     if (*callback_mode & CALL_START) {
         keystroke.stage = KEYSTROKE_START;
         action.fcn(&keystroke, action.arg);
@@ -86,30 +86,29 @@ void callback_task(keystroke_t *keystroke)
     uint8_t *callback_mode;
     callback_timer_t *callback_timer;
 
-    for (uint8_t i = ROWS; i--;)
-        for (uint8_t j = COLUMNS; j--;) {
-            callback_mode = &callback_modes[i][j];
-            if (keystroke) {
-                if (keystroke->stage == KEYSTROKE_START) {
-                    if (*callback_mode & CALL_ON_KEYSTROKE_START) {
-                        *callback_mode |= CALLED_ON_KEYSTROKE_START;
-                        goto execute_callback;
-                    }
-                } else
-                    if (*callback_mode & CALL_ON_KEYSTROKE_FINISH) {
-                        *callback_mode |= CALLED_ON_KEYSTROKE_FINISH;
-                        goto execute_callback;
-                    }
-            }
-            if (*callback_mode & CALL_ON_TIMEOUT) {
-                callback_timer = &callback_timers[i][j];
-                if ((uint16_t)timer_read() - callback_timer->timestamp > callback_timer->wait) {
-                    *callback_mode |= CALLED_ON_TIMEOUT;
+    for (uint8_t i = ROWS * COLUMNS; i--;) {
+        callback_mode = &callback_modes[i];
+        if (keystroke) {
+            if (keystroke->stage == KEYSTROKE_START) {
+                if (*callback_mode & CALL_ON_KEYSTROKE_START) {
+                    *callback_mode |= CALLED_ON_KEYSTROKE_START;
                     goto execute_callback;
                 }
-            }
-            continue;
-        execute_callback:
-            callbacks_execute(&(keyswitch_t){ i, j });
+            } else
+                if (*callback_mode & CALL_ON_KEYSTROKE_FINISH) {
+                    *callback_mode |= CALLED_ON_KEYSTROKE_FINISH;
+                    goto execute_callback;
+                }
         }
+        if (*callback_mode & CALL_ON_TIMEOUT) {
+            callback_timer = &callback_timers[i];
+            if ((uint16_t)timer_read() - callback_timer->timestamp > callback_timer->wait) {
+                *callback_mode |= CALLED_ON_TIMEOUT;
+                goto execute_callback;
+            }
+        }
+        continue;
+    execute_callback:
+        callbacks_execute(i);
+    }
 }

@@ -125,9 +125,9 @@ keystroke_t *matrix_scan(void)
             keyswitch_state->state = !keyswitch_is_open;
 #endif
 #ifdef BACKWARDS_DIODES
-            keystroke.keyswitch = (keyswitch_t){ j, i };
+            keystroke.keyswitch = j * COLUMNS + i;
 #else
-            keystroke.keyswitch = (keyswitch_t){ i, j };
+            keystroke.keyswitch = i * COLUMNS + j;
 #endif
             keystroke.stage = keyswitch_is_open;
             return &keystroke;
