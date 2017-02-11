@@ -53,8 +53,9 @@ void keys_add(uint8_t code)
 
 void keys_delete(uint8_t code)
 {
-    if (!code)
+    if (!code) {
         return;
+    }
 	for (uint8_t i = 6; i--;)
         if (keys[i] == code && !--key_activations[i]) {
             usb_wait_until_previous_keyboard_report_sent();
