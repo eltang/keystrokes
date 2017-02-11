@@ -36,6 +36,8 @@ void leader_key_end(keystroke_t *keystroke, const __flash void *arg)
 
 void leader_key_start(uint8_t keyswitch)
 {
+    if (leader_key_active)
+        return;
     leader_key_active = 1;
     leader_key_keyswitch = keyswitch;
     callbacks_set_mode(keyswitch, CALL_START | CALL_ON_TIMEOUT);
