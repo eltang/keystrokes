@@ -13,9 +13,9 @@ void actions_modifiers_and_scancode(keystroke_t *keystroke, const __flash void *
 
     if (keystroke->stage == KEYSTROKE_START) {
         modifiers_add_temporary(modifiers, keystroke->keyswitch);
-        keys_add(key, keystroke->keyswitch);
+        keys_add(key);
     } else {
-        keys_delete(key, keystroke->keyswitch);
+        keys_delete(key);
         modifiers_delete_temporary(modifiers, keystroke->keyswitch);
     }
 }
@@ -36,9 +36,9 @@ void actions_scancode(keystroke_t *keystroke, const __flash void *arg)
 
     if (keystroke->stage == KEYSTROKE_START) {
         modifiers_add_temporary(0, keystroke->keyswitch);
-        keys_add(key, keystroke->keyswitch);
+        keys_add(key);
     } else {
-        keys_delete(key, keystroke->keyswitch);
+        keys_delete(key);
         modifiers_delete_temporary(0, keystroke->keyswitch);
     }
 }

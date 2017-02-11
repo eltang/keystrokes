@@ -21,16 +21,19 @@
 #include "KeyboardMouse.h"
 
 static uint8_t keys[6];
-static uint8_t keyswitches[6];
+static uint8_t key_activations[6];
 
-void keys_add(uint8_t code, uint8_t keyswitch)
+void keys_add(uint8_t code)
 {
-    uint8_t empty_slot_index = -1;
+    uint8_t empty_slot_index;
 
+    if (!code)
+        return;
     if (leader_key_is_active()) {
         leader_key_process(code);
         return;
     }
+    empty_slot_index = -1;
 	for (uint8_t i = 6; i--;) {
         if (keys[i] == code) {
             usb_wait_until_previous_keyboard_report_sent();
@@ -45,18 +48,19 @@ void keys_add(uint8_t code, uint8_t keyswitch)
         return;
     usb_wait_until_previous_keyboard_report_sent();
     keys[empty_slot_index] = code;
-    keyswitches[empty_slot_index] = keyswitch;
+    ++key_activations[empty_slot_index];
 }
 
-void keys_delete(uint8_t code, uint8_t keyswitch)
+void keys_delete(uint8_t code)
 {
+    if (!code)
+        return;
 	for (uint8_t i = 6; i--;)
-        if (keys[i] == code)
-            if (keyswitches[i] == keyswitch) {
-                usb_wait_until_previous_keyboard_report_sent();
-                keys[i] = 0;
-                break;
-            }
+        if (keys[i] == code && !--key_activations[i]) {
+            usb_wait_until_previous_keyboard_report_sent();
+            keys[i] = 0;
+            break;
+        }
 }
 
 uint8_t *keys_get(void)
