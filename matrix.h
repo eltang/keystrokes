@@ -15,8 +15,8 @@ typedef struct {
 } keystroke_t;
 
 enum {
-    KEYSTROKE_START,
-    KEYSTROKE_FINISH
+    KEYSTROKE_FINISH,
+    KEYSTROKE_START
 };
 
 void matrix_init_output(uint8_t output);
