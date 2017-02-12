@@ -33,7 +33,7 @@ LAYOUT(
         NO_ACTION, NO_ACTION, K(SC(US, NK('7'))), K(SC(US, NK('8'))), K(SC(US, NK('9'))), K(SC(US, NK('+'))), NO_ACTION,
                    NO_ACTION, K(SC(US, NK('4'))), K(SC(US, NK('5'))), K(SC(US, NK('6'))), K(SC(US, NK('+'))), NO_ACTION,
         L(GOTO, 0), NO_ACTION, K(SC(US, NK('1'))), K(SC(US, NK('2'))), K(SC(US, NK('3'))), K(SC(US, NK(ENTER))), HT(K(SC(US, R_SHIFT)), K(SC(US, ')'))),
-                   K(SC(US, R_GUI)), K(SC(US, R_ALT)), K(SC(US, R_CTRL)), NO_ACTION, NO_ACTION,
+                   K(SC(US, R_GUI)), K(SC(US, R_ALT)), TH(K(SC(US, NK('.'))), K(SC(US, R_CTRL))), NO_ACTION, NO_ACTION,
         NO_ACTION, NO_ACTION,
         NO_ACTION,
         NO_ACTION, NO_ACTION, K(SC(US, NK('0')))
