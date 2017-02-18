@@ -19,8 +19,6 @@ void Bootloader_Jump_Check(void)
     if ((MCUSR & (1 << WDRF)) && (Boot_Key == MAGIC_BOOT_KEY))
     {
         Boot_Key = 0;
-        MCUSR = 0;
-        wdt_disable();
         ((void (*)(void))BOOTLOADER_START_ADDRESS)();
     }
 }
