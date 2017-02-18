@@ -44,6 +44,7 @@
 #include "power.h"
 #include "timer.h"
 #include "layers.h"
+#include "keystrokes.h"
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
@@ -100,10 +101,6 @@ USB_ClassInfo_HID_Device_t Extrakey_HID_Interface =
  */
 int main(void)
 {
-    action_t action;
-    keystroke_t *keystroke;
-    uint8_t layer;
-
 	SetupHardware();
 
 	GlobalInterruptEnable();
@@ -112,18 +109,7 @@ int main(void)
 	{
         HID_Device_USBTask(&Keyboard_HID_Interface);
         HID_Device_USBTask(&Extrakey_HID_Interface);
-        keystroke = matrix_scan();
-        callback_task(keystroke);
-        if (!keystroke)
-            continue;
-        if (USB_DeviceState == DEVICE_STATE_Suspended)
-            if (USB_Device_RemoteWakeupEnabled)
-	            USB_Device_SendRemoteWakeup();
-        layer = layers_get_source_layer(keystroke);
-        action = layout[layer][keystroke->keyswitch];
-        if (!action.fcn)
-            continue;
-        action.fcn(keystroke, action.arg);
+        keystrokes_process(matrix_scan());
     }
 }
 

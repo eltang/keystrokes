@@ -1,7 +1,6 @@
 #include "leader_key.h"
 #include "modifiers.h"
 #include "layout.h"
-#include "callbacks.h"
 
 static bool leader_key_active;
 static struct {
@@ -22,9 +21,9 @@ void leader_key_end(keystroke_t *keystroke, const __flash void *arg)
     entry = leader_key_dictionary;
     while (entry->sequence) {
         if (entry->sequence == sequence.raw) {
-            keystroke->stage = KEYSTROKE_START;
+            keystroke->state = KEYSTROKE_START;
             entry->action.fcn(keystroke, entry->action.arg);
-            keystroke->stage = KEYSTROKE_FINISH;
+            keystroke->state = KEYSTROKE_FINISH;
             entry->action.fcn(keystroke, entry->action.arg);
             break;
         }
@@ -40,7 +39,7 @@ void leader_key_start(uint8_t keyswitch)
         return;
     leader_key_active = 1;
     leader_key_keyswitch = keyswitch;
-    callbacks_set_mode(keyswitch, CALL_START | CALL_ON_TIMEOUT);
+    // callbacks_set_mode(keyswitch, CALL_START | CALL_ON_TIMEOUT);
     callbacks_set_timeout_action(keyswitch, &leader_key_end_action);
     callbacks_set_timer(keyswitch, 1000);
 }
@@ -56,4 +55,9 @@ void leader_key_process(uint8_t code)
         return;
     sequence.codes[sequence.index++] = code | modifiers_get() << 8;
     callbacks_set_timer(leader_key_keyswitch, 1000);
+}
+
+void leader_key_task(void)
+{
+    // remove dependence on the callback system
 }

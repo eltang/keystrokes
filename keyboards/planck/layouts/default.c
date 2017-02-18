@@ -3,9 +3,9 @@
 LAYOUT(
     {
         K(SC(US, TAB)), K(SC(US, 'q')), K(SC(US, 'w')), K(SC(US, 'e')), K(SC(US, 'r')), K(SC(US, 't')), K(SC(US, 'y')), K(SC(US, 'u')), K(SC(US, 'i')), K(SC(US, 'o')), K(SC(US, 'p')), K(SC(US, BKSP)),
-        K(SC(US, ESC)), K(SC(US, 'a')), K(SC(US, 's')), K(SC(US, 'd')), K(SC(US, 'f')), K(SC(US, 'g')), K(SC(US, 'h')), TH(K(SC(US, 'j')), K(SC(US, R_ALT))), K(SC(US, 'k')), K(SC(US, 'l')), K(SC(US, ';')), K(SC(US, '\'')),
-        HT(K(SC(US, L_SHIFT)), K(SC(US, '('))), K(SC(US, 'z')), K(SC(US, 'x')), K(SC(US, 'c')), K(SC(US, 'v')), K(SC(US, 'b')), K(SC(US, 'n')), K(SC(US, 'm')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, '/')), K(SC(US, ENTER)),
-        LEADER_KEY, K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)), L(VISIT, 1), K(SC(US, ' ')), K(SC(US, ' ')), L(VISIT, 2), K(SC(US, LEFT)), K(SC(US, DOWN)), K(SC(US, UP)), K(SC(US, RIGHT))
+        K(SC(US, ESC)), K(SC(US, 'a')), K(SC(US, 's')), K(SC(US, 'd')), K(SC(US, 'f')), K(SC(US, 'g')), K(SC(US, 'h')), K(SC(US, 'j')), K(SC(US, 'k')), K(SC(US, 'l')), K(SC(US, ';')), K(SC(US, '\'')),
+        K(SC(US, L_SHIFT)), K(SC(US, 'z')), K(SC(US, 'x')), K(SC(US, 'c')), K(SC(US, 'v')), K(SC(US, 'b')), K(SC(US, 'n')), K(SC(US, 'm')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, '/')), K(SC(US, ENTER)),
+        RESET, K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)), L(VISIT, 1), K(SC(US, ' ')), K(SC(US, ' ')), L(VISIT, 2), K(SC(US, LEFT)), K(SC(US, DOWN)), K(SC(US, UP)), K(SC(US, RIGHT))
     },
     {
         K(SC(US, '~')), K(SC(US, '!')), K(SC(US, '@')), K(SC(US, '#')), K(SC(US, '$')), K(SC(US, '%')), K(SC(US, '^')), K(SC(US, '&')), K(SC(US, '*')), K(SC(US, '(')), K(SC(US, ')')), K(SC(US, BKSP)),

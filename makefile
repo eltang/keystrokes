@@ -28,12 +28,11 @@ SRC          = $(TARGET).c \
 			   matrix.c \
 			   modifiers.c \
 			   timer.c \
-			   keyboards/ergodox/layouts/eric.c \
-			   keyboards/ergodox/ergodox.c \
+			   keyboards/planck/layouts/default.c \
 			   reset.c \
 			   layers.c \
-			   callbacks.c \
-			   leader_key.c
+			   keystrokes.c 
+
 
 LUFA_PATH    = lufa/LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -Ii2cmaster -include config.h
