@@ -18,7 +18,7 @@
 
 #include "keys.h"
 #include "leader_key.h"
-#include "KeyboardMouse.h"
+#include "main.h"
 
 static uint8_t keys[6];
 static uint8_t key_activations[6];

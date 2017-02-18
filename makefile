@@ -17,7 +17,7 @@ BOARD        = NONE
 F_CPU        = 16000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
-TARGET       = KeyboardMouse
+TARGET       = main
 SRC          = $(TARGET).c \
                Descriptors.c \
                $(LUFA_SRC_USB) \

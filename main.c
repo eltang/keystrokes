@@ -34,7 +34,7 @@
  *  the demo and is responsible for the initial application hardware configuration.
  */
 
-#include "KeyboardMouse.h"
+#include "main.h"
 #include "keys.h"
 #include "modifiers.h"
 #include "matrix.h"
@@ -44,7 +44,6 @@
 #include "power.h"
 #include "timer.h"
 #include "layers.h"
-#include "callbacks.h"
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
