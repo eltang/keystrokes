@@ -2,7 +2,6 @@
 #include <avr/interrupt.h>
 #include <util/atomic.h>
 #include "timer.h"
-#include "KeyboardMouse.h"
 
 static volatile uint32_t count;
 

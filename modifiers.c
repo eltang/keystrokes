@@ -1,5 +1,4 @@
 #include "modifiers.h"
-#include "KeyboardMouse.h"
 
 static struct {
     uint8_t modifiers[8];
