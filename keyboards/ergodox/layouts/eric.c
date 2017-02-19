@@ -60,3 +60,10 @@ LAYOUT(
     ))
 #endif
 );
+
+const __flash leader_key_dictionary_entry_t leader_key_dictionary[] = {
+    LEADER_KEY_DICTIONARY_ENTRY(
+        LEADER_KEY_SEQUENCE(0, 0, 0, 0),
+        NO_ACTION
+    )
+};
