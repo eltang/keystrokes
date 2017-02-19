@@ -3,7 +3,6 @@
 #include "keys.h"
 #include "reset.h"
 #include "layers.h"
-#include "callbacks.h"
 #include "leader_key.h"
 
 void actions_modifiers_and_scancode(keystroke_t *keystroke, const __flash void *arg)
@@ -11,12 +10,15 @@ void actions_modifiers_and_scancode(keystroke_t *keystroke, const __flash void *
     uint8_t key = ((const __flash uint8_t *)arg)[0];
     uint8_t modifiers = ((const __flash uint8_t *)arg)[1];
 
-    if (keystroke->stage == KEYSTROKE_START) {
-        modifiers_add_temporary(modifiers, &keystroke->keyswitch);
-        keys_add(key, &keystroke->keyswitch);
-    } else {
-        keys_delete(key, &keystroke->keyswitch);
-        modifiers_delete_temporary(modifiers, &keystroke->keyswitch);
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
+        modifiers_set_temporary(modifiers);
+        keys_add(key);
+        break;
+    case KEYSTROKE_FINISH:
+        keys_delete(key);
+        modifiers_clear_temporary();
+        break;
     }
 }
 
@@ -24,22 +26,27 @@ void actions_modifiers(keystroke_t *keystroke, const __flash void *arg)
 {
     uint8_t modifiers = *(const __flash uint8_t *)arg;
 
-    if (keystroke->stage == KEYSTROKE_START)
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
         modifiers_add_permanent(modifiers);
-    else
+        break;
+    case KEYSTROKE_FINISH:
         modifiers_delete_permanent(modifiers);
+        break;
+    }
 }
 
 void actions_scancode(keystroke_t *keystroke, const __flash void *arg)
 {
     uint8_t key = *(const __flash uint8_t *)arg;
 
-    if (keystroke->stage == KEYSTROKE_START) {
-        modifiers_add_temporary(0, &keystroke->keyswitch);
-        keys_add(key, &keystroke->keyswitch);
-    } else {
-        keys_delete(key, &keystroke->keyswitch);
-        modifiers_delete_temporary(0, &keystroke->keyswitch);
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
+        keys_add(key);
+        break;
+    case KEYSTROKE_FINISH:
+        keys_delete(key);
+        break;
     }
 }
 
@@ -47,25 +54,30 @@ void actions_layers_goto(keystroke_t *keystroke, const __flash void *arg)
 {
     uint8_t layer;
 
-    if (keystroke->stage == KEYSTROKE_FINISH)
-        return;
-    layer = *(const __flash uint8_t *)arg;
-    layers_set_primary_layer(layer);
+    if (keystroke->state == KEYSTROKE_START) {
+        layer = *(const __flash uint8_t *)arg;
+        layers_set_primary_layer(layer);
+    }
 }
 
 void actions_layers_visit(keystroke_t *keystroke, const __flash void *arg)
 {
     uint8_t layer = *(const __flash uint8_t *)arg;
 
-    if (keystroke->stage == KEYSTROKE_START)
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
         layers_activate_secondary_layer(layer);
-    else
+        break;
+    case KEYSTROKE_FINISH:
         layers_deactivate_secondary_layer(layer);
+        break;
+    }
 }
 
 void actions_reset(keystroke_t *keystroke, const __flash void *arg)
 {
-    reset();
+    if (keystroke->state == KEYSTROKE_START)
+        reset();
 }
 
 void actions_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
@@ -84,24 +96,24 @@ void actions_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
 //     while (actions[action_count].fcn) {
 //         ++action_count;
 //     }
-//     uint8_t tap_count = callbacks_tap_count_get(&keystroke->keyswitch);
-//     switch (keystroke->stage) {
+//     uint8_t tap_count = callbacks_tap_count_get(keystroke->keyswitch);
+//     switch (keystroke->state) {
 //     case KEYSTROKE_START:
 //         if (tap_count <= action_count) {
-//             callbacks_set_action(&keystroke->keyswitch, &actions[tap_count]);
-//             callbacks_set_mode(&keystroke->keyswitch, CALL_START | CALL_ON_KEYSTROKE | CALL_ON_TIMEOUT);
-//             callbacks_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
+//             callbacks_set_action(keystroke->keyswitch, &actions[tap_count]);
+//             callbacks_set_mode(keystroke->keyswitch, CALL_START | CALL_ON_KEYSTROKE | CALL_ON_TIMEOUT);
+//             callbacks_set_timer(keystroke->keyswitch, MAX_TAP_DURATION);
 //         } else {
-//             callbacks_cancel(&keystroke->keyswitch);
+//             callbacks_cancel(keystroke->keyswitch);
 //         }
 //         break;
 //     case KEYSTROKE_FINISH:
-//         if (callback_called_on_timeout(&keystroke->keyswitch)) {
+//         if (callback_called_on_timeout(keystroke->keyswitch)) {
 //             actions[tap_count].fcn(keystroke, actions[tap_count].arg);
-//             callbacks_tap_count_clear(&keystroke->keyswitch);
+//             callbacks_tap_count_clear(keystroke->keyswitch);
 //         } else {
-//             callbacks_tap_count_increment(&keystroke->keyswitch);
-//             callbacks_set_mode(&keystroke->keyswitch, CALL_FINISH);
+//             callbacks_tap_count_increment(keystroke->keyswitch);
+//             callbacks_set_mode(keystroke->keyswitch, CALL_FINISH);
 //         }
 //         break;
 //     }
@@ -113,22 +125,21 @@ void actions_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
 void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash action_t *actions = arg;
+    action_t action = actions[0];
 
-    switch (keystroke->stage) {
+    switch (keystroke->state) {
     case KEYSTROKE_START:
-        actions[0].fcn(keystroke, actions[0].arg);
-        callbacks_set_mode(&keystroke->keyswitch, CALL_ON_TIMEOUT | CALL_ON_KEYSTROKE_START);
-        callbacks_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
+        action.fcn(keystroke, action.arg);
         break;
     case KEYSTROKE_FINISH:
-        actions[0].fcn(keystroke, actions[0].arg);
-        if (!callbacks_get_mode(&keystroke->keyswitch))
+        action.fcn(keystroke, action.arg);
+        if (keystroke->previous_state != KEYSTROKE_START)
             return;
-        callbacks_cancel(&keystroke->keyswitch);
-        keystroke->stage = KEYSTROKE_START;
-        actions[1].fcn(keystroke, actions[1].arg);
-        keystroke->stage = KEYSTROKE_FINISH;
-        actions[1].fcn(keystroke, actions[1].arg);
+        action = actions[1];
+        keystroke->state = KEYSTROKE_START;
+        action.fcn(keystroke, action.arg);
+        keystroke->state = KEYSTROKE_FINISH;
+        action.fcn(keystroke, action.arg);
         break;
     }
 }
@@ -136,29 +147,46 @@ void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
 void actions_tap_hold(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash action_t *actions = arg;
+    action_t action;
 
-    switch (keystroke->stage) {
-    case KEYSTROKE_START:
-        callbacks_set_action(&keystroke->keyswitch, &actions[1]);
-        callbacks_set_mode(&keystroke->keyswitch, CALL_START | CALL_ON_TIMEOUT);
-        callbacks_set_timer(&keystroke->keyswitch, MAX_TAP_DURATION);
+    switch (keystroke->state) {
+    case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
+        action = actions[1];
+        keystroke->state = KEYSTROKE_START;
+        action.fcn(keystroke, action.arg);
+        break;
+    case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
+        if (keystroke->interruptions == 1) {
+            action = actions[0];
+            keystroke->state = KEYSTROKE_START;
+            action.fcn(keystroke, action.arg);
+        }
         break;
     case KEYSTROKE_FINISH:
-        if (callbacks_get_mode(&keystroke->keyswitch)) {
-            callbacks_cancel(&keystroke->keyswitch);
-            keystroke->stage = KEYSTROKE_START;
-            actions[0].fcn(keystroke, actions[0].arg);
-            keystroke->stage = KEYSTROKE_FINISH;
-            actions[0].fcn(keystroke, actions[0].arg);
-        } else
-            actions[1].fcn(keystroke, actions[1].arg);
+        action = actions[0];
+        keystroke->state = KEYSTROKE_FINISH;
+        switch (keystroke->previous_state) {
+            case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
+                action.fcn(keystroke, action.arg);
+                break;
+            case KEYSTROKE_START:
+                keystroke->state = KEYSTROKE_START;
+                action.fcn(keystroke, action.arg);
+                keystroke->state = KEYSTROKE_FINISH;
+                action.fcn(keystroke, action.arg);
+                break;
+            case KEYSTROKE_START | KEYSTROKE_TIMED_OUT | KEYSTROKE_INTERRUPTED:
+            case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
+                action = actions[1];
+                action.fcn(keystroke, action.arg);
+                break;
+        }
         break;
     }
 }
 
 void actions_leader_key_start(keystroke_t *keystroke, const __flash void *arg)
 {
-    if (keystroke->stage == KEYSTROKE_FINISH)
-        return;
-    leader_key_start(&keystroke->keyswitch);
+    if (keystroke->state == KEYSTROKE_START)
+        leader_key_start(keystroke->keyswitch);
 }

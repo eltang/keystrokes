@@ -17,26 +17,26 @@ BOARD        = NONE
 F_CPU        = 16000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
-TARGET       = KeyboardMouse
+TARGET       = main
 SRC          = $(TARGET).c \
                Descriptors.c \
                $(LUFA_SRC_USB) \
                $(LUFA_SRC_USBCLASS) \
 			   keys.c \
+			   i2cmaster/twimaster.c \
 			   actions.c \
 			   matrix.c \
 			   modifiers.c \
 			   timer.c \
-			   TWI_Master/TWI_Master.c \
-			   keyboards/ergodox/layouts/erez.c \
-			   keyboards/ergodox/ergodox.c \
+			   keyboards/planck/layouts/default.c \
 			   reset.c \
 			   layers.c \
-			   callbacks.c \
+			   keystrokes.c \
 			   leader_key.c
 
+
 LUFA_PATH    = lufa/LUFA
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -ITWI_Master -include config.h
+CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -Ii2cmaster -include config.h
 LD_FLAGS     =
 
 # Default target

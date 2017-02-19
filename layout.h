@@ -24,14 +24,14 @@ enum {
     KEY_TRANSPARENT
 };
 
-extern const __flash action_t layout[][ROWS][COLUMNS];
+extern const __flash action_t layout[][ROWS * COLUMNS];
 extern const __flash leader_key_dictionary_entry_t leader_key_dictionary[];
 
 #define NO_ACTION { 0 }
 #define LAYOUT(...) \
-const __flash action_t layout[][ROWS][COLUMNS] = { __VA_ARGS__ }
+const __flash action_t layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
 #define LEADER_KEY { actions_leader_key_start }
-#define TRANSPARENT { keyswitch_transparent }
+#define TRANSPARENT { uint8_transparent }
 
 
 #define LEADER_KEY_DICTIONARY(...) \
@@ -257,7 +257,7 @@ enum input_sources {
 (code & 0xFFFFFFFFFF) == '.' ? CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_KEYPAD_DOT_AND_DELETE : HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN : \
 (code & 0xFFFFFFFFFF) == '/' ? CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_KEYPAD_SLASH : HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK : \
 (code & 0xFFFFFFFFFF) == '0' ? CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_KEYPAD_0_AND_INSERT : HID_KEYBOARD_SC_0_AND_CLOSING_PARENTHESIS : \
-(code & 0xFFFFFFFFFF) >= '1' && code <= '9' ? code - '1' + (CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_KEYPAD_1_AND_END : HID_KEYBOARD_SC_1_AND_EXCLAMATION) : \
+(code & 0xFFFFFFFFFF) >= '1' && (code & 0xFFFFFFFFFF) <= '9' ? (code & 0xFFFFFFFFFF) - '1' + (CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_KEYPAD_1_AND_END : HID_KEYBOARD_SC_1_AND_EXCLAMATION) : \
 (code & 0xFFFFFFFFFF) == ':' ? R_S(HID_KEYBOARD_SC_SEMICOLON_AND_COLON) : \
 (code & 0xFFFFFFFFFF) == ';' ? HID_KEYBOARD_SC_SEMICOLON_AND_COLON : \
 (code & 0xFFFFFFFFFF) == '<' ? R_S(HID_KEYBOARD_SC_COMMA_AND_LESS_THAN_SIGN) : \

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <avr/io.h>
-#include "TWI_Master/TWI_Master.h"
+#include "i2cmaster/i2cmaster.h"
 #include "layout.h"
 #include "matrix.h"
 
@@ -35,12 +35,10 @@
 // The address of the slave which controls the left LED strip is 0x42.
 // There are 15 leds connected to pin D7.
 
-static uint8_t OLATA_state, OLATB_state, GPIOB_state = 0xFF;
+static uint8_t OLATA_state = 0xFF, OLATB_state, GPIOB_state = 0xFF;
 
 void matrix_init(void)
 {
-    uint8_t transmission[4];
-
     DDRB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
     PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
     DDRD |= 1 << 3 | 1 << 2;
@@ -48,20 +46,19 @@ void matrix_init(void)
     DDRC |= 1 << 6;
     PORTC |= 1 << 6;
     PORTF |= ~(1 << 3 | 1 << 2);
-    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
-    transmission[1] = IODIRA;
-    transmission[2] = 0;
-    transmission[3] = (uint8_t)~(1 << 6 | 1 << 7);
-    TWI_Start_Transceiver_With_Data(transmission, 4);
-    transmission[1] = GPPUB;
-    transmission[2] = (uint8_t)~(1 << 6 | 1 << 7);
-    TWI_Start_Transceiver_With_Data(transmission, 3);
+    i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
+    i2c_write(IODIRA);
+    i2c_write(0);
+    i2c_write((uint8_t)~(1 << 6 | 1 << 7));
+    i2c_stop();
+    i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
+    i2c_write(GPPUB);
+    i2c_write((uint8_t)~(1 << 6 | 1 << 7));
+    i2c_stop();
 }
 
 bool matrix_read_input(uint8_t input, uint8_t output)
 {
-    uint8_t transmission[2];
-
     if (output > 6)
         switch (input) {
         case 0:
@@ -77,19 +74,11 @@ bool matrix_read_input(uint8_t input, uint8_t output)
         case 5:
             return PINF & 1 << 7;
         }
-    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
-    transmission[1] = GPIOB;
-    TWI_Start_Transceiver_With_Data(transmission, 2);
-    transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | TRUE << TWI_READ_BIT;
-    TWI_Start_Transceiver_With_Data(transmission, 1);
-    TWI_Get_Data_From_Transceiver(&GPIOB_state, 1);
     return GPIOB_state & 1 << input;
 }
 
 void matrix_activate_output(uint8_t output)
 {
-    uint8_t transmission[3];
-
     switch (output) {
     case 7:
         PORTB &= ~1;
@@ -113,18 +102,21 @@ void matrix_activate_output(uint8_t output)
         PORTC &= ~(1 << 6);
         break;
     default:
-        transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
-        transmission[1] = OLATA;
-        transmission[2] = OLATA_state &= 1 << output;
-        TWI_Start_Transceiver_With_Data(transmission, 3);
+        i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
+        i2c_write(OLATA);
+        i2c_write(OLATA_state &= ~(1 << output));
+        i2c_stop();
+        i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
+        i2c_write(GPIOB);
+        i2c_start(MCP23018_ADDR << 1 | I2C_READ);
+        GPIOB_state = i2c_readNak();
+        i2c_stop();
         break;
     }
 }
 
-void matrix_deactivate_output(uint8_t output)
+void matrix_deactivate_output(uint8_t output, bool keystroke_detected)
 {
-    uint8_t transmission[3];
-
     switch (output) {
     case 7 ... 10:
         PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
@@ -137,12 +129,12 @@ void matrix_deactivate_output(uint8_t output)
         break;
     default:
         OLATA_state |= ~(1 << 7);
-        if (output)
+        if (output && !keystroke_detected)
             break;
-        transmission[0] = MCP23018_ADDR << TWI_ADR_BITS | FALSE << TWI_READ_BIT;
-        transmission[1] = OLATA;
-        transmission[2] = OLATA_state;
-        TWI_Start_Transceiver_With_Data(transmission, 3);
+        i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
+        i2c_write(OLATA);
+        i2c_write(OLATA_state);
+        i2c_stop();
         break;
     }
 }

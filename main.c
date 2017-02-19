@@ -34,17 +34,17 @@
  *  the demo and is responsible for the initial application hardware configuration.
  */
 
-#include "KeyboardMouse.h"
+#include "main.h"
 #include "keys.h"
 #include "modifiers.h"
 #include "matrix.h"
-#include "TWI_Master.h"
+#include "i2cmaster/i2cmaster.h"
 #include "actions.h"
 #include "layout.h"
 #include "power.h"
 #include "timer.h"
 #include "layers.h"
-#include "callbacks.h"
+#include "keystrokes.h"
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
@@ -101,32 +101,14 @@ USB_ClassInfo_HID_Device_t Extrakey_HID_Interface =
  */
 int main(void)
 {
-    action_t action;
-    keystroke_t *keystroke;
-    uint8_t layer, row, column;
-
 	SetupHardware();
 
 	GlobalInterruptEnable();
 
 	for (;;)
 	{
-        HID_Device_USBTask(&Keyboard_HID_Interface);
-        HID_Device_USBTask(&Extrakey_HID_Interface);
-        keystroke = matrix_scan();
-        callback_task(keystroke);
-        if (!keystroke)
-            continue;
-        if (USB_DeviceState == DEVICE_STATE_Suspended)
-            if (USB_Device_RemoteWakeupEnabled)
-	            USB_Device_SendRemoteWakeup();
-        layer = layers_get_source_layer(keystroke);
-        row = keystroke->keyswitch.row;
-        column = keystroke->keyswitch.column;
-        action = layout[layer][row][column];
-        if (!action.fcn)
-            continue;
-        action.fcn(keystroke, action.arg);
+        keystrokes_process(matrix_scan());
+        keystrokes_task();
     }
 }
 
@@ -155,10 +137,10 @@ void SetupHardware()
 #endif
 	/* Hardware Initialization */
     timer_init();
-    matrix_init();
 #ifdef USING_TWI
-    TWI_Master_Initialise();
+    i2c_init();
 #endif
+    matrix_init();
 	USB_Init();
 }
 
@@ -254,20 +236,18 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 	}
 }
 
-void usb_wait_until_previous_keyboard_report_sent(void)
+void usb_send_keyboard_report(void)
 {
-    static uint8_t saved_keyboard_report_counter;
+    uint8_t saved_keyboard_report_counter = keyboard_report_counter;
 
     while (saved_keyboard_report_counter == keyboard_report_counter)
         HID_Device_USBTask(&Keyboard_HID_Interface);
-    saved_keyboard_report_counter = keyboard_report_counter;
 }
 
-void usb_wait_until_previous_extrakey_report_sent(void)
+void usb_send_extrakey_report(void)
 {
-    static uint8_t saved_extrakey_report_counter;
+    uint8_t saved_extrakey_report_counter = extrakey_report_counter;
 
     while (saved_extrakey_report_counter == extrakey_report_counter)
         HID_Device_USBTask(&Extrakey_HID_Interface);
-    saved_extrakey_report_counter = extrakey_report_counter;
 }
