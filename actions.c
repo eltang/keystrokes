@@ -74,7 +74,8 @@ void actions_layers_visit(keystroke_t *keystroke, const __flash void *arg)
 
 void actions_reset(keystroke_t *keystroke, const __flash void *arg)
 {
-    reset();
+    if (keystroke->state == KEYSTROKE_START)
+        reset();
 }
 
 void actions_multiple_actions(keystroke_t *keystroke, const __flash void *arg)

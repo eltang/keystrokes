@@ -17,7 +17,7 @@ enum {
 };
 
 
-static void keystrokes_execute(uint8_t keyswitch)
+static void keystrokes_execute(uint8_t keyswitch, uint8_t previous_state)
 {
     action_t action;
     keystroke_t keystroke;
@@ -32,43 +32,44 @@ static void keystrokes_execute(uint8_t keyswitch)
     keystroke.keyswitch = keyswitch;
     keystroke.interruptions = keystroke_interruptions[keyswitch];
     keystroke.state = keystroke_states[keyswitch];
+    keystroke.previous_state = previous_state;
     if (action.fcn)
         action.fcn(&keystroke, action.arg);
 }
 
-void keystrokes_process(uint8_t *keyswitch)
+void keystrokes_process(raw_keystroke_t *raw_keystroke)
 {
     uint16_t timer_count = timer_read();
-    uint8_t *keystroke_state;
+    uint8_t *keystroke_state, previous_keystroke_state;
     bool keystroke_in_progress, keystroke_is_not_tap;
 
-    if (keyswitch)
-        keystroke_states[*keyswitch] ^= KEYSTROKE_IN_PROGRESS;
-//     for (uint8_t i = ROWS * COLUMNS; i--;) {
-//         if (keyswitch && *keyswitch == i)
-//             continue;
-//         keystroke_state = &keystroke_states[i];
-//         keystroke_in_progress = *keystroke_state & KEYSTROKE_IN_PROGRESS;
-//         keystroke_is_not_tap = *keystroke_state & KEYSTROKE_IS_NOT_TAP;
-//         if (keyswitch && keystroke_states[*keyswitch] & KEYSTROKE_IN_PROGRESS) {
-//             if (keystroke_in_progress || !keystroke_is_not_tap) {
-//                 ++keystroke_interruptions[i];
-//                 goto execute_keystroke;
-//             }
-//         } else {
-//             if (!keystroke_is_not_tap)
-//                 if (timer_count - keystroke_timestamps[i] > MAX_TAP_DURATION)
-//                     goto execute_keystroke;
-//         }
-//         continue;
-// execute_keystroke:
-//         *keystroke_state |= KEYSTROKE_IS_NOT_TAP;
-//         keystrokes_execute(i);
-//     }
-    if (keyswitch) {
-        keystroke_states[*keyswitch] &= ~KEYSTROKE_IS_NOT_TAP;
-        keystroke_interruptions[*keyswitch] = 0;
-        keystroke_timestamps[*keyswitch] = timer_count;
-        keystrokes_execute(*keyswitch);
+    for (uint8_t i = ROWS * COLUMNS; i--;) {
+        if (raw_keystroke && raw_keystroke->keyswitch == i)
+            continue;
+        keystroke_state = &keystroke_states[i];
+        keystroke_in_progress = *keystroke_state & KEYSTROKE_IN_PROGRESS;
+        keystroke_is_not_tap = *keystroke_state & KEYSTROKE_IS_NOT_TAP;
+        if (raw_keystroke && raw_keystroke->state == KEYSTROKE_IN_PROGRESS) {
+            if (keystroke_in_progress || !keystroke_is_not_tap) {
+                ++keystroke_interruptions[i];
+                goto execute_keystroke;
+            }
+        } else {
+            if (!keystroke_is_not_tap)
+                if (timer_count - keystroke_timestamps[i] > MAX_TAP_DURATION)
+                    goto execute_keystroke;
+        }
+        continue;
+execute_keystroke:
+        previous_keystroke_state = *keystroke_state;
+        *keystroke_state |= KEYSTROKE_IS_NOT_TAP;
+        keystrokes_execute(i, previous_keystroke_state);
+    }
+    if (raw_keystroke) {
+        previous_keystroke_state = keystroke_states[raw_keystroke->keyswitch];
+        keystroke_states[raw_keystroke->keyswitch] = raw_keystroke->state;
+        keystroke_interruptions[raw_keystroke->keyswitch] = 0;
+        keystroke_timestamps[raw_keystroke->keyswitch] = timer_count;
+        keystrokes_execute(raw_keystroke->keyswitch, previous_keystroke_state);
     }
 }
