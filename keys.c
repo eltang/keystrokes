@@ -29,10 +29,10 @@ void keys_add(uint8_t code)
 
     if (!code)
         return;
-    // if (leader_key_is_active()) {
-    //     leader_key_process(code);
-    //     return;
-    // }
+    if (leader_key_is_active()) {
+        leader_key_process(code);
+        return;
+    }
     empty_slot_index = -1;
 	for (uint8_t i = 6; i--;) {
         if (keys[i] == code) {

@@ -108,6 +108,7 @@ int main(void)
 	for (;;)
 	{
         keystrokes_process(matrix_scan());
+        keystrokes_task();
     }
 }
 

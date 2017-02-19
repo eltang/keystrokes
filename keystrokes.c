@@ -73,3 +73,8 @@ execute_keystroke:
         keystrokes_execute(raw_keystroke->keyswitch, previous_keystroke_state);
     }
 }
+
+void keystrokes_task(void)
+{
+    leader_key_task();
+}

@@ -31,7 +31,8 @@ SRC          = $(TARGET).c \
 			   keyboards/planck/layouts/default.c \
 			   reset.c \
 			   layers.c \
-			   keystrokes.c 
+			   keystrokes.c \
+			   leader_key.c
 
 
 LUFA_PATH    = lufa/LUFA

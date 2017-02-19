@@ -1,6 +1,7 @@
 #include "leader_key.h"
 #include "modifiers.h"
 #include "layout.h"
+#include "timer.h"
 
 static bool leader_key_active;
 static struct {
@@ -11,20 +12,22 @@ static struct {
     uint8_t index;
 } sequence;
 static uint8_t leader_key_keyswitch;
-const __flash action_t leader_key_end_action = { leader_key_end };
+static uint16_t leader_key_timestamp;
 
-void leader_key_end(keystroke_t *keystroke, const __flash void *arg)
+static void leader_key_end(void)
 {
+    keystroke_t keystroke;
     const __flash leader_key_dictionary_entry_t *entry;
 
     leader_key_active = 0;
     entry = leader_key_dictionary;
     while (entry->sequence) {
         if (entry->sequence == sequence.raw) {
-            keystroke->state = KEYSTROKE_START;
-            entry->action.fcn(keystroke, entry->action.arg);
-            keystroke->state = KEYSTROKE_FINISH;
-            entry->action.fcn(keystroke, entry->action.arg);
+            keystroke.keyswitch = leader_key_keyswitch;
+            keystroke.state = KEYSTROKE_START;
+            entry->action.fcn(&keystroke, entry->action.arg);
+            keystroke.state = KEYSTROKE_FINISH;
+            entry->action.fcn(&keystroke, entry->action.arg);
             break;
         }
         entry++;
@@ -39,9 +42,7 @@ void leader_key_start(uint8_t keyswitch)
         return;
     leader_key_active = 1;
     leader_key_keyswitch = keyswitch;
-    // callbacks_set_mode(keyswitch, CALL_START | CALL_ON_TIMEOUT);
-    callbacks_set_timeout_action(keyswitch, &leader_key_end_action);
-    callbacks_set_timer(keyswitch, 1000);
+    leader_key_timestamp = timer_read();
 }
 
 bool leader_key_is_active(void)
@@ -54,10 +55,12 @@ void leader_key_process(uint8_t code)
     if (sequence.index == 4)
         return;
     sequence.codes[sequence.index++] = code | modifiers_get() << 8;
-    callbacks_set_timer(leader_key_keyswitch, 1000);
+    leader_key_timestamp = timer_read();
 }
 
 void leader_key_task(void)
 {
-    // remove dependence on the callback system
+    if (leader_key_active)
+        if ((uint16_t)timer_read() - leader_key_timestamp > 1000)
+            leader_key_end();
 }
