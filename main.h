@@ -77,12 +77,12 @@
 		                                          const void* ReportData,
 		                                          const uint16_t ReportSize);
 
-        void usb_wait_until_previous_keyboard_report_sent(void);
-        void usb_wait_until_previous_extrakey_report_sent(void);
+        void usb_send_keyboard_report(void);
+        void usb_send_extrakey_report(void);
 
         extern USB_ClassInfo_HID_Device_t Keyboard_HID_Interface;
         extern USB_ClassInfo_HID_Device_t Extrakey_HID_Interface;
-        
+
         typedef struct {
             uint8_t id;
             uint16_t usage;

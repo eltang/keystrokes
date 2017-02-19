@@ -107,8 +107,6 @@ int main(void)
 
 	for (;;)
 	{
-        HID_Device_USBTask(&Keyboard_HID_Interface);
-        HID_Device_USBTask(&Extrakey_HID_Interface);
         keystrokes_process(matrix_scan());
     }
 }
@@ -237,20 +235,18 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 	}
 }
 
-void usb_wait_until_previous_keyboard_report_sent(void)
+void usb_send_keyboard_report(void)
 {
-    static uint8_t saved_keyboard_report_counter;
+    uint8_t saved_keyboard_report_counter = keyboard_report_counter;
 
     while (saved_keyboard_report_counter == keyboard_report_counter)
         HID_Device_USBTask(&Keyboard_HID_Interface);
-    saved_keyboard_report_counter = keyboard_report_counter;
 }
 
-void usb_wait_until_previous_extrakey_report_sent(void)
+void usb_send_extrakey_report(void)
 {
-    static uint8_t saved_extrakey_report_counter;
+    uint8_t saved_extrakey_report_counter = extrakey_report_counter;
 
     while (saved_extrakey_report_counter == extrakey_report_counter)
         HID_Device_USBTask(&Extrakey_HID_Interface);
-    saved_extrakey_report_counter = extrakey_report_counter;
 }
