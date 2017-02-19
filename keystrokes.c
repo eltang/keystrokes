@@ -33,9 +33,9 @@ void keystrokes_process(raw_keystroke_t *raw_keystroke)
     uint16_t timer_count = timer_read();
     uint8_t *keystroke_state, previous_keystroke_state;
     bool keystroke_in_progress, keystroke_is_not_tap;
-    bool keystroke_interruption = raw_keystroke && raw_keystroke->state == KEYSTROKE_START;
+    bool keystroke_interrupted = raw_keystroke && raw_keystroke->state == KEYSTROKE_START;
 
-    if (keystroke_interruption) {
+    if (keystroke_interrupted) {
         if (USB_DeviceState == DEVICE_STATE_Suspended)
             if (USB_Device_RemoteWakeupEnabled)
                 USB_Device_SendRemoteWakeup();
@@ -47,7 +47,7 @@ void keystrokes_process(raw_keystroke_t *raw_keystroke)
         keystroke_state = &keystroke_states[i];
         keystroke_in_progress = *keystroke_state & KEYSTROKE_START;
         keystroke_is_not_tap = *keystroke_state & KEYSTROKE_IS_NOT_TAP;
-        if (keystroke_interruption) {
+        if (keystroke_interrupted) {
             if (keystroke_in_progress || !keystroke_is_not_tap) {
                 ++keystroke_interruptions[i];
                 *keystroke_state |= KEYSTROKE_INTERRUPTED;
