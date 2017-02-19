@@ -43,43 +43,28 @@
  *  the device will send, and what it may be sent back from the host. Refer to the HID specification for
  *  more details on HID report descriptors.
  *
- *  This descriptor describes the keyboard HID interface's report structure.
+ *  This descriptor describes the mouse HID interface's report structure.
  */
+const USB_Descriptor_HIDReport_Datatype_t PROGMEM MouseReport[] =
+{
+	/* Use the HID class driver's standard Mouse report.
+	 *   Min X/Y Axis values: -1
+	 *   Max X/Y Axis values:  1
+	 *   Min physical X/Y Axis values (used to determine resolution): -1
+	 *   Max physical X/Y Axis values (used to determine resolution):  1
+	 *   Buttons: 3
+	 *   Absolute screen coordinates: false
+	 */
+	HID_DESCRIPTOR_MOUSE(-1, 1, -1, 1, 3, false)
+};
+
+/** Same as the MouseReport structure, but defines the keyboard HID interface's report structure. */
 const USB_Descriptor_HIDReport_Datatype_t PROGMEM KeyboardReport[] =
 {
 	/* Use the HID class driver's standard Keyboard report.
 	 *   Max simultaneous keys: 6
 	 */
 	HID_DESCRIPTOR_KEYBOARD(6)
-};
-
-const USB_Descriptor_HIDReport_Datatype_t PROGMEM ExtrakeyReport[] =
-{
-    HID_RI_USAGE_PAGE(8, 0x01), /* Generic Desktop */
-    HID_RI_USAGE(8, 0x80), /* System Control */
-    HID_RI_COLLECTION(8, 0x01), /* Application */
-        HID_RI_REPORT_ID(8, REPORT_ID_SYSTEM),
-        HID_RI_LOGICAL_MINIMUM(16, 0x0001),
-        HID_RI_LOGICAL_MAXIMUM(16, 0x0003),
-        HID_RI_USAGE_MINIMUM(16, 0x0081), /* System Power Down */
-        HID_RI_USAGE_MAXIMUM(16, 0x0083), /* System Wake Up */
-        HID_RI_REPORT_SIZE(8, 16),
-        HID_RI_REPORT_COUNT(8, 1),
-        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_ARRAY | HID_IOF_ABSOLUTE),
-    HID_RI_END_COLLECTION(0),
-
-    HID_RI_USAGE_PAGE(8, 0x0C), /* Consumer */
-    HID_RI_USAGE(8, 0x01), /* Consumer Control */
-    HID_RI_COLLECTION(8, 0x01), /* Application */
-        HID_RI_REPORT_ID(8, REPORT_ID_CONSUMER),
-        HID_RI_LOGICAL_MINIMUM(16, 0x0001),
-        HID_RI_LOGICAL_MAXIMUM(16, 0x029C),
-        HID_RI_USAGE_MINIMUM(16, 0x0001), /* +10 */
-        HID_RI_USAGE_MAXIMUM(16, 0x029C), /* AC Distribute Vertically */
-        HID_RI_REPORT_SIZE(8, 16),
-        HID_RI_REPORT_COUNT(8, 1),
-        HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_ARRAY | HID_IOF_ABSOLUTE),
-    HID_RI_END_COLLECTION(0),
 };
 
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall
@@ -168,23 +153,23 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.PollingIntervalMS      = 0x01
 		},
 
-	.HID2_ExtrakeyInterface =
+	.HID2_MouseInterface =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
-			.InterfaceNumber        = INTERFACE_ID_Extrakey,
+			.InterfaceNumber        = INTERFACE_ID_Mouse,
 			.AlternateSetting       = 0x00,
 
 			.TotalEndpoints         = 1,
 
 			.Class                  = HID_CSCP_HIDClass,
-			.SubClass               = HID_CSCP_NonBootSubclass,
-			.Protocol               = HID_CSCP_NonBootProtocol,
+			.SubClass               = HID_CSCP_BootSubclass,
+			.Protocol               = HID_CSCP_MouseBootProtocol,
 
 			.InterfaceStrIndex      = NO_DESCRIPTOR
 		},
 
-	.HID2_ExtrakeyHID =
+	.HID2_MouseHID =
 		{
 			.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
 
@@ -192,14 +177,14 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.CountryCode            = 0x00,
 			.TotalReportDescriptors = 1,
 			.HIDReportType          = HID_DTYPE_Report,
-			.HIDReportLength        = sizeof(ExtrakeyReport)
+			.HIDReportLength        = sizeof(MouseReport)
 		},
 
 	.HID2_ReportINEndpoint =
 		{
 			.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-			.EndpointAddress        = EXTRAKEY_IN_EPADDR,
+			.EndpointAddress        = MOUSE_IN_EPADDR,
 			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 			.EndpointSize           = HID_EPSIZE,
 			.PollingIntervalMS      = 0x01
@@ -275,10 +260,10 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					Address = &ConfigurationDescriptor.HID1_KeyboardHID;
 					Size    = sizeof(USB_HID_Descriptor_HID_t);
 					break;
-				case INTERFACE_ID_Extrakey:
-                    Address = &ConfigurationDescriptor.HID2_ExtrakeyHID;
-                    Size    = sizeof(USB_HID_Descriptor_HID_t);
-                    break;
+				case INTERFACE_ID_Mouse:
+					Address = &ConfigurationDescriptor.HID2_MouseHID;
+					Size    = sizeof(USB_HID_Descriptor_HID_t);
+					break;
 			}
 
 			break;
@@ -289,10 +274,10 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					Address = &KeyboardReport;
 					Size    = sizeof(KeyboardReport);
 					break;
-				case INTERFACE_ID_Extrakey:
-                    Address = &ExtrakeyReport;
-                    Size    = sizeof(ExtrakeyReport);
-                    break;
+				case INTERFACE_ID_Mouse:
+					Address = &MouseReport;
+					Size    = sizeof(MouseReport);
+					break;
 			}
 
 			break;

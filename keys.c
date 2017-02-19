@@ -37,7 +37,7 @@ void keys_add(uint8_t code)
 	for (uint8_t i = 6; i--;) {
         if (keys[i] == code) {
             keys[i] = 0;
-            usb_send_keyboard_report();
+            SendKeyboardReport();
         }
         if (!keys[i]) {
             empty_slot_index = i;
@@ -48,7 +48,7 @@ void keys_add(uint8_t code)
         return;
     keys[empty_slot_index] = code;
     ++key_activations[empty_slot_index];
-    usb_send_keyboard_report();
+    SendKeyboardReport();
 }
 
 void keys_delete(uint8_t code)
@@ -59,7 +59,7 @@ void keys_delete(uint8_t code)
 	for (uint8_t i = 6; i--;)
         if (keys[i] == code && !--key_activations[i]) {
             keys[i] = 0;
-            usb_send_keyboard_report();
+            SendKeyboardReport();
             break;
         }
 }

@@ -77,14 +77,7 @@
 		                                          const void* ReportData,
 		                                          const uint16_t ReportSize);
 
-        void usb_send_keyboard_report(void);
-        void usb_send_extrakey_report(void);
+        void SendKeyboardReport(void);
+        void SendMouseReport(void);
 
-        extern USB_ClassInfo_HID_Device_t Keyboard_HID_Interface;
-        extern USB_ClassInfo_HID_Device_t Extrakey_HID_Interface;
-
-        typedef struct {
-            uint8_t id;
-            uint16_t usage;
-        } __attribute__ ((packed)) USB_ExtrakeyReport_Data_t;
 #endif
