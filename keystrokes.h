@@ -19,8 +19,9 @@ typedef struct {
 enum {
     KEYSTROKE_FINISH,
     KEYSTROKE_START,
-    KEYSTROKE_START_IS_NOT_TAP,
-    KEYSTROKE_RELEASE_IS_NOT_TAP
+    KEYSTROKE_INTERRUPTED = 1 << 1,
+    KEYSTROKE_TIMED_OUT = 1 << 2,
+    KEYSTROKE_IS_NOT_TAP = KEYSTROKE_INTERRUPTED | KEYSTROKE_TIMED_OUT
 };
 
 void keystrokes_process(raw_keystroke_t *raw_keystroke);

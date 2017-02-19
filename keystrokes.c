@@ -10,19 +10,12 @@ static uint8_t keystroke_states[ROWS * COLUMNS];
 static uint16_t keystroke_timestamps[ROWS * COLUMNS];
 static uint8_t keystroke_interruptions[ROWS * COLUMNS];
 
-enum {
-    KEYSTROKE_IN_PROGRESS = 1,
-    KEYSTROKE_IS_NOT_TAP = 1 << 1, // use interruptions variable to signal if
-    // interrupted or timed out
-};
-
-
 static void keystrokes_execute(uint8_t keyswitch, uint8_t previous_state)
 {
     action_t action;
     keystroke_t keystroke;
     uint8_t layer;
-    bool new_keystroke = keystroke_states[keyswitch] == KEYSTROKE_IN_PROGRESS;
+    bool new_keystroke = keystroke_states[keyswitch] == KEYSTROKE_START;
 
     if (USB_DeviceState == DEVICE_STATE_Suspended)
         if (USB_Device_RemoteWakeupEnabled)
@@ -42,28 +35,30 @@ void keystrokes_process(raw_keystroke_t *raw_keystroke)
     uint16_t timer_count = timer_read();
     uint8_t *keystroke_state, previous_keystroke_state;
     bool keystroke_in_progress, keystroke_is_not_tap;
-    bool keystroke_interruption = raw_keystroke && raw_keystroke->state == KEYSTROKE_IN_PROGRESS;
+    bool keystroke_interruption = raw_keystroke && raw_keystroke->state == KEYSTROKE_START;
 
     for (uint8_t i = ROWS * COLUMNS; i--;) {
         if (raw_keystroke && raw_keystroke->keyswitch == i)
             continue;
         keystroke_state = &keystroke_states[i];
-        keystroke_in_progress = *keystroke_state & KEYSTROKE_IN_PROGRESS;
+        keystroke_in_progress = *keystroke_state & KEYSTROKE_START;
         keystroke_is_not_tap = *keystroke_state & KEYSTROKE_IS_NOT_TAP;
         if (keystroke_interruption) {
             if (keystroke_in_progress || !keystroke_is_not_tap) {
                 ++keystroke_interruptions[i];
+                *keystroke_state |= KEYSTROKE_INTERRUPTED;
                 goto execute_keystroke;
             }
         } else {
             if (!keystroke_is_not_tap)
-                if (timer_count - keystroke_timestamps[i] > MAX_TAP_DURATION)
+                if (timer_count - keystroke_timestamps[i] > MAX_TAP_DURATION) {
+                    *keystroke_state |= KEYSTROKE_TIMED_OUT;
                     goto execute_keystroke;
+                }
         }
         continue;
 execute_keystroke:
         previous_keystroke_state = *keystroke_state;
-        *keystroke_state |= KEYSTROKE_IS_NOT_TAP;
         keystrokes_execute(i, previous_keystroke_state);
     }
     if (raw_keystroke) {
