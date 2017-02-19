@@ -5,6 +5,7 @@
 #include "layers.h"
 #include "timer.h"
 #include "layout.h"
+#include "modifiers.h"
 
 static uint8_t keystroke_states[ROWS * COLUMNS];
 static uint16_t keystroke_timestamps[ROWS * COLUMNS];
@@ -17,9 +18,6 @@ static void keystrokes_execute(uint8_t keyswitch, uint8_t previous_state)
     uint8_t layer;
     bool new_keystroke = keystroke_states[keyswitch] == KEYSTROKE_START;
 
-    if (USB_DeviceState == DEVICE_STATE_Suspended)
-        if (USB_Device_RemoteWakeupEnabled)
-            USB_Device_SendRemoteWakeup();
     layer = layers_get_source_layer(keyswitch, new_keystroke);
     action = layout[layer][keyswitch];
     keystroke.keyswitch = keyswitch;
@@ -37,6 +35,12 @@ void keystrokes_process(raw_keystroke_t *raw_keystroke)
     bool keystroke_in_progress, keystroke_is_not_tap;
     bool keystroke_interruption = raw_keystroke && raw_keystroke->state == KEYSTROKE_START;
 
+    if (keystroke_interruption) {
+        if (USB_DeviceState == DEVICE_STATE_Suspended)
+            if (USB_Device_RemoteWakeupEnabled)
+                USB_Device_SendRemoteWakeup();
+        modifiers_clear_temporary();
+    }
     for (uint8_t i = ROWS * COLUMNS; i--;) {
         if (raw_keystroke && raw_keystroke->keyswitch == i)
             continue;

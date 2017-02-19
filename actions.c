@@ -12,12 +12,12 @@ void actions_modifiers_and_scancode(keystroke_t *keystroke, const __flash void *
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
-        modifiers_add_temporary(modifiers, keystroke->keyswitch);
+        modifiers_set_temporary(modifiers);
         keys_add(key);
         break;
     case KEYSTROKE_FINISH:
         keys_delete(key);
-        modifiers_delete_temporary(modifiers, keystroke->keyswitch);
+        modifiers_clear_temporary();
         break;
     }
 }
@@ -42,12 +42,10 @@ void actions_scancode(keystroke_t *keystroke, const __flash void *arg)
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
-        modifiers_add_temporary(0, keystroke->keyswitch);
         keys_add(key);
         break;
     case KEYSTROKE_FINISH:
         keys_delete(key);
-        modifiers_delete_temporary(0, keystroke->keyswitch);
         break;
     }
 }

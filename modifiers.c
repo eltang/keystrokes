@@ -5,32 +5,16 @@ static struct {
     uint8_t set;
 } permanent_modifiers;
 
-typedef struct {
-    uint8_t keyswitch;
-    uint8_t modifiers;
-} temporary_modifier_set_t;
+static uint8_t temporary_modifiers;
 
-static struct {
-    temporary_modifier_set_t sets[ROWS * COLUMNS];
-    uint8_t index;
-} temporary_modifiers;
-
-void modifiers_add_temporary(uint8_t modifiers, uint8_t keyswitch)
+void modifiers_set_temporary(uint8_t modifiers)
 {
-    temporary_modifier_set_t new_set = { keyswitch, modifiers };
-    temporary_modifiers.sets[temporary_modifiers.index++] = new_set;
+    temporary_modifiers = modifiers;
 }
 
-void modifiers_delete_temporary(uint8_t modifiers, uint8_t keyswitch)
+void modifiers_clear_temporary(void)
 {
-    uint8_t i;
-
-    for (i = temporary_modifiers.index--; i--;) {
-        if (temporary_modifiers.sets[i].keyswitch == keyswitch)
-            break;
-    }
-    for (; i != temporary_modifiers.index; ++i)
-        temporary_modifiers.sets[i] = temporary_modifiers.sets[i + 1];
+    temporary_modifiers = 0;
 }
 
 void modifiers_add_permanent(uint8_t modifiers)
@@ -53,9 +37,5 @@ void modifiers_delete_permanent(uint8_t modifiers)
 
 uint8_t modifiers_get(void)
 {
-    uint8_t modifiers = permanent_modifiers.set;
-
-    if (temporary_modifiers.index)
-        modifiers |= temporary_modifiers.sets[temporary_modifiers.index - 1].modifiers;
-    return modifiers;
+    return permanent_modifiers.set | temporary_modifiers;
 }
