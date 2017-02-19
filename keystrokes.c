@@ -42,6 +42,7 @@ void keystrokes_process(raw_keystroke_t *raw_keystroke)
     uint16_t timer_count = timer_read();
     uint8_t *keystroke_state, previous_keystroke_state;
     bool keystroke_in_progress, keystroke_is_not_tap;
+    bool keystroke_interruption = raw_keystroke && raw_keystroke->state == KEYSTROKE_IN_PROGRESS;
 
     for (uint8_t i = ROWS * COLUMNS; i--;) {
         if (raw_keystroke && raw_keystroke->keyswitch == i)
@@ -49,7 +50,7 @@ void keystrokes_process(raw_keystroke_t *raw_keystroke)
         keystroke_state = &keystroke_states[i];
         keystroke_in_progress = *keystroke_state & KEYSTROKE_IN_PROGRESS;
         keystroke_is_not_tap = *keystroke_state & KEYSTROKE_IS_NOT_TAP;
-        if (raw_keystroke && raw_keystroke->state == KEYSTROKE_IN_PROGRESS) {
+        if (keystroke_interruption) {
             if (keystroke_in_progress || !keystroke_is_not_tap) {
                 ++keystroke_interruptions[i];
                 goto execute_keystroke;
