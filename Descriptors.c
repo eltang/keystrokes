@@ -67,7 +67,7 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM KeyboardReport[] =
 	HID_DESCRIPTOR_KEYBOARD(6)
 };
 
-const USB_Descriptor_HIDReport_Datatype_t PROGMEM ExtendedKeyboardReport[] =
+const USB_Descriptor_HIDReport_Datatype_t PROGMEM EnhancedKeyboardReport[] =
 {
     // System Control Collection (8 bits)
 	//
@@ -230,11 +230,11 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.PollingIntervalMS      = 0x01
 		},
 
-    .HID3_ExtendedKeyboardInterface =
+    .HID3_EnhancedKeyboardInterface =
     	{
     		.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
 
-    		.InterfaceNumber        = INTERFACE_ID_ExtendedKeyboard,
+    		.InterfaceNumber        = INTERFACE_ID_EnhancedKeyboard,
     		.AlternateSetting       = 0x00,
 
     		.TotalEndpoints         = 1,
@@ -246,7 +246,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
     		.InterfaceStrIndex      = NO_DESCRIPTOR
     	},
 
-	.HID3_ExtendedKeyboardHID =
+	.HID3_EnhancedKeyboardHID =
     	{
     		.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
 
@@ -254,14 +254,14 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
     		.CountryCode            = 0x00,
     		.TotalReportDescriptors = 1,
     		.HIDReportType          = HID_DTYPE_Report,
-    		.HIDReportLength        = sizeof(ExtendedKeyboardReport)
+    		.HIDReportLength        = sizeof(EnhancedKeyboardReport)
     	},
 
 	.HID3_ReportINEndpoint =
     	{
     		.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-    		.EndpointAddress        = EXTENDEDKEYBOARD_IN_EPADDR,
+    		.EndpointAddress        = ENHANCEDKEYBOARD_IN_EPADDR,
     		.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
     		.EndpointSize           = HID_EPSIZE,
     		.PollingIntervalMS      = 0x01
@@ -341,8 +341,8 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					Address = &ConfigurationDescriptor.HID2_MouseHID;
 					Size    = sizeof(USB_HID_Descriptor_HID_t);
 					break;
-				case INTERFACE_ID_ExtendedKeyboard:
-					Address = &ConfigurationDescriptor.HID3_ExtendedKeyboardHID;
+				case INTERFACE_ID_EnhancedKeyboard:
+					Address = &ConfigurationDescriptor.HID3_EnhancedKeyboardHID;
 					Size    = sizeof(USB_HID_Descriptor_HID_t);
 					break;
 			}
@@ -359,9 +359,9 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					Address = &MouseReport;
 					Size    = sizeof(MouseReport);
 					break;
-                case INTERFACE_ID_ExtendedKeyboard:
-					Address = &ExtendedKeyboardReport;
-					Size    = sizeof(ExtendedKeyboardReport);
+                case INTERFACE_ID_EnhancedKeyboard:
+					Address = &EnhancedKeyboardReport;
+					Size    = sizeof(EnhancedKeyboardReport);
 					break;
 			}
 

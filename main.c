@@ -52,9 +52,9 @@ static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
 /** Buffer to hold the previously generated Mouse HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
 
-static uint8_t PrevExtendedKeyboardHIDReportBuffer[MAX(sizeof(USB_GenericDesktopReport_Data_t), sizeof(USB_ConsumerReport_Data_t))];
+static uint8_t PrevEnhancedKeyboardHIDReportBuffer[MAX(sizeof(USB_GenericDesktopReport_Data_t), sizeof(USB_ConsumerReport_Data_t))];
 
-static uint8_t KeyboardReportCounter, MouseReportCounter, ExtendedKeyboardReportCounter;
+static uint8_t KeyboardReportCounter, MouseReportCounter, EnhancedKeyboardReportCounter;
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -98,19 +98,19 @@ USB_ClassInfo_HID_Device_t Mouse_HID_Interface =
 			},
 	};
 
-USB_ClassInfo_HID_Device_t ExtendedKeyboard_HID_Interface =
+USB_ClassInfo_HID_Device_t EnhancedKeyboard_HID_Interface =
 	{
 		.Config =
 			{
-				.InterfaceNumber              = INTERFACE_ID_ExtendedKeyboard,
+				.InterfaceNumber              = INTERFACE_ID_EnhancedKeyboard,
 				.ReportINEndpoint             =
 					{
-						.Address              = EXTENDEDKEYBOARD_IN_EPADDR,
+						.Address              = ENHANCEDKEYBOARD_IN_EPADDR,
 						.Size                 = HID_EPSIZE,
 						.Banks                = 1,
 					},
-				.PrevReportINBuffer           = PrevExtendedKeyboardHIDReportBuffer,
-				.PrevReportINBufferSize       = sizeof(PrevExtendedKeyboardHIDReportBuffer),
+				.PrevReportINBuffer           = PrevEnhancedKeyboardHIDReportBuffer,
+				.PrevReportINBufferSize       = sizeof(PrevEnhancedKeyboardHIDReportBuffer),
 			},
 	};
 
@@ -179,7 +179,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 
 	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
 	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
-	ConfigSuccess &= HID_Device_ConfigureEndpoints(&ExtendedKeyboard_HID_Interface);
+	ConfigSuccess &= HID_Device_ConfigureEndpoints(&EnhancedKeyboard_HID_Interface);
 
 	USB_Device_EnableSOFEvents();
 }
@@ -189,7 +189,7 @@ void EVENT_USB_Device_ControlRequest(void)
 {
 	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
 	HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
-	HID_Device_ProcessControlRequest(&ExtendedKeyboard_HID_Interface);
+	HID_Device_ProcessControlRequest(&EnhancedKeyboard_HID_Interface);
 }
 
 /** Event handler for the USB device Start Of Frame event. */
@@ -197,7 +197,7 @@ void EVENT_USB_Device_StartOfFrame(void)
 {
 	HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
 	HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
-	HID_Device_MillisecondElapsed(&ExtendedKeyboard_HID_Interface);
+	HID_Device_MillisecondElapsed(&EnhancedKeyboard_HID_Interface);
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
@@ -249,7 +249,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
                 *ReportSize = sizeof(USB_ConsumerReport_Data_t);
                 break;
         }
-        ++ExtendedKeyboardReportCounter;
+        ++EnhancedKeyboardReportCounter;
     }
     return false;
 }
@@ -292,11 +292,11 @@ void SendMouseReport(void)
     while (Temp == MouseReportCounter);
 }
 
-void SendExtendedKeyboardReport(void)
+void SendEnhancedKeyboardReport(void)
 {
-    uint8_t Temp = ExtendedKeyboardReportCounter;
+    uint8_t Temp = EnhancedKeyboardReportCounter;
 
     do
-        HID_Device_USBTask(&ExtendedKeyboard_HID_Interface);
-    while (Temp == ExtendedKeyboardReportCounter);
+        HID_Device_USBTask(&EnhancedKeyboard_HID_Interface);
+    while (Temp == EnhancedKeyboardReportCounter);
 }

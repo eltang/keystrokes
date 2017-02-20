@@ -79,13 +79,13 @@ void keys_add_generic_desktop(uint8_t code)
     if (generic_desktop_code == code) {
         generic_desktop_code = 0;
         extended_keyboard_report_id = HID_REPORTID_GenericDesktopReport;
-        SendExtendedKeyboardReport();
+        SendEnhancedKeyboardReport();
     }
     if (!generic_desktop_code) {
         generic_desktop_code = code;
         ++generic_desktop_code_activations;
         extended_keyboard_report_id = HID_REPORTID_GenericDesktopReport;
-        SendExtendedKeyboardReport();
+        SendEnhancedKeyboardReport();
     }
 }
 
@@ -97,7 +97,7 @@ void keys_delete_generic_desktop(uint8_t code)
         if (!--generic_desktop_code_activations) {
             generic_desktop_code = 0;
             extended_keyboard_report_id = HID_REPORTID_GenericDesktopReport;
-            SendExtendedKeyboardReport();
+            SendEnhancedKeyboardReport();
         }
 }
 
@@ -114,13 +114,13 @@ void keys_add_consumer(uint16_t code)
     if (consumer_code == code) {
         consumer_code = 0;
         extended_keyboard_report_id = HID_REPORTID_ConsumerReport;
-        SendExtendedKeyboardReport();
+        SendEnhancedKeyboardReport();
     }
     if (!consumer_code) {
         consumer_code = code;
         ++consumer_code_activations;
         extended_keyboard_report_id = HID_REPORTID_ConsumerReport;
-        SendExtendedKeyboardReport();
+        SendEnhancedKeyboardReport();
     }
 }
 
@@ -132,7 +132,7 @@ void keys_delete_consumer(uint16_t code)
         if (!--consumer_code_activations) {
             consumer_code = 0;
             extended_keyboard_report_id = HID_REPORTID_ConsumerReport;
-            SendExtendedKeyboardReport();
+            SendEnhancedKeyboardReport();
         }
 }
 

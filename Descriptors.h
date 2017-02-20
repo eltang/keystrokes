@@ -60,9 +60,9 @@
 			USB_HID_Descriptor_HID_t              HID2_MouseHID;
 			USB_Descriptor_Endpoint_t             HID2_ReportINEndpoint;
 
-			// Extended Keyboard HID Interface
-			USB_Descriptor_Interface_t            HID3_ExtendedKeyboardInterface;
-			USB_HID_Descriptor_HID_t              HID3_ExtendedKeyboardHID;
+			// Enhanced Keyboard HID Interface
+			USB_Descriptor_Interface_t            HID3_EnhancedKeyboardInterface;
+			USB_HID_Descriptor_HID_t              HID3_EnhancedKeyboardHID;
 			USB_Descriptor_Endpoint_t             HID3_ReportINEndpoint;
 		} USB_Descriptor_Configuration_t;
 
@@ -83,8 +83,8 @@
 		/** Endpoint address of the Mouse HID reporting IN endpoint. */
 		#define MOUSE_IN_EPADDR            (ENDPOINT_DIR_IN | 2)
 
-		/** Endpoint address of the Extended Keyboard HID reporting IN endpoint. */
-		#define EXTENDEDKEYBOARD_IN_EPADDR (ENDPOINT_DIR_IN | 3)
+		/** Endpoint address of the Enhanced Keyboard HID reporting IN endpoint. */
+		#define ENHANCEDKEYBOARD_IN_EPADDR (ENDPOINT_DIR_IN | 3)
 
 		/** Size in bytes of each of the HID reporting IN endpoints. */
 		#define HID_EPSIZE                8
@@ -98,7 +98,7 @@
 		{
 			INTERFACE_ID_Keyboard         = 0, /**< Keyboard interface descriptor ID */
 			INTERFACE_ID_Mouse            = 1, /**< Mouse interface descriptor ID */
-			INTERFACE_ID_ExtendedKeyboard = 2, /**< Extended Keyboard interface descriptor ID */
+			INTERFACE_ID_EnhancedKeyboard = 2, /**< Enhanced Keyboard interface descriptor ID */
 		};
 
 		/** Enum for the device string descriptor IDs within the device. Each string descriptor should
