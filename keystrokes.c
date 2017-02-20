@@ -8,6 +8,7 @@
 #include "modifiers.h"
 
 static uint8_t keystroke_states[ROWS * COLUMNS];
+static uint8_t previous_keystroke_states[ROWS * COLUMNS];
 static uint16_t keystroke_timestamps[ROWS * COLUMNS];
 static uint8_t keystroke_interruptions[ROWS * COLUMNS];
 

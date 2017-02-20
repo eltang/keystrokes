@@ -7,16 +7,16 @@
 
 void actions_modifiers_and_scancode(keystroke_t *keystroke, const __flash void *arg)
 {
-    uint8_t key = ((const __flash uint8_t *)arg)[0];
+    uint8_t code = ((const __flash uint8_t *)arg)[0];
     uint8_t modifiers = ((const __flash uint8_t *)arg)[1];
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
         modifiers_set_temporary(modifiers);
-        keys_add(key);
+        keys_add_scancode(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete(key);
+        keys_delete_scancode(code);
         modifiers_clear_temporary();
         break;
     }
@@ -38,14 +38,14 @@ void actions_modifiers(keystroke_t *keystroke, const __flash void *arg)
 
 void actions_scancode(keystroke_t *keystroke, const __flash void *arg)
 {
-    uint8_t key = *(const __flash uint8_t *)arg;
+    uint8_t code = *(const __flash uint8_t *)arg;
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
-        keys_add(key);
+        keys_add_scancode(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete(key);
+        keys_delete_scancode(code);
         break;
     }
 }
@@ -189,4 +189,66 @@ void actions_leader_key_start(keystroke_t *keystroke, const __flash void *arg)
 {
     if (keystroke->state == KEYSTROKE_START)
         leader_key_start(keystroke->keyswitch);
+}
+
+void actions_modifiers_and_generic_desktop(keystroke_t *keystroke, const __flash void *arg)
+{
+    uint8_t code = ((const __flash uint8_t *)arg)[0];
+    uint8_t modifiers = ((const __flash uint8_t *)arg)[1];
+
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
+        modifiers_set_temporary(modifiers);
+        keys_add_generic_desktop(code);
+        break;
+    case KEYSTROKE_FINISH:
+        keys_delete_generic_desktop(code);
+        modifiers_clear_temporary();
+        break;
+    }
+}
+
+void actions_generic_desktop(keystroke_t *keystroke, const __flash void *arg)
+{
+    uint8_t code = *(const __flash uint8_t *)arg;
+
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
+        keys_add_generic_desktop(code);
+        break;
+    case KEYSTROKE_FINISH:
+        keys_delete_generic_desktop(code);
+        break;
+    }
+}
+
+void actions_modifiers_and_consumer(keystroke_t *keystroke, const __flash void *arg)
+{
+    uint8_t code = ((const __flash uint16_t *)arg)[0];
+    uint8_t modifiers = ((const __flash uint8_t *)arg)[2];
+
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
+        modifiers_set_temporary(modifiers);
+        keys_add_consumer(code);
+        break;
+    case KEYSTROKE_FINISH:
+        keys_delete_consumer(code);
+        modifiers_clear_temporary();
+        break;
+    }
+}
+
+void actions_consumer(keystroke_t *keystroke, const __flash void *arg)
+{
+    uint8_t code = *(const __flash uint16_t *)arg;
+
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
+        keys_add_consumer(code);
+        break;
+    case KEYSTROKE_FINISH:
+        keys_delete_consumer(code);
+        break;
+    }
 }

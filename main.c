@@ -52,7 +52,7 @@ static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
 /** Buffer to hold the previously generated Mouse HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
 
-static uint8_t PrevExtendedKeyboardHIDReportBuffer[MAX(sizeof(USB_GenericHIDReport_Data_t), sizeof(USB_ConsumerReport_Data_t))];
+static uint8_t PrevExtendedKeyboardHIDReportBuffer[MAX(sizeof(USB_GenericDesktopReport_Data_t), sizeof(USB_ConsumerReport_Data_t))];
 
 static uint8_t KeyboardReportCounter, MouseReportCounter, ExtendedKeyboardReportCounter;
 
@@ -222,24 +222,34 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
     {
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
-        ++KeyboardReportCounter;
         KeyboardReport->Modifier = modifiers_get();
-        memcpy(KeyboardReport->KeyCode, keys_get(), 6);
+        memcpy(KeyboardReport->KeyCode, keys_get_scancode(), 6);
 
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
+        ++KeyboardReportCounter;
     }
     else if (HIDInterfaceInfo == &Mouse_HID_Interface)
     {
 		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
 
-        ++MouseReportCounter;
 
 		*ReportSize = sizeof(USB_MouseReport_Data_t);
+        ++MouseReportCounter;
     }
     else
     {
+        switch (*ReportID = keys_get_extended_keyboard_report_id())
+        {
+            case HID_REPORTID_GenericDesktopReport:
+                ((USB_GenericDesktopReport_Data_t*)ReportData)->Usage = keys_get_generic_desktop();
+                *ReportSize = sizeof(USB_GenericDesktopReport_Data_t);
+                break;
+            case HID_REPORTID_ConsumerReport:
+                ((USB_ConsumerReport_Data_t*)ReportData)->Usage = keys_get_consumer();
+                *ReportSize = sizeof(USB_ConsumerReport_Data_t);
+                break;
+        }
         ++ExtendedKeyboardReportCounter;
-
     }
     return false;
 }
@@ -268,22 +278,25 @@ void SendKeyboardReport(void)
 {
     uint8_t Temp = KeyboardReportCounter;
 
-    while (Temp == KeyboardReportCounter)
+    do
         HID_Device_USBTask(&Keyboard_HID_Interface);
+    while (Temp == KeyboardReportCounter);
 }
 
 void SendMouseReport(void)
 {
     uint8_t Temp = MouseReportCounter;
 
-    while (Temp == MouseReportCounter)
+    do
         HID_Device_USBTask(&Mouse_HID_Interface);
+    while (Temp == MouseReportCounter);
 }
 
 void SendExtendedKeyboardReport(void)
 {
     uint8_t Temp = ExtendedKeyboardReportCounter;
 
-    while (Temp == ExtendedKeyboardReportCounter)
+    do
         HID_Device_USBTask(&ExtendedKeyboard_HID_Interface);
+    while (Temp == ExtendedKeyboardReportCounter);
 }

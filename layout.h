@@ -188,6 +188,12 @@ enum input_sources {
     US_COLEMAK,
 };
 
+enum {
+    SC_CODE_ID,
+    GD_CODE_ID,
+    C_CODE_ID
+};
+
 #define US_CODE_TO_SCANCODE(code) \
 (((code & 0xFFFFFFFFFF) == BKSP ? HID_KEYBOARD_SC_BACKSPACE : \
 (code & 0xFFFFFFFFFF) == ENTER ? CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_KEYPAD_ENTER : HID_KEYBOARD_SC_ENTER : \
@@ -383,14 +389,39 @@ US_CODE_TO_SCANCODE(code)) | (code & ~0xFFFFFFFFFFULL))
 (code & 0xFFFFFFFFFF) == 'y' ? HID_KEYBOARD_SC_O : \
 US_PRINTING_CODE_TO_SCANCODE(code)) | (code & ~0xFFFFFFFFFFULL))
 
-#define K_CREATE_FCN(code) \
+#define K_CREATE_SC_FCN(code) \
 (code >> 8 && code & 0xFF ? actions_modifiers_and_scancode : \
 code & 0xFF ? actions_scancode : \
 code >> 8 ? actions_modifiers : 0)
 
+#define K_CREATE_GD_FCN(code) \
+(code & 0xFF00 ? actions_modifiers_and_generic_desktop : \
+actions_generic_desktop)
+
+#define K_CREATE_C_FCN(code) \
+(code & 0xFF0000 ? actions_modifiers_and_consumer : actions_consumer)
+
 #define K_CREATE_ARG(code) \
-(code >> 8 && code & 0xFF ? (const __flash void *)&(const __flash uint16_t){ code } : \
-code & 0xFF ? (const __flash void *)&(const __flash uint8_t){ code & 0xFF } : (const __flash void *)&(const __flash uint8_t){ code >> 8 })
+(code >> 24 == SC_CODE_ID ? K_CREATE_SC_ARG(code) : \
+code >> 24 == GD_CODE_ID ? K_CREATE_GD_ARG(code) : \
+code >> 24 == C_CODE_ID ? K_CREATE_C_ARG(code) : 0)
+
+#define K_CREATE_FCN(code) \
+(code >> 24 == SC_CODE_ID ? K_CREATE_SC_FCN(code) : \
+code >> 24 == GD_CODE_ID ? K_CREATE_GD_FCN(code) : \
+code >> 24 == C_CODE_ID ? K_CREATE_C_FCN(code) : 0)
+
+#define K_CREATE_SC_ARG(code) \
+(code & 0xFF00 && code & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ code } : \
+code & 0xFF ? &(const __flash uint8_t){ code & 0xFF } : &(const __flash uint8_t){ code >> 8 })
+
+#define K_CREATE_GD_ARG(code) \
+(code & 0xFF00 && code & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ code } : \
+&(const __flash uint8_t){ code })
+
+#define K_CREATE_C_ARG(code) \
+(code & 0xFF0000 && code & 0xFFFF ? (const __flash uint8_t []){ code, code >> 8, code >> 16 } : \
+(const __flash uint8_t *)&(const __flash uint16_t){ code })
 
 #define K(code) \
 { \
@@ -398,11 +429,15 @@ code & 0xFF ? (const __flash void *)&(const __flash uint8_t){ code & 0xFF } : (c
     K_CREATE_ARG(code) \
 }
 
-#define SC_ASSEMBLE(code) (CODE_GET_MODIFIER(code) << 8 | CODE_GET_SCANCODE(code))
+#define SC_ASSEMBLE(code) \
+((uint32_t)SC_CODE_ID << 24 | CODE_GET_MODIFIER(code) << 8 | CODE_GET_SCANCODE(code))
 
 #define SC(country, code) \
 SC_ASSEMBLE((country == US ? US_CODE_TO_SCANCODE(code) : \
 country == US_DVORAK ? US_DVORAK_CODE_TO_SCANCODE(code) : 0))
 
+#define GD(code) ((uint32_t)GD_CODE_ID << 24 | CODE_GET_MODIFIER(code) << 8 | code)
+
+#define C(code) ((uint32_t)C_CODE_ID << 24 | CODE_GET_MODIFIER(code) << 16 | code)
 
 #endif

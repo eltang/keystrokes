@@ -69,13 +69,13 @@
         typedef struct
         {
             uint8_t Usage;
-        } USB_GenericHIDReport_Data_t;
+        } USB_GenericDesktopReport_Data_t;
 
         typedef struct
         {
             uint16_t Usage;
         } USB_ConsumerReport_Data_t;
-        
+
 	/* Macros: */
 		/** Endpoint address of the Keyboard HID reporting IN endpoint. */
 		#define KEYBOARD_IN_EPADDR         (ENDPOINT_DIR_IN | 1)
