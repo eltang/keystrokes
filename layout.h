@@ -420,8 +420,8 @@ code & 0xFF ? &(const __flash uint8_t){ code & 0xFF } : &(const __flash uint8_t)
 &(const __flash uint8_t){ code })
 
 #define K_CREATE_C_ARG(code) \
-(code & 0xFF0000 && code & 0xFFFF ? (const __flash uint8_t []){ code, code >> 8, code >> 16 } : \
-(const __flash uint8_t *)&(const __flash uint16_t){ code })
+(code & 0xFF0000 && code & 0xFFFF ? (const __flash uint8_t []){ code & 0xFF, code >> 8 & 0xFF, code >> 16 & 0xFF } : \
+(const __flash uint8_t *)&(const __flash uint16_t){ code & 0xFFFF })
 
 #define K(code) \
 { \
