@@ -28,7 +28,7 @@ enum {
     KEYSWITCH_WAS_CLOSED = 1 << 1
 };
 
-static keyswitch_state_t keyswitch_states[ROWS][COLUMNS];
+static keyswitch_state_t keyswitch_states[OUTPUTS][INPUTS];
 static const __flash pin_t output_pins[OUTPUTS] = OUTPUT_PINS;
 static const __flash pin_t input_pins[INPUTS] = INPUT_PINS;
 
@@ -91,11 +91,7 @@ raw_keystroke_t *matrix_scan(void)
     for (uint8_t i = OUTPUTS; i--;) {
         matrix_activate_output(i);
         for (uint8_t j = INPUTS; j--;) {
-#ifdef BACKWARDS_DIODES
-            keyswitch_state = &keyswitch_states[j][i];
-#else
             keyswitch_state = &keyswitch_states[i][j];
-#endif
             keyswitch_is_closed = keyswitch_state->state & KEYSWITCH_IS_CLOSED;
             if (!keyswitch_is_closed != matrix_read_input(j, i)) {
                 keyswitch_state->state ^= KEYSWITCH_IS_CLOSED;
