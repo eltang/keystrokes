@@ -59,16 +59,46 @@
 			USB_Descriptor_Interface_t            HID2_MouseInterface;
 			USB_HID_Descriptor_HID_t              HID2_MouseHID;
 			USB_Descriptor_Endpoint_t             HID2_ReportINEndpoint;
+
+			// Extended Keyboard HID Interface
+			USB_Descriptor_Interface_t            HID3_ExtendedKeyboardInterface;
+			USB_HID_Descriptor_HID_t              HID3_ExtendedKeyboardHID;
+			USB_Descriptor_Endpoint_t             HID3_ReportINEndpoint;
 		} USB_Descriptor_Configuration_t;
 
-		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
+        typedef struct
+        {
+            uint8_t Usage;
+        } USB_GenericHIDReport_Data_t;
+
+        typedef struct
+        {
+            uint16_t Usage;
+        } USB_ConsumerReport_Data_t;
+        
+	/* Macros: */
+		/** Endpoint address of the Keyboard HID reporting IN endpoint. */
+		#define KEYBOARD_IN_EPADDR         (ENDPOINT_DIR_IN | 1)
+
+		/** Endpoint address of the Mouse HID reporting IN endpoint. */
+		#define MOUSE_IN_EPADDR            (ENDPOINT_DIR_IN | 2)
+
+		/** Endpoint address of the Extended Keyboard HID reporting IN endpoint. */
+		#define EXTENDEDKEYBOARD_IN_EPADDR (ENDPOINT_DIR_IN | 3)
+
+		/** Size in bytes of each of the HID reporting IN endpoints. */
+		#define HID_EPSIZE                8
+
+	/* Enums: */
+    	/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
 		 *  should have a unique ID index associated with it, which can be used to refer to the
 		 *  interface from other descriptors.
 		 */
 		enum InterfaceDescriptors_t
 		{
-			INTERFACE_ID_Keyboard = 0, /**< Keyboard interface descriptor ID */
-			INTERFACE_ID_Mouse    = 1, /**< Mouse interface descriptor ID */
+			INTERFACE_ID_Keyboard         = 0, /**< Keyboard interface descriptor ID */
+			INTERFACE_ID_Mouse            = 1, /**< Mouse interface descriptor ID */
+			INTERFACE_ID_ExtendedKeyboard = 2, /**< Extended Keyboard interface descriptor ID */
 		};
 
 		/** Enum for the device string descriptor IDs within the device. Each string descriptor should
@@ -82,15 +112,12 @@
 			STRING_ID_Product      = 2, /**< Product string ID */
 		};
 
-	/* Macros: */
-		/** Endpoint address of the Keyboard HID reporting IN endpoint. */
-		#define KEYBOARD_IN_EPADDR        (ENDPOINT_DIR_IN | 1)
-
-		/** Endpoint address of the Mouse HID reporting IN endpoint. */
-		#define MOUSE_IN_EPADDR           (ENDPOINT_DIR_IN | 3)
-
-		/** Size in bytes of each of the HID reporting IN endpoints. */
-		#define HID_EPSIZE                8
+		/** Enum for the HID report IDs used in the device. */
+		enum
+		{
+			HID_REPORTID_GenericDesktopReport = 0x02, /**< Report ID for the Generic Desktop report within the device. */
+			HID_REPORTID_ConsumerReport       = 0x03, /**< Report ID for the Consumer report within the device. */
+		} HID_Report_IDs;
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,

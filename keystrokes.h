@@ -25,5 +25,6 @@ enum {
 };
 
 void keystrokes_process(raw_keystroke_t *raw_keystroke);
+void keystrokes_task(void);
 
 #endif

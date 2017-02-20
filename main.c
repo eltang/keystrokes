@@ -52,7 +52,9 @@ static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
 /** Buffer to hold the previously generated Mouse HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
 
-static uint8_t keyboard_report_counter, mouse_report_counter;
+static uint8_t PrevExtendedKeyboardHIDReportBuffer[MAX(sizeof(USB_GenericHIDReport_Data_t), sizeof(USB_ConsumerReport_Data_t))];
+
+static uint8_t KeyboardReportCounter, MouseReportCounter, ExtendedKeyboardReportCounter;
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -93,6 +95,22 @@ USB_ClassInfo_HID_Device_t Mouse_HID_Interface =
 					},
 				.PrevReportINBuffer           = PrevMouseHIDReportBuffer,
 				.PrevReportINBufferSize       = sizeof(PrevMouseHIDReportBuffer),
+			},
+	};
+
+USB_ClassInfo_HID_Device_t ExtendedKeyboard_HID_Interface =
+	{
+		.Config =
+			{
+				.InterfaceNumber              = INTERFACE_ID_ExtendedKeyboard,
+				.ReportINEndpoint             =
+					{
+						.Address              = EXTENDEDKEYBOARD_IN_EPADDR,
+						.Size                 = HID_EPSIZE,
+						.Banks                = 1,
+					},
+				.PrevReportINBuffer           = PrevExtendedKeyboardHIDReportBuffer,
+				.PrevReportINBufferSize       = sizeof(PrevExtendedKeyboardHIDReportBuffer),
 			},
 	};
 
@@ -161,6 +179,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 
 	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
 	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
+	ConfigSuccess &= HID_Device_ConfigureEndpoints(&ExtendedKeyboard_HID_Interface);
 
 	USB_Device_EnableSOFEvents();
 }
@@ -170,6 +189,7 @@ void EVENT_USB_Device_ControlRequest(void)
 {
 	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
 	HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
+	HID_Device_ProcessControlRequest(&ExtendedKeyboard_HID_Interface);
 }
 
 /** Event handler for the USB device Start Of Frame event. */
@@ -177,6 +197,7 @@ void EVENT_USB_Device_StartOfFrame(void)
 {
 	HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
 	HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
+	HID_Device_MillisecondElapsed(&ExtendedKeyboard_HID_Interface);
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
@@ -198,21 +219,28 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 	/* Determine which interface must have its report generated */
 	if (HIDInterfaceInfo == &Keyboard_HID_Interface)
-	{
-        ++keyboard_report_counter;
+    {
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
+        ++KeyboardReportCounter;
         KeyboardReport->Modifier = modifiers_get();
         memcpy(KeyboardReport->KeyCode, keys_get(), 6);
+
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
-	}
-	else
-	{
-        ++mouse_report_counter;
+    }
+    else if (HIDInterfaceInfo == &Mouse_HID_Interface)
+    {
 		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
 
+        ++MouseReportCounter;
+
 		*ReportSize = sizeof(USB_MouseReport_Data_t);
-	}
+    }
+    else
+    {
+        ++ExtendedKeyboardReportCounter;
+
+    }
     return false;
 }
 
@@ -238,16 +266,24 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 
 void SendKeyboardReport(void)
 {
-    uint8_t saved_keyboard_report_counter = keyboard_report_counter;
+    uint8_t Temp = KeyboardReportCounter;
 
-    while (saved_keyboard_report_counter == keyboard_report_counter)
+    while (Temp == KeyboardReportCounter)
         HID_Device_USBTask(&Keyboard_HID_Interface);
 }
 
 void SendMouseReport(void)
 {
-    uint8_t saved_mouse_report_counter = mouse_report_counter;
+    uint8_t Temp = MouseReportCounter;
 
-    while (saved_mouse_report_counter == mouse_report_counter)
+    while (Temp == MouseReportCounter)
         HID_Device_USBTask(&Mouse_HID_Interface);
+}
+
+void SendExtendedKeyboardReport(void)
+{
+    uint8_t Temp = ExtendedKeyboardReportCounter;
+
+    while (Temp == ExtendedKeyboardReportCounter)
+        HID_Device_USBTask(&ExtendedKeyboard_HID_Interface);
 }

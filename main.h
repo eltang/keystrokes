@@ -79,5 +79,6 @@
 
         void SendKeyboardReport(void);
         void SendMouseReport(void);
+        void SendExtendedKeyboardReport(void);
 
 #endif

@@ -67,6 +67,46 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM KeyboardReport[] =
 	HID_DESCRIPTOR_KEYBOARD(6)
 };
 
+const USB_Descriptor_HIDReport_Datatype_t PROGMEM ExtendedKeyboardReport[] =
+{
+    // System Control Collection (8 bits)
+	//
+	// NOTES:
+	// Not bothering with NKRO for this table. If there's need, I can implement it. -HaaTa
+	// Using a 1KRO scheme
+	0x05, 0x01,          // Usage Page (Generic Desktop),
+	0x09, 0x80,          // Usage (System Control),
+	0xA1, 0x01,          // Collection (Application),
+	0x85, 0x02,          //   Report ID (2),
+	0x75, 0x08,          //   Report Size (8),
+	0x95, 0x01,          //   Report Count (1),
+	0x16, 0x81, 0x00,    //   Logical Minimum (129),
+	0x26, 0xB7, 0x00,    //   Logical Maximum (183),
+	0x19, 0x81,          //   Usage Minimum (129),
+	0x29, 0xB7,          //   Usage Maximum (183),
+	0x81, 0x00,          //   Input (Data, Array),
+	0xc0,                // End Collection - System Control
+
+	// Consumer Control Collection - Media Keys (16 bits)
+	//
+	// NOTES:
+	// Not bothering with NKRO for this table. If there's a need, I can implement it. -HaaTa
+	// Using a 1KRO scheme
+	0x05, 0x0c,          // Usage Page (Consumer),
+	0x09, 0x01,          // Usage (Consumer Control),
+	0xA1, 0x01,          // Collection (Application),
+	0x85, 0x03,          //   Report ID (3),
+	0x75, 0x10,          //   Report Size (16),
+	0x95, 0x01,          //   Report Count (1),
+	0x16, 0x01, 0x00,    //   Logical Minimum (1),
+	0x26, 0x9D, 0x02,    //   Logical Maximum (669),
+	0x05, 0x0C,          //   Usage Page (Consumer),
+	0x19, 0x01,          //   Usage Minimum (1),
+	0x2A, 0x9D, 0x02,    //   Usage Maximum (669),
+	0x81, 0x00,          //   Input (Data, Array),
+	0xc0,                // End Collection - Consumer Control
+};
+
 /** Device descriptor structure. This descriptor, located in FLASH memory, describes the overall
  *  device characteristics, including the supported USB version, control endpoint size and the
  *  number of device configurations. The descriptor is read out by the USB host when the enumeration
@@ -106,7 +146,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
 			.TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
-			.TotalInterfaces        = 2,
+			.TotalInterfaces        = 3,
 
 			.ConfigurationNumber    = 1,
 			.ConfigurationStrIndex  = NO_DESCRIPTOR,
@@ -188,7 +228,44 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 			.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 			.EndpointSize           = HID_EPSIZE,
 			.PollingIntervalMS      = 0x01
-		}
+		},
+
+    .HID3_ExtendedKeyboardInterface =
+    	{
+    		.Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
+
+    		.InterfaceNumber        = INTERFACE_ID_ExtendedKeyboard,
+    		.AlternateSetting       = 0x00,
+
+    		.TotalEndpoints         = 1,
+
+    		.Class                  = HID_CSCP_HIDClass,
+    		.SubClass               = HID_CSCP_NonBootSubclass,
+    		.Protocol               = HID_CSCP_NonBootProtocol,
+
+    		.InterfaceStrIndex      = NO_DESCRIPTOR
+    	},
+
+	.HID3_ExtendedKeyboardHID =
+    	{
+    		.Header                 = {.Size = sizeof(USB_HID_Descriptor_HID_t), .Type = HID_DTYPE_HID},
+
+    		.HIDSpec                = VERSION_BCD(1,1,1),
+    		.CountryCode            = 0x00,
+    		.TotalReportDescriptors = 1,
+    		.HIDReportType          = HID_DTYPE_Report,
+    		.HIDReportLength        = sizeof(ExtendedKeyboardReport)
+    	},
+
+	.HID3_ReportINEndpoint =
+    	{
+    		.Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+    		.EndpointAddress        = EXTENDEDKEYBOARD_IN_EPADDR,
+    		.Attributes             = (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+    		.EndpointSize           = HID_EPSIZE,
+    		.PollingIntervalMS      = 0x01
+    	}
 };
 
 /** Language descriptor structure. This descriptor, located in FLASH memory, is returned when the host requests
@@ -264,6 +341,10 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 					Address = &ConfigurationDescriptor.HID2_MouseHID;
 					Size    = sizeof(USB_HID_Descriptor_HID_t);
 					break;
+				case INTERFACE_ID_ExtendedKeyboard:
+					Address = &ConfigurationDescriptor.HID3_ExtendedKeyboardHID;
+					Size    = sizeof(USB_HID_Descriptor_HID_t);
+					break;
 			}
 
 			break;
@@ -277,6 +358,10 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 				case INTERFACE_ID_Mouse:
 					Address = &MouseReport;
 					Size    = sizeof(MouseReport);
+					break;
+                case INTERFACE_ID_ExtendedKeyboard:
+					Address = &ExtendedKeyboardReport;
+					Size    = sizeof(ExtendedKeyboardReport);
 					break;
 			}
 
