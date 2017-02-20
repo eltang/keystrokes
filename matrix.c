@@ -86,7 +86,6 @@ raw_keystroke_t *matrix_scan(void)
 {
     static raw_keystroke_t raw_keystroke;
     keyswitch_state_t *keyswitch_state;
-    uint8_t timer_count = timer_read();
     bool keyswitch_was_closed, keyswitch_is_closed;
 
     for (uint8_t i = OUTPUTS; i--;) {
@@ -100,13 +99,13 @@ raw_keystroke_t *matrix_scan(void)
             keyswitch_is_closed = keyswitch_state->state & KEYSWITCH_IS_CLOSED;
             if (!keyswitch_is_closed != matrix_read_input(j, i)) {
                 keyswitch_state->state ^= KEYSWITCH_IS_CLOSED;
-                keyswitch_state->timestamp = timer_count;
+                keyswitch_state->timestamp = timer_read();
                 continue;
             }
             keyswitch_was_closed = keyswitch_state->state & KEYSWITCH_WAS_CLOSED;
             if (keyswitch_was_closed == keyswitch_is_closed)
                 continue;
-            if ((uint8_t)(timer_count - keyswitch_state->timestamp) <= KEYSWITCH_BOUNCE_TIME)
+            if ((uint8_t)(timer_read() - keyswitch_state->timestamp) <= KEYSWITCH_BOUNCE_TIME)
                 continue;
             matrix_deactivate_output(i, 1);
             keyswitch_state->state ^= KEYSWITCH_WAS_CLOSED;
