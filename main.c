@@ -241,11 +241,11 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
         switch (*ReportID = keys_get_extended_keyboard_report_id())
         {
             case HID_REPORTID_GenericDesktopReport:
-                ((USB_GenericDesktopReport_Data_t*)ReportData)->Usage = keys_get_generic_desktop();
+                *(USB_GenericDesktopReport_Data_t*)ReportData = keys_get_generic_desktop();
                 *ReportSize = sizeof(USB_GenericDesktopReport_Data_t);
                 break;
             case HID_REPORTID_ConsumerReport:
-                ((USB_ConsumerReport_Data_t*)ReportData)->Usage = keys_get_consumer();
+                *(USB_ConsumerReport_Data_t*)ReportData = keys_get_consumer();
                 *ReportSize = sizeof(USB_ConsumerReport_Data_t);
                 break;
         }

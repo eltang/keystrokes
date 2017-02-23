@@ -66,15 +66,9 @@
 			USB_Descriptor_Endpoint_t             HID3_ReportINEndpoint;
 		} USB_Descriptor_Configuration_t;
 
-        typedef struct
-        {
-            uint8_t Usage;
-        } USB_GenericDesktopReport_Data_t;
+        typedef uint8_t USB_GenericDesktopReport_Data_t;
 
-        typedef struct
-        {
-            uint16_t Usage;
-        } USB_ConsumerReport_Data_t;
+        typedef uint16_t USB_ConsumerReport_Data_t;
 
 	/* Macros: */
 		/** Endpoint address of the Keyboard HID reporting IN endpoint. */
