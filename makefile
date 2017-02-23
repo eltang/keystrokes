@@ -19,7 +19,7 @@ F_USB        = $(F_CPU)
 OPTIMIZATION = s
 TARGET       = main
 SRC          = $(TARGET).c \
-               Descriptors.c \
+               descriptors.c \
                $(LUFA_SRC_USB) \
                $(LUFA_SRC_USBCLASS) \
 			   keys.c \
