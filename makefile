@@ -36,7 +36,7 @@ SRC          = $(TARGET).c \
 
 
 LUFA_PATH    = lufa/LUFA
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -Ii2cmaster -include config.h
+CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -Ii2cmaster -include config.h -flto
 LD_FLAGS     =
 
 # Default target
