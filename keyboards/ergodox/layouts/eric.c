@@ -21,14 +21,14 @@ LAYOUT(
         K(SC(US, DOWN)), K(SC(US, ENTER)), K(SC(US, ' '))
     ),
     LAYER(
-        NO_ACTION, K(SC(US, F11)), K(SC(US, F12)), K(SC(US, F13)), K(SC(US, F14)), K(SC(US, F15)), NO_ACTION,
+        RESET, K(SC(US, F11)), K(SC(US, F12)), K(SC(US, F13)), K(SC(US, F14)), K(SC(US, F15)), NO_ACTION,
         NO_ACTION, K(SC(US, F6)), K(SC(US, F7)), K(SC(US, F8)), K(SC(US, F9)), K(SC(US, F10)), NO_ACTION,
         NO_ACTION, K(SC(US, F1)), K(SC(US, F2)), K(SC(US, F3)), K(SC(US, F4)), K(SC(US, F5)),
         HT(K(SC(US, L_SHIFT)), K(SC(US, '('))), NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION,
         NO_ACTION, NO_ACTION, K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)),
                                                                 NO_ACTION, NO_ACTION,
                                                                            NO_ACTION,
-                                                     RESET, NO_ACTION, NO_ACTION,
+                                                     K(C(0xEA)), K(C(0xE9)), K(C(0xE2)),
         NO_ACTION, NO_ACTION, K(SC(US, NUM_LOCK)), K(SC(US, NK('/'))), K(SC(US, NK('*'))), K(SC(US, NK('-'))), NO_ACTION,
         NO_ACTION, NO_ACTION, K(SC(US, NK('7'))), K(SC(US, NK('8'))), K(SC(US, NK('9'))), K(SC(US, NK('+'))), NO_ACTION,
                    NO_ACTION, K(SC(US, NK('4'))), K(SC(US, NK('5'))), K(SC(US, NK('6'))), K(SC(US, NK('+'))), NO_ACTION,
