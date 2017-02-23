@@ -53,12 +53,12 @@ LAYOUT(
                                                      NO_ACTION, NO_ACTION, NO_ACTION,
          NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION,
          NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION,
-                    NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, K(C(0xCD)),
-         NO_ACTION, NO_ACTION, NO_ACTION, K(C(0xB6)), K(C(0xB5)), NO_ACTION, NO_ACTION,
-                               K(C(0xE9)), K(C(0xEA)), K(C(0xE2)), NO_ACTION, NO_ACTION,
+                    NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, C(0xCD),
+         NO_ACTION, NO_ACTION, NO_ACTION, C(0xB6), C(0xB5), NO_ACTION, NO_ACTION,
+                               C(0xE9), C(0xEA), C(0xE2), NO_ACTION, NO_ACTION,
          NO_ACTION, NO_ACTION,
          NO_ACTION,
-         NO_ACTION, NO_ACTION, K(C(0x0224))
+         NO_ACTION, NO_ACTION, C(0x0224)
     ),
 );
 

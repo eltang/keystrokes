@@ -1,3 +1,4 @@
+
 #include "layout.h"
 #include "../ergodox.h"
 
@@ -7,7 +8,7 @@ LAYOUT(
         K(SC(US, TAB)), K(SC(US, '\'')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, 'p')), K(SC(US, 'y')), K(SC(US, '[')),
         K(SC(US, CAPS_LOCK)), K(SC(US, 'a')), K(SC(US, 'o')), K(SC(US, 'e')), K(SC(US, 'u')), K(SC(US, 'i')),
         HT(K(SC(US, L_SHIFT)), K(SC(US, '('))), K(SC(US, ';')), K(SC(US, 'q')), K(SC(US, 'j')), K(SC(US, 'k')), K(SC(US, 'x')), L(GOTO, 1),
-        NO_ACTION, K(GD(0x81)), K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)),
+        NO_ACTION, GD(0x81), K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)),
                                                                 K(SC(US, HOME)), K(SC(US, END)),
                                                                           K(SC(US, PG_UP)),
                                                      K(SC(US, ' ')), K(SC(US, BKSP)), K(SC(US, PG_DN)),
@@ -15,7 +16,7 @@ LAYOUT(
         K(SC(US, ']')), K(SC(US, 'f')), K(SC(US, 'g')), K(SC(US, 'c')), K(SC(US, 'r')), K(SC(US, 'l')), K(SC(US, '/')),
                    K(SC(US, 'd')), K(SC(US, 'h')), K(SC(US, 't')), K(SC(US, 'n')), K(SC(US, 's')), K(SC(US, '-')),
         NO_ACTION, K(SC(US, 'b')), K(SC(US, 'm')), K(SC(US, 'w')), K(SC(US, 'v')), K(SC(US, 'z')), HT(K(SC(US, R_SHIFT)), K(SC(US, ')'))),
-                   K(SC(US, R_GUI)), K(SC(US, R_ALT)), K(SC(US, R_CTRL)), K(GD(0x81)), NO_ACTION,
+                   K(SC(US, R_GUI)), K(SC(US, R_ALT)), K(SC(US, R_CTRL)), GD(0x81), NO_ACTION,
         K(SC(US, LEFT)), K(SC(US, RIGHT)),
         K(SC(US, UP)),
         K(SC(US, DOWN)), K(SC(US, ENTER)), K(SC(US, ' '))
@@ -28,7 +29,7 @@ LAYOUT(
         NO_ACTION, NO_ACTION, K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)),
                                                                 NO_ACTION, NO_ACTION,
                                                                            NO_ACTION,
-                                                     K(C(0xEA)), K(C(0xE9)), K(C(0xE2)),
+                                                     C(0xEA), C(0xE9), C(0xE2),
         NO_ACTION, NO_ACTION, K(SC(US, NUM_LOCK)), K(SC(US, NK('/'))), K(SC(US, NK('*'))), K(SC(US, NK('-'))), NO_ACTION,
         NO_ACTION, NO_ACTION, K(SC(US, NK('7'))), K(SC(US, NK('8'))), K(SC(US, NK('9'))), K(SC(US, NK('+'))), NO_ACTION,
                    NO_ACTION, K(SC(US, NK('4'))), K(SC(US, NK('5'))), K(SC(US, NK('6'))), K(SC(US, NK('+'))), NO_ACTION,
