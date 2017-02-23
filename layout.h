@@ -416,8 +416,8 @@ code >> 24 == C_CODE_ID ? K_CREATE_C_FCN(code) : 0)
 code & 0xFF ? &(const __flash uint8_t){ code & 0xFF } : &(const __flash uint8_t){ code >> 8 })
 
 #define K_CREATE_GD_ARG(code) \
-(code & 0xFF00 && code & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ code } : \
-&(const __flash uint8_t){ code })
+(code & 0xFF00 && code & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ code & 0xFFFF } : \
+&(const __flash uint8_t){ code & 0xFF })
 
 #define K_CREATE_C_ARG(code) \
 (code & 0xFF0000 && code & 0xFFFF ? (const __flash uint8_t []){ code & 0xFF, code >> 8 & 0xFF, code >> 16 & 0xFF } : \
