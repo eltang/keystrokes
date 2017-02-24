@@ -307,7 +307,7 @@ enum input_sources {
 ((code) & 0xFFFFFFFFFF) == 'P' ? R_S(HID_KEYBOARD_SC_R) : \
 ((code) & 0xFFFFFFFFFF) == 'Q' ? R_S(HID_KEYBOARD_SC_X) : \
 ((code) & 0xFFFFFFFFFF) == 'R' ? R_S(HID_KEYBOARD_SC_O) : \
-((code) & 0xFFFFFFFFFF) == 'S' ? R_S(R_S(HID_KEYBOARD_SC_SEMICOLON_AND_COLON)) : \
+((code) & 0xFFFFFFFFFF) == 'S' ? R_S(HID_KEYBOARD_SC_SEMICOLON_AND_COLON) : \
 ((code) & 0xFFFFFFFFFF) == 'T' ? R_S(HID_KEYBOARD_SC_K) : \
 ((code) & 0xFFFFFFFFFF) == 'U' ? R_S(HID_KEYBOARD_SC_F) : \
 ((code) & 0xFFFFFFFFFF) == 'V' ? R_S(HID_KEYBOARD_SC_DOT_AND_GREATER_THAN_SIGN) : \
