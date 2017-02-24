@@ -4,14 +4,16 @@
 #include <stdint.h>
 #include <avr/io.h>
 
-#define PIN(port, pin) { &PIN ## port, 1 << pin }
-#define PIN_MASK(pin) (pin.mask)
-#define PIN_PIN(pin) (pin.addr[0])
-#define PIN_DDR(pin) (pin.addr[1])
-#define PIN_PORT(pin) (pin.addr[2])
+#define PIN(port, pin) { (port_t *)&PIN ## port, 1 << pin }
 
 typedef struct {
-    volatile uint8_t *addr;
+    volatile uint8_t pin;
+    volatile uint8_t ddr;
+    volatile uint8_t port;
+} port_t;
+
+typedef struct {
+    port_t *port;
     uint8_t mask;
 } pin_t;
 

@@ -37,8 +37,8 @@ void matrix_init_output(uint8_t output)
 {
     pin_t pin = output_pins[output];
 
-    PIN_DDR(pin) |= PIN_MASK(pin);
-    PIN_PORT(pin) |= PIN_MASK(pin);
+    pin.port->ddr |= pin.mask;
+    pin.port->port |= pin.mask;
 }
 
 __attribute__((weak))
@@ -46,7 +46,7 @@ void matrix_init_input(uint8_t input)
 {
     pin_t pin = input_pins[input];
 
-    PIN_PORT(pin) |= PIN_MASK(pin);
+    pin.port->port |= pin.mask;
 }
 
 __attribute__((weak))
@@ -54,7 +54,7 @@ void matrix_activate_output(uint8_t output)
 {
     pin_t pin = output_pins[output];
 
-    PIN_PORT(pin) &= ~PIN_MASK(pin);
+    pin.port->port &= ~pin.mask;
 }
 
 __attribute__((weak))
@@ -62,7 +62,7 @@ void matrix_deactivate_output(uint8_t output, bool keystroke_detected)
 {
     pin_t pin = output_pins[output];
 
-    PIN_PORT(pin) |= PIN_MASK(pin);
+    pin.port->port |= pin.mask;
 }
 
 __attribute__((weak))
@@ -70,7 +70,7 @@ bool matrix_read_input(uint8_t input, uint8_t output)
 {
     pin_t pin = input_pins[input];
 
-    return PIN_PIN(pin) & PIN_MASK(pin);
+    return pin.port->pin & pin.mask;
 }
 
 __attribute__((weak))
