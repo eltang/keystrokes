@@ -14,6 +14,13 @@ void modifiers_set_temporary(uint8_t modifiers)
     SendKeyboardReport();
 }
 
+void modifiers_unset_temporary(uint8_t modifiers)
+{
+    if (temporary_modifiers != modifiers)
+        return;
+    modifiers_clear_temporary();
+}
+
 void modifiers_clear_temporary(void)
 {
     temporary_modifiers = 0;

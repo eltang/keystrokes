@@ -17,7 +17,7 @@ void actions_modifiers_and_scancode(keystroke_t *keystroke, const __flash void *
         break;
     case KEYSTROKE_FINISH:
         keys_delete_scancode(code);
-        modifiers_clear_temporary();
+        modifiers_unset_temporary();
         break;
     }
 }
@@ -203,7 +203,7 @@ void actions_modifiers_and_generic_desktop(keystroke_t *keystroke, const __flash
         break;
     case KEYSTROKE_FINISH:
         keys_delete_generic_desktop(code);
-        modifiers_clear_temporary();
+        modifiers_unset_temporary();
         break;
     }
 }
@@ -234,7 +234,7 @@ void actions_modifiers_and_consumer(keystroke_t *keystroke, const __flash void *
         break;
     case KEYSTROKE_FINISH:
         keys_delete_consumer(code);
-        modifiers_clear_temporary();
+        modifiers_unset_temporary();
         break;
     }
 }
