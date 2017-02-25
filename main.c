@@ -134,10 +134,6 @@ int main(void)
 void SetupHardware()
 {
 #if (ARCH == ARCH_AVR8)
-	/* Disable watchdog if enabled by bootloader/fuses */
-	MCUSR &= ~(1 << WDRF);
-	wdt_disable();
-
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
     MCUCR |= 1 << JTD;
