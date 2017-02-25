@@ -1,6 +1,6 @@
 #ifndef RESET_H
 #define RESET_H
 
-void reset(void);
+void Jump_To_Bootloader(void);
 
 #endif

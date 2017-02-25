@@ -23,7 +23,7 @@ void Bootloader_Jump_Check(void)
     }
 }
 
-void reset(void)
+void Jump_To_Bootloader(void)
 {
     // If USB is used, detach from the bus and reset it
     USB_Disable();

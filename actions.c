@@ -77,7 +77,7 @@ void actions_layers_visit(keystroke_t *keystroke, const __flash void *arg)
 void actions_reset(keystroke_t *keystroke, const __flash void *arg)
 {
     if (keystroke->state == KEYSTROKE_START)
-        reset();
+        Jump_To_Bootloader();
 }
 
 void actions_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
