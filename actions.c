@@ -148,8 +148,12 @@ void actions_tap_hold(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash action_t *actions = arg;
     action_t action;
+    static uint8_t tap_action_modifiers;
 
     switch (keystroke->state) {
+    case KEYSTROKE_START:
+        tap_action_modifiers = modifiers_get_permanent();
+        break;
     case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
         action = actions[1];
         keystroke->state = KEYSTROKE_START;
@@ -170,10 +174,12 @@ void actions_tap_hold(keystroke_t *keystroke, const __flash void *arg)
                 action.fcn(keystroke, action.arg);
                 break;
             case KEYSTROKE_START:
+                modifiers_add_permanent(tap_action_modifiers);
                 keystroke->state = KEYSTROKE_START;
                 action.fcn(keystroke, action.arg);
                 keystroke->state = KEYSTROKE_FINISH;
                 action.fcn(keystroke, action.arg);
+                modifiers_delete_permanent(tap_action_modifiers);
                 break;
             case KEYSTROKE_START | KEYSTROKE_TIMED_OUT | KEYSTROKE_INTERRUPTED:
             case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:

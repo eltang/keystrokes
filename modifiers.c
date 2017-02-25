@@ -51,3 +51,8 @@ uint8_t modifiers_get(void)
 {
     return permanent_modifiers.set | temporary_modifiers;
 }
+
+uint8_t modifiers_get_permanent(void)
+{
+    return permanent_modifiers.set;
+}
