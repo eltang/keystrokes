@@ -42,26 +42,32 @@
 		#include <LUFA/Drivers/USB/USB.h>
 
 	/* Macros: */
+    	/** Endpoint address of the Keyboard HID reporting IN endpoint. */
+    	#define KEYBOARD_EPADDR                (ENDPOINT_DIR_IN  | 1)
+
+    	/** Endpoint address of the Mouse HID reporting IN endpoint. */
+    	#define MOUSE_EPADDR                   (ENDPOINT_DIR_IN  | 2)
+
+    	/** Endpoint address of the Enhanced Keyboard HID reporting IN endpoint. */
+    	#define ENHANCEDKEYBOARD_EPADDR        (ENDPOINT_DIR_IN  | 3)
+
+    	/** Size in bytes of the HID reporting IN endpoint. */
+    	#define HID_EPSIZE                     8
+
 		/** Endpoint address of the CDC device-to-host notification IN endpoint. */
-		#define CDC_NOTIFICATION_EPADDR        (ENDPOINT_DIR_IN  | 2)
+		#define CDC_NOTIFICATION_EPADDR        (ENDPOINT_DIR_IN  | 4)
 
 		/** Endpoint address of the CDC device-to-host data IN endpoint. */
-		#define CDC_TX_EPADDR                  (ENDPOINT_DIR_IN  | 3)
+		#define CDC_TX_EPADDR                  (ENDPOINT_DIR_IN  | 5)
 
 		/** Endpoint address of the CDC host-to-device data OUT endpoint. */
-		#define CDC_RX_EPADDR                  (ENDPOINT_DIR_OUT | 4)
+		#define CDC_RX_EPADDR                  (ENDPOINT_DIR_OUT | 6)
 
 		/** Size in bytes of the CDC device-to-host notification IN endpoint. */
 		#define CDC_NOTIFICATION_EPSIZE        8
 
 		/** Size in bytes of the CDC data IN and OUT endpoints. */
 		#define CDC_TXRX_EPSIZE                16
-
-		/** Endpoint address of the Mouse HID reporting IN endpoint. */
-		#define MOUSE_EPADDR                   (ENDPOINT_DIR_IN  | 1)
-
-		/** Size in bytes of the Mouse HID reporting IN endpoint. */
-		#define MOUSE_EPSIZE                   8
 
 	/* Type Defines: */
 		/** Type define for the device configuration descriptor structure. This must be defined in the
@@ -71,6 +77,21 @@
 		typedef struct
 		{
 			USB_Descriptor_Configuration_Header_t    Config;
+
+            // Keyboard HID Interface
+			USB_Descriptor_Interface_t               HID1_KeyboardInterface;
+			USB_HID_Descriptor_HID_t                 HID1_KeyboardHID;
+			USB_Descriptor_Endpoint_t                HID1_ReportINEndpoint;
+
+			// Mouse HID Interface
+			USB_Descriptor_Interface_t               HID2_MouseInterface;
+			USB_HID_Descriptor_HID_t                 HID2_MouseHID;
+			USB_Descriptor_Endpoint_t                HID2_ReportINEndpoint;
+
+			// Enhanced Keyboard HID Interface
+			USB_Descriptor_Interface_t               HID3_EnhancedKeyboardInterface;
+			USB_HID_Descriptor_HID_t                 HID3_EnhancedKeyboardHID;
+			USB_Descriptor_Endpoint_t                HID3_ReportINEndpoint;
 
 			// CDC Control Interface
 			USB_Descriptor_Interface_Association_t   CDC_IAD;
@@ -84,11 +105,6 @@
 			USB_Descriptor_Interface_t               CDC_DCI_Interface;
 			USB_Descriptor_Endpoint_t                CDC_DataOutEndpoint;
 			USB_Descriptor_Endpoint_t                CDC_DataInEndpoint;
-
-			// Mouse HID Interface
-			USB_Descriptor_Interface_t               HID_Interface;
-			USB_HID_Descriptor_HID_t                 HID_MouseHID;
-	        USB_Descriptor_Endpoint_t                HID_ReportINEndpoint;
 		} USB_Descriptor_Configuration_t;
 
 		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
@@ -97,9 +113,11 @@
 		 */
 		enum InterfaceDescriptors_t
 		{
-			INTERFACE_ID_CDC_CCI = 0, /**< CDC CCI interface descriptor ID */
-			INTERFACE_ID_CDC_DCI = 1, /**< CDC DCI interface descriptor ID */
-			INTERFACE_ID_Mouse   = 2, /**< Mouse interface descriptor ID */
+			INTERFACE_ID_Keyboard         = 0, /**< Keyboard interface descriptor ID */
+			INTERFACE_ID_Mouse            = 1, /**< Mouse interface descriptor ID */
+			INTERFACE_ID_EnhancedKeyboard = 2, /**< Enhanced Keyboard interface descriptor ID */
+			INTERFACE_ID_CDC_CCI          = 3, /**< CDC CCI interface descriptor ID */
+			INTERFACE_ID_CDC_DCI          = 4, /**< CDC DCI interface descriptor ID */
 		};
 
 		/** Enum for the device string descriptor IDs within the device. Each string descriptor should
@@ -113,6 +131,13 @@
 			STRING_ID_Product      = 2, /**< Product string ID */
 		};
 
+        /** Enum for the HID report IDs used in the device. */
+		enum
+		{
+			HID_REPORTID_GenericDesktopReport = 0x02, /**< Report ID for the Generic Desktop report within the device. */
+			HID_REPORTID_ConsumerReport       = 0x03, /**< Report ID for the Consumer report within the device. */
+		} HID_Report_IDs;
+
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 		                                    const uint16_t wIndex,
@@ -120,4 +145,3 @@
 		                                    ATTR_WARN_UNUSED_RESULT ATTR_NON_NULL_PTR_ARG(3);
 
 #endif
-

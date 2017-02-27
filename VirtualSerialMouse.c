@@ -66,8 +66,15 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
 			},
 	};
 
+/** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
+static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
+
 /** Buffer to hold the previously generated Mouse HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
+
+static uint8_t PrevEnhancedKeyboardHIDReportBuffer[MAX(sizeof(USB_GenericDesktopReport_Data_t), sizeof(USB_ConsumerReport_Data_t))];
+
+static uint8_t KeyboardReportCounter, MouseReportCounter, EnhancedKeyboardReportCounter;
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -97,32 +104,24 @@ int main(void)
 {
 	SetupHardware();
 
-	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
 	GlobalInterruptEnable();
 
 	for (;;)
 	{
-		CheckJoystickMovement();
-
-		/* Must throw away unused bytes from the host, or it will lock up while waiting for the device */
-		CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
-
-		CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
-		HID_Device_USBTask(&Mouse_HID_Interface);
-		USB_USBTask();
-	}
+        keystrokes_process(matrix_scan());
+        keystrokes_task();
+    }
 }
 
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
-void SetupHardware(void)
+void SetupHardware()
 {
 #if (ARCH == ARCH_AVR8)
-	/* Disable watchdog if enabled by bootloader/fuses */
-	MCUSR &= ~(1 << WDRF);
-	wdt_disable();
-
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
+
+    MCUCR |= 1 << JTD;
+    MCUCR |= 1 << JTD;
 #elif (ARCH == ARCH_XMEGA)
 	/* Start the PLL to multiply the 2MHz RC oscillator to 32MHz and switch the CPU core to run from it */
 	XMEGACLK_StartPLL(CLOCK_SRC_INT_RC2MHZ, 2000000, F_CPU);
@@ -134,51 +133,23 @@ void SetupHardware(void)
 
 	PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
 #endif
-
 	/* Hardware Initialization */
-	Joystick_Init();
-	LEDs_Init();
+    timer_init();
+#ifdef USING_TWI
+    i2c_init();
+#endif
+    matrix_init();
 	USB_Init();
-}
-
-/** Checks for changes in the position of the board joystick, sending strings to the host upon each change. */
-void CheckJoystickMovement(void)
-{
-	uint8_t     JoyStatus_LCL = Joystick_GetStatus();
-	char*       ReportString  = NULL;
-	static bool ActionSent    = false;
-
-	if (JoyStatus_LCL & JOY_UP)
-	  ReportString = "Joystick Up\r\n";
-	else if (JoyStatus_LCL & JOY_DOWN)
-	  ReportString = "Joystick Down\r\n";
-	else if (JoyStatus_LCL & JOY_LEFT)
-	  ReportString = "Joystick Left\r\n";
-	else if (JoyStatus_LCL & JOY_RIGHT)
-	  ReportString = "Joystick Right\r\n";
-	else if (JoyStatus_LCL & JOY_PRESS)
-	  ReportString = "Joystick Pressed\r\n";
-	else
-	  ActionSent = false;
-
-	if ((ReportString != NULL) && (ActionSent == false))
-	{
-		ActionSent = true;
-
-		CDC_Device_SendString(&VirtualSerial_CDC_Interface, ReportString);
-	}
 }
 
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void)
 {
-	LEDs_SetAllLEDs(LEDMASK_USB_ENUMERATING);
 }
 
 /** Event handler for the library USB Disconnection event. */
 void EVENT_USB_Device_Disconnect(void)
 {
-	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
 }
 
 /** Event handler for the library USB Configuration Changed event. */
@@ -186,7 +157,9 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 {
 	bool ConfigSuccess = true;
 
+	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
 	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
+	ConfigSuccess &= HID_Device_ConfigureEndpoints(&EnhancedKeyboard_HID_Interface);
 	ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 
 	USB_Device_EnableSOFEvents();
@@ -198,13 +171,17 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 void EVENT_USB_Device_ControlRequest(void)
 {
 	CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
+	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
 	HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
+	HID_Device_ProcessControlRequest(&EnhancedKeyboard_HID_Interface);
 }
 
 /** Event handler for the USB device Start Of Frame event. */
 void EVENT_USB_Device_StartOfFrame(void)
 {
+	HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
 	HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
+	HID_Device_MillisecondElapsed(&EnhancedKeyboard_HID_Interface);
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
@@ -223,29 +200,42 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
                                          void* ReportData,
                                          uint16_t* const ReportSize)
 {
-	USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
 
-	uint8_t JoyStatus_LCL    = Joystick_GetStatus();
-	uint8_t ButtonStatus_LCL = Buttons_GetStatus();
+	/* Determine which interface must have its report generated */
+	if (HIDInterfaceInfo == &Keyboard_HID_Interface)
+    {
+		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
-	if (JoyStatus_LCL & JOY_UP)
-	  MouseReport->Y = -1;
-	else if (JoyStatus_LCL & JOY_DOWN)
-	  MouseReport->Y =  1;
+        KeyboardReport->Modifier = modifiers_get();
+        memcpy(KeyboardReport->KeyCode, keys_get_scancode(), 6);
 
-	if (JoyStatus_LCL & JOY_LEFT)
-	  MouseReport->X = -1;
-	else if (JoyStatus_LCL & JOY_RIGHT)
-	  MouseReport->X =  1;
+		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
+        ++KeyboardReportCounter;
+    }
+    else if (HIDInterfaceInfo == &Mouse_HID_Interface)
+    {
+		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
 
-	if (JoyStatus_LCL & JOY_PRESS)
-	  MouseReport->Button |= (1 << 0);
 
-	if (ButtonStatus_LCL & BUTTONS_BUTTON1)
-	  MouseReport->Button |= (1 << 1);
-
-	*ReportSize = sizeof(USB_MouseReport_Data_t);
-	return true;
+		*ReportSize = sizeof(USB_MouseReport_Data_t);
+        ++MouseReportCounter;
+    }
+    else
+    {
+        switch (*ReportID = keys_get_extended_keyboard_report_id())
+        {
+            case HID_REPORTID_GenericDesktopReport:
+                *(USB_GenericDesktopReport_Data_t*)ReportData = keys_get_generic_desktop();
+                *ReportSize = sizeof(USB_GenericDesktopReport_Data_t);
+                break;
+            case HID_REPORTID_ConsumerReport:
+                *(USB_ConsumerReport_Data_t*)ReportData = keys_get_consumer();
+                *ReportSize = sizeof(USB_ConsumerReport_Data_t);
+                break;
+        }
+        ++EnhancedKeyboardReportCounter;
+    }
+    return false;
 }
 
 /** HID class driver callback function for the processing of HID reports from the host.
@@ -279,4 +269,31 @@ void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const C
 	   in the pending data from the USB endpoints.
 	*/
 	bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
+}
+
+void SendKeyboardReport(void)
+{
+    uint8_t Temp = KeyboardReportCounter;
+
+    do
+        HID_Device_USBTask(&Keyboard_HID_Interface);
+    while (Temp == KeyboardReportCounter);
+}
+
+void SendMouseReport(void)
+{
+    uint8_t Temp = MouseReportCounter;
+
+    do
+        HID_Device_USBTask(&Mouse_HID_Interface);
+    while (Temp == MouseReportCounter);
+}
+
+void SendEnhancedKeyboardReport(void)
+{
+    uint8_t Temp = EnhancedKeyboardReportCounter;
+
+    do
+        HID_Device_USBTask(&EnhancedKeyboard_HID_Interface);
+    while (Temp == EnhancedKeyboardReportCounter);
 }
