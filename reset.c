@@ -16,11 +16,13 @@ void Bootloader_Jump_Check(void) ATTR_INIT_SECTION(3);
 void Bootloader_Jump_Check(void)
 {
     // If the reset source was the bootloader and the key is correct, clear it and jump to the bootloader
-    if ((MCUSR & (1 << WDRF)) && (Boot_Key == MAGIC_BOOT_KEY))
+    bool watchdog_reset = MCUSR & (1 << WDRF);
+
+    MCUSR = 0;
+    wdt_disable();
+    if (watchdog_reset && (Boot_Key == MAGIC_BOOT_KEY))
     {
         Boot_Key = 0;
-        MCUSR = 0;
-        wdt_disable();
         ((void (*)(void))BOOTLOADER_START_ADDRESS)();
     }
 }
