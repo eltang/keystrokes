@@ -12,6 +12,5 @@ uint8_t keys_get_generic_desktop(void);
 void keys_add_consumer(uint16_t code);
 void keys_delete_consumer(uint16_t code);
 uint16_t keys_get_consumer(void);
-uint8_t keys_get_extended_keyboard_report_id(void);
 
 #endif

@@ -109,9 +109,10 @@
 #endif
 		} USB_Descriptor_Configuration_t;
 
-        typedef uint8_t USB_GenericDesktopReport_Data_t;
-
-        typedef uint16_t USB_ConsumerReport_Data_t;
+        typedef struct {
+            uint16_t Consumer;
+            uint8_t GenericDesktop;
+        } USB_EnhancedKeyboardReport_Data_t;
 
 		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
 		 *  should have a unique ID index associated with it, which can be used to refer to the
@@ -136,13 +137,6 @@
 			STRING_ID_Manufacturer = 1, /**< Manufacturer string ID */
 			STRING_ID_Product      = 2, /**< Product string ID */
 		};
-
-        /** Enum for the HID report IDs used in the device. */
-		enum
-		{
-			HID_REPORTID_GenericDesktopReport = 0x02, /**< Report ID for the Generic Desktop report within the device. */
-			HID_REPORTID_ConsumerReport       = 0x03, /**< Report ID for the Consumer report within the device. */
-		} HID_Report_IDs;
 
 	/* Function Prototypes: */
 		uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,

@@ -80,7 +80,7 @@ static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
 /** Buffer to hold the previously generated Mouse HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevMouseHIDReportBuffer[sizeof(USB_MouseReport_Data_t)];
 
-static uint8_t PrevEnhancedKeyboardHIDReportBuffer[MAX(sizeof(USB_GenericDesktopReport_Data_t), sizeof(USB_ConsumerReport_Data_t))];
+static uint8_t PrevEnhancedKeyboardHIDReportBuffer[sizeof(USB_EnhancedKeyboardReport_Data_t)];
 
 static uint8_t KeyboardReportCounter, MouseReportCounter, EnhancedKeyboardReportCounter;
 
@@ -276,17 +276,12 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
     }
     else
     {
-        switch (*ReportID = keys_get_extended_keyboard_report_id())
-        {
-            case HID_REPORTID_GenericDesktopReport:
-                *(USB_GenericDesktopReport_Data_t*)ReportData = keys_get_generic_desktop();
-                *ReportSize = sizeof(USB_GenericDesktopReport_Data_t);
-                break;
-            case HID_REPORTID_ConsumerReport:
-                *(USB_ConsumerReport_Data_t*)ReportData = keys_get_consumer();
-                *ReportSize = sizeof(USB_ConsumerReport_Data_t);
-                break;
-        }
+        USB_EnhancedKeyboardReport_Data_t* EnhancedKeyboardReport = (USB_EnhancedKeyboardReport_Data_t*)ReportData;
+
+        EnhancedKeyboardReport->Consumer = keys_get_consumer();
+        EnhancedKeyboardReport->GenericDesktop = keys_get_generic_desktop();
+
+        *ReportSize = sizeof(USB_EnhancedKeyboardReport_Data_t);
         ++EnhancedKeyboardReportCounter;
     }
     return false;

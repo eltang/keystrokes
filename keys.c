@@ -6,7 +6,6 @@ static uint8_t keyboard_codes[6], keyboard_code_activations[6];
 static uint8_t generic_desktop_code, generic_desktop_code_activations;
 static uint16_t consumer_code;
 static uint8_t consumer_code_activations;
-static uint8_t extended_keyboard_report_id;
 
 void keys_add_scancode(uint8_t code)
 {
@@ -52,7 +51,6 @@ void keys_add_generic_desktop(uint8_t code)
 {
     if (!code)
         return;
-    extended_keyboard_report_id = HID_REPORTID_GenericDesktopReport;
     if (generic_desktop_code == code) {
         generic_desktop_code = 0;
         SendEnhancedKeyboardReport();
@@ -70,7 +68,6 @@ void keys_delete_generic_desktop(uint8_t code)
         return;
     if (generic_desktop_code == code && !--generic_desktop_code_activations) {
         generic_desktop_code = 0;
-        extended_keyboard_report_id = HID_REPORTID_GenericDesktopReport;
         SendEnhancedKeyboardReport();
     }
 }
@@ -85,7 +82,6 @@ void keys_add_consumer(uint16_t code)
 {
     if (!code)
         return;
-    extended_keyboard_report_id = HID_REPORTID_ConsumerReport;
     if (consumer_code == code) {
         consumer_code = 0;
         SendEnhancedKeyboardReport();
@@ -103,7 +99,6 @@ void keys_delete_consumer(uint16_t code)
         return;
     if (consumer_code == code && !--consumer_code_activations) {
         consumer_code = 0;
-        extended_keyboard_report_id = HID_REPORTID_ConsumerReport;
         SendEnhancedKeyboardReport();
     }
 }
@@ -111,9 +106,4 @@ void keys_delete_consumer(uint16_t code)
 uint16_t keys_get_consumer(void)
 {
     return consumer_code;
-}
-
-uint8_t keys_get_extended_keyboard_report_id(void)
-{
-    return extended_keyboard_report_id;
 }
