@@ -17,9 +17,9 @@ LAYOUT(
                    K(SC(US, 'd')), K(SC(US, 'h')), K(SC(US, 't')), K(SC(US, 'n')), K(SC(US, 's')), K(SC(US, '-')),
         NO_ACTION, K(SC(US, 'b')), K(SC(US, 'm')), K(SC(US, 'w')), K(SC(US, 'v')), K(SC(US, 'z')), HT(K(SC(US, R_SHIFT)), K(SC(US, ')'))),
                               K(SC(US, R_GUI)), K(SC(US, R_ALT)), K(SC(US, R_CTRL)), NO_ACTION, NO_ACTION,
-        C(0xE2), GD(0x81),
-        C(0xE9),
-        C(0xEA), K(SC(US, ENTER)), K(SC(US, ' '))
+        M(0xE2), PM(0x81),
+        M(0xE9),
+        M(0xEA), K(SC(US, ENTER)), K(SC(US, ' '))
     ),
     LAYER(
         NO_ACTION, K(SC(US, F11)), K(SC(US, F12)), K(SC(US, F13)), K(SC(US, F14)), K(SC(US, F15)), NO_ACTION,

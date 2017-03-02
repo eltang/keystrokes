@@ -110,8 +110,8 @@
 		} USB_Descriptor_Configuration_t;
 
         typedef struct {
-            uint16_t Consumer;
-            uint8_t GenericDesktop;
+            uint16_t ConsumerControlCode;
+            uint8_t SystemControlCode;
         } USB_EnhancedKeyboardReport_Data_t;
 
 		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor

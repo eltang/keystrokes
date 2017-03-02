@@ -388,22 +388,22 @@ US_PRINTING_CODE_TO_SCANCODE(code)) | ((code) & ~0xFFFFFFFFFFULL))
 (code) & 0xFF ? actions_scancode : \
 (code) >> 8 ? actions_modifiers : 0)
 
-#define GD_CREATE_FCN(code) \
-((code) & 0xFF00 ? actions_modifiers_and_generic_desktop : \
-actions_generic_desktop)
+#define PM_CREATE_FCN(code) \
+((code) & 0xFF00 ? actions_modifiers_and_power_management : \
+actions_power_management)
 
-#define C_CREATE_FCN(code) \
-((code) & 0xFF0000 ? actions_modifiers_and_consumer : actions_consumer)
+#define M_CREATE_FCN(code) \
+((code) & 0xFF0000 ? actions_modifiers_and_multimedia : actions_multimedia)
 
 #define K_CREATE_ARG(code) \
 ((code) & 0xFF00 && (code) & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ (code) } : \
 (code) & 0xFF ? &(const __flash uint8_t){ (code) & 0xFF } : &(const __flash uint8_t){ (code) >> 8 })
 
-#define GD_CREATE_ARG(code) \
+#define PM_CREATE_ARG(code) \
 ((code) & 0xFF00 && (code) & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ (code) & 0xFFFF } : \
 &(const __flash uint8_t){ (code) & 0xFF })
 
-#define C_CREATE_ARG(code) \
+#define M_CREATE_ARG(code) \
 ((code) & 0xFF0000 && (code) & 0xFFFF ? (const __flash uint8_t []){ (code) & 0xFF, (code) >> 8 & 0xFF, (code) >> 16 & 0xFF } : \
 (const __flash uint8_t *)&(const __flash uint16_t){ (code) & 0xFFFF })
 
@@ -420,16 +420,16 @@ actions_generic_desktop)
 SC_ASSEMBLE((country == US ? US_CODE_TO_SCANCODE(code) : \
 country == US_DVORAK ? US_DVORAK_CODE_TO_SCANCODE(code) : 0))
 
-#define GD(code) \
+#define PM(code) \
 { \
-    GD_CREATE_FCN(CODE_GET_MODIFIER(code) << 8 | ((code) & 0xFF)), \
-    GD_CREATE_ARG(CODE_GET_MODIFIER(code) << 8 | ((code) & 0xFF)) \
+    PM_CREATE_FCN(CODE_GET_MODIFIER(code) << 8 | ((code) & 0xFF)), \
+    PM_CREATE_ARG(CODE_GET_MODIFIER(code) << 8 | ((code) & 0xFF)) \
 }
 
-#define C(code) \
+#define M(code) \
 { \
-    C_CREATE_FCN(CODE_GET_MODIFIER(code) << 16 | ((code) & 0xFFFF)), \
-    C_CREATE_ARG(CODE_GET_MODIFIER(code) << 16 | ((code) & 0xFFFF)) \
+    M_CREATE_FCN(CODE_GET_MODIFIER(code) << 16 | ((code) & 0xFFFF)), \
+    M_CREATE_ARG(CODE_GET_MODIFIER(code) << 16 | ((code) & 0xFFFF)) \
 }
 
 #endif

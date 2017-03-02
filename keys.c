@@ -3,9 +3,9 @@
 #include "main.h"
 
 static uint8_t keyboard_codes[6], keyboard_code_activations[6];
-static uint8_t generic_desktop_code, generic_desktop_code_activations;
-static uint16_t consumer_code;
-static uint8_t consumer_code_activations;
+static uint8_t power_management_code, power_management_code_activations;
+static uint16_t multimedia_code;
+static uint8_t multimedia_code_activations;
 
 void keys_add_scancode(uint8_t code)
 {
@@ -47,63 +47,63 @@ uint8_t *keys_get_scancode(void)
     return keyboard_codes;
 }
 
-void keys_add_generic_desktop(uint8_t code)
+void keys_add_power_management(uint8_t code)
 {
     if (!code)
         return;
-    if (generic_desktop_code == code) {
-        generic_desktop_code = 0;
+    if (power_management_code == code) {
+        power_management_code = 0;
         SendEnhancedKeyboardReport();
     }
-    if (!generic_desktop_code) {
-        generic_desktop_code = code;
-        ++generic_desktop_code_activations;
+    if (!power_management_code) {
+        power_management_code = code;
+        ++power_management_code_activations;
         SendEnhancedKeyboardReport();
     }
 }
 
-void keys_delete_generic_desktop(uint8_t code)
+void keys_delete_power_management(uint8_t code)
 {
     if (!code)
         return;
-    if (generic_desktop_code == code && !--generic_desktop_code_activations) {
-        generic_desktop_code = 0;
+    if (power_management_code == code && !--power_management_code_activations) {
+        power_management_code = 0;
         SendEnhancedKeyboardReport();
     }
 }
 
-uint8_t keys_get_generic_desktop(void)
+uint8_t keys_get_power_management(void)
 {
-    return generic_desktop_code;
+    return power_management_code;
 }
 
 
-void keys_add_consumer(uint16_t code)
-{
-    if (!code)
-        return;
-    if (consumer_code == code) {
-        consumer_code = 0;
-        SendEnhancedKeyboardReport();
-    }
-    if (!consumer_code) {
-        consumer_code = code;
-        ++consumer_code_activations;
-        SendEnhancedKeyboardReport();
-    }
-}
-
-void keys_delete_consumer(uint16_t code)
+void keys_add_multimedia(uint16_t code)
 {
     if (!code)
         return;
-    if (consumer_code == code && !--consumer_code_activations) {
-        consumer_code = 0;
+    if (multimedia_code == code) {
+        multimedia_code = 0;
+        SendEnhancedKeyboardReport();
+    }
+    if (!multimedia_code) {
+        multimedia_code = code;
+        ++multimedia_code_activations;
         SendEnhancedKeyboardReport();
     }
 }
 
-uint16_t keys_get_consumer(void)
+void keys_delete_multimedia(uint16_t code)
 {
-    return consumer_code;
+    if (!code)
+        return;
+    if (multimedia_code == code && !--multimedia_code_activations) {
+        multimedia_code = 0;
+        SendEnhancedKeyboardReport();
+    }
+}
+
+uint16_t keys_get_multimedia(void)
+{
+    return multimedia_code;
 }

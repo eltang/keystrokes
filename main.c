@@ -278,8 +278,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
     {
         USB_EnhancedKeyboardReport_Data_t* EnhancedKeyboardReport = (USB_EnhancedKeyboardReport_Data_t*)ReportData;
 
-        EnhancedKeyboardReport->Consumer = keys_get_consumer();
-        EnhancedKeyboardReport->GenericDesktop = keys_get_generic_desktop();
+        EnhancedKeyboardReport->ConsumerControlCode = keys_get_multimedia();
+        EnhancedKeyboardReport->SystemControlCode = keys_get_power_management();
 
         *ReportSize = sizeof(USB_EnhancedKeyboardReport_Data_t);
         ++EnhancedKeyboardReportCounter;

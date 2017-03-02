@@ -197,7 +197,7 @@ void actions_leader_key_start(keystroke_t *keystroke, const __flash void *arg)
         leader_key_start(keystroke->keyswitch);
 }
 
-void actions_modifiers_and_generic_desktop(keystroke_t *keystroke, const __flash void *arg)
+void actions_modifiers_and_power_management(keystroke_t *keystroke, const __flash void *arg)
 {
     uint8_t code = ((const __flash uint8_t *)arg)[0];
     uint8_t modifiers = ((const __flash uint8_t *)arg)[1];
@@ -205,30 +205,30 @@ void actions_modifiers_and_generic_desktop(keystroke_t *keystroke, const __flash
     switch (keystroke->state) {
     case KEYSTROKE_START:
         modifiers_set_temporary(modifiers);
-        keys_add_generic_desktop(code);
+        keys_add_power_management(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete_generic_desktop(code);
+        keys_delete_power_management(code);
         modifiers_unset_temporary(modifiers);;
         break;
     }
 }
 
-void actions_generic_desktop(keystroke_t *keystroke, const __flash void *arg)
+void actions_power_management(keystroke_t *keystroke, const __flash void *arg)
 {
     uint8_t code = *(const __flash uint8_t *)arg;
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
-        keys_add_generic_desktop(code);
+        keys_add_power_management(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete_generic_desktop(code);
+        keys_delete_power_management(code);
         break;
     }
 }
 
-void actions_modifiers_and_consumer(keystroke_t *keystroke, const __flash void *arg)
+void actions_modifiers_and_multimedia(keystroke_t *keystroke, const __flash void *arg)
 {
     uint8_t code = ((const __flash uint16_t *)arg)[0];
     uint8_t modifiers = ((const __flash uint8_t *)arg)[2];
@@ -236,25 +236,25 @@ void actions_modifiers_and_consumer(keystroke_t *keystroke, const __flash void *
     switch (keystroke->state) {
     case KEYSTROKE_START:
         modifiers_set_temporary(modifiers);
-        keys_add_consumer(code);
+        keys_add_multimedia(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete_consumer(code);
+        keys_delete_multimedia(code);
         modifiers_unset_temporary(modifiers);;
         break;
     }
 }
 
-void actions_consumer(keystroke_t *keystroke, const __flash void *arg)
+void actions_multimedia(keystroke_t *keystroke, const __flash void *arg)
 {
     uint8_t code = *(const __flash uint16_t *)arg;
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
-        keys_add_consumer(code);
+        keys_add_multimedia(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete_consumer(code);
+        keys_delete_multimedia(code);
         break;
     }
 }
