@@ -25,6 +25,7 @@ enum {
 };
 
 extern const __flash action_t layout[][ROWS * COLUMNS];
+__attribute__((weak))
 extern const __flash leader_key_dictionary_entry_t leader_key_dictionary[];
 
 #define NO_ACTION { 0 }
