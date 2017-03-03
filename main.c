@@ -186,6 +186,7 @@ void SetupHardware()
 	PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
 #endif
 	/* Hardware Initialization */
+    power_init();
     timer_init();
 #ifdef USING_TWI
     i2c_init();

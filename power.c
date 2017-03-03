@@ -7,15 +7,25 @@ static const __flash pin_t unused_pins[] = UNUSED_PINS;
 void power_init(void)
 {
     pin_t pin;
+    uint8_t temp = 0;
 
     for (uint8_t i = sizeof(unused_pins) / sizeof(unused_pins[0]); i--;) {
         pin = unused_pins[i];
 
-        PIN_DDR(pin) |= PIN_MASK(pin);
+        pin.port->ddr |= pin.mask;
     }
 #ifndef USING_TWI
-    PRR0 |= 1 << PRTWI;
+    temp |= 1 << PRTWI;
 #endif
 #ifndef USING_BACKLIGHT
-    PPR0 |= 1 << PRTIM1;
+    temp |= 1 << PRTIM1;
+#endif
+    temp |= 1 << PRSPI;
+    temp |= 1 << PRADC;
+    PRR0 = temp;
+    temp = 0;
+    temp |= 1 << 4; // PRTIM4
+    temp |= 1 << PRTIM3;
+    temp |= 1 << PRUSART1;
+    PRR1 = temp;
 }
