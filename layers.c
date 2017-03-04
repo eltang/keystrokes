@@ -23,16 +23,11 @@ void layers_set_primary_layer(uint8_t layer)
 
 void layers_activate_secondary_layer(uint8_t layer)
 {
-    switch (using_secondary_layer) {
-    default:
-        if (secondary_layer != layer) {
-            using_secondary_layer = 1;
-            break;
-        }
-    case 0:
-        ++using_secondary_layer;
+    if (secondary_layer != layer) {
+        using_secondary_layer = 0;
+        secondary_layer = layer;
     }
-    secondary_layer = layer;
+    ++using_secondary_layer;
 }
 
 void layers_deactivate_secondary_layer(uint8_t layer)
