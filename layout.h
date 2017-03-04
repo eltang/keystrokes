@@ -277,7 +277,7 @@ enum input_sources {
 ((code) & 0xFFFFFFFFFF) == '{' ? R_S(HID_KEYBOARD_SC_OPENING_BRACKET_AND_OPENING_BRACE) : \
 ((code) & 0xFFFFFFFFFF) == '|' ? R_S(HID_KEYBOARD_SC_BACKSLASH_AND_PIPE) : \
 ((code) & 0xFFFFFFFFFF) == '}' ? R_S(HID_KEYBOARD_SC_CLOSING_BRACKET_AND_CLOSING_BRACE) : \
-((code) & 0xFFFFFFFFFF) == '~' ? R_S(HID_KEYBOARD_SC_GRAVE_ACCENT_AND_TILDE) : 0) | ((code) & ~0xFFFFFFFFFFULL))
+((code) & 0xFFFFFFFFFF) == '~' ? R_S(HID_KEYBOARD_SC_GRAVE_ACCENT_AND_TILDE) : 0) | ((code) & ~(uint64_t)0xFFFFFFFFFF))
 
 #define US_DVORAK_CODE_TO_SCANCODE(code) \
 ((((code) & 0xFFFFFFFFFF) == '\'' ? HID_KEYBOARD_SC_Q : \
@@ -345,7 +345,7 @@ enum input_sources {
 ((code) & 0xFFFFFFFFFF) == 'z' ? HID_KEYBOARD_SC_SLASH_AND_QUESTION_MARK : \
 ((code) & 0xFFFFFFFFFF) == '{' ? R_S(HID_KEYBOARD_SC_MINUS_AND_UNDERSCORE) : \
 ((code) & 0xFFFFFFFFFF) == '}' ? R_S(HID_KEYBOARD_SC_EQUAL_AND_PLUS) : \
-US_CODE_TO_SCANCODE(code)) | ((code) & ~0xFFFFFFFFFFULL))
+US_CODE_TO_SCANCODE(code)) | ((code) & ~(uint64_t)0xFFFFFFFFFF))
 
 #define US_COLEMAK_CODE_TO_SCANCODE(code) \
 ((((code) & 0xFFFFFFFFFF) == ':' ? R_S(HID_KEYBOARD_SC_P) : \
@@ -382,7 +382,7 @@ US_CODE_TO_SCANCODE(code)) | ((code) & ~0xFFFFFFFFFFULL))
 ((code) & 0xFFFFFFFFFF) == 't' ? HID_KEYBOARD_SC_F : \
 ((code) & 0xFFFFFFFFFF) == 'u' ? HID_KEYBOARD_SC_I : \
 ((code) & 0xFFFFFFFFFF) == 'y' ? HID_KEYBOARD_SC_O : \
-US_PRINTING_CODE_TO_SCANCODE(code)) | ((code) & ~0xFFFFFFFFFFULL))
+US_PRINTING_CODE_TO_SCANCODE(code)) | ((code) & ~(uint64_t)0xFFFFFFFFFF))
 
 #define K_CREATE_FCN(code) \
 ((code) >> 8 && (code) & 0xFF ? actions_modifiers_and_scancode : \

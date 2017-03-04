@@ -9,7 +9,7 @@
 uint32_t Boot_Key ATTR_NO_INIT;
 
 #define MAGIC_BOOT_KEY            0xDC42ACCA
-#define FLASH_SIZE_BYTES (FLASHEND + 1UL)
+#define FLASH_SIZE_BYTES (FLASHEND + (uint32_t)1)
 #define BOOTLOADER_START_ADDRESS  ((FLASH_SIZE_BYTES - BOOTLOADER_SEC_SIZE_BYTES) >> 1)
 
 void Bootloader_Jump_Check(void) ATTR_INIT_SECTION(3);
