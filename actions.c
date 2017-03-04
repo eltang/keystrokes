@@ -16,8 +16,8 @@ void actions_modifiers_and_scancode(keystroke_t *keystroke, const __flash void *
         keys_add_scancode(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete_scancode(code);
         modifiers_unset_temporary(modifiers);;
+        keys_delete_scancode(code);
         break;
     }
 }
@@ -126,9 +126,11 @@ void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
 {
     const __flash action_t *actions = arg;
     action_t action = actions[0];
+    static uint8_t tap_action_modifiers;
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
+        tap_action_modifiers = modifiers_get_permanent();
         action.fcn(keystroke, action.arg);
         break;
     case KEYSTROKE_FINISH:
@@ -137,7 +139,9 @@ void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
             return;
         action = actions[1];
         keystroke->state = KEYSTROKE_START;
+        modifiers_add_permanent(tap_action_modifiers);
         action.fcn(keystroke, action.arg);
+        modifiers_delete_permanent(tap_action_modifiers);
         keystroke->state = KEYSTROKE_FINISH;
         action.fcn(keystroke, action.arg);
         break;
@@ -174,12 +178,12 @@ void actions_tap_hold(keystroke_t *keystroke, const __flash void *arg)
                 action.fcn(keystroke, action.arg);
                 break;
             case KEYSTROKE_START:
-                modifiers_add_permanent(tap_action_modifiers);
                 keystroke->state = KEYSTROKE_START;
-                action.fcn(keystroke, action.arg);
-                keystroke->state = KEYSTROKE_FINISH;
+                modifiers_add_permanent(tap_action_modifiers);
                 action.fcn(keystroke, action.arg);
                 modifiers_delete_permanent(tap_action_modifiers);
+                keystroke->state = KEYSTROKE_FINISH;
+                action.fcn(keystroke, action.arg);
                 break;
             case KEYSTROKE_START | KEYSTROKE_TIMED_OUT | KEYSTROKE_INTERRUPTED:
             case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
@@ -208,8 +212,8 @@ void actions_modifiers_and_power_management(keystroke_t *keystroke, const __flas
         keys_add_power_management(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete_power_management(code);
         modifiers_unset_temporary(modifiers);;
+        keys_delete_power_management(code);
         break;
     }
 }
@@ -239,8 +243,8 @@ void actions_modifiers_and_multimedia(keystroke_t *keystroke, const __flash void
         keys_add_multimedia(code);
         break;
     case KEYSTROKE_FINISH:
-        keys_delete_multimedia(code);
         modifiers_unset_temporary(modifiers);;
+        keys_delete_multimedia(code);
         break;
     }
 }
