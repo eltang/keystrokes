@@ -28,7 +28,7 @@ extern const __flash action_t layout[][ROWS * COLUMNS];
 __attribute__((weak))
 extern const __flash leader_key_dictionary_entry_t leader_key_dictionary[];
 
-#define NO_ACTION { 0 }
+#define NO_ACTION { actions_none }
 #define LAYOUT(...) \
 const __flash action_t layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
 #define LEADER_KEY { actions_leader_key_start }
@@ -53,6 +53,11 @@ const __flash leader_key_dictionary_entry_t leader_key_dictionary[] = { \
 #define LEADER_KEY_SEQUENCE(one, two, three, four) \
 ((uint64_t)four << 48 | (uint64_t)three << 32 | (uint64_t)two << 16 | one)
 
+#define TD(...) \
+{ \
+    actions_tap_dance, \
+    (const __flash action_t []){ __VA_ARGS__, { actions_none } } \
+}
 
 #define HT(hold_action, tap_action) \
 { \
@@ -69,7 +74,7 @@ const __flash leader_key_dictionary_entry_t leader_key_dictionary[] = { \
 #define MA(...) \
 { \
     actions_multiple_actions, \
-    (const __flash action_t []){ __VA_ARGS__, { 0 } } \
+    (const __flash action_t []){ __VA_ARGS__, { actions_none } } \
 }
 
 #define CC(case_number) \
@@ -95,8 +100,7 @@ operation == GOTO ? actions_layers_goto : 0)
 
 #define RESET \
 { \
-    actions_reset, \
-    0 \
+    actions_reset \
 }
 
 enum {

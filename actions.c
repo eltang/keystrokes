@@ -88,39 +88,45 @@ void actions_multiple_actions(keystroke_t *keystroke, const __flash void *arg)
         action->fcn(keystroke, action->arg);
 }
 
-// void actions_tap_dance(keystroke_t *keystroke, const __flash void *arg)
-// {
-//     const __flash action_t *actions = arg;
-//     uint8_t action_count = 0;
-//
-//     while (actions[action_count].fcn) {
-//         ++action_count;
-//     }
-//     uint8_t tap_count = callbacks_tap_count_get(keystroke->keyswitch);
-//     switch (keystroke->state) {
-//     case KEYSTROKE_START:
-//         if (tap_count <= action_count) {
-//             callbacks_set_action(keystroke->keyswitch, &actions[tap_count]);
-//             callbacks_set_mode(keystroke->keyswitch, CALL_START | CALL_ON_KEYSTROKE | CALL_ON_TIMEOUT);
-//             callbacks_set_timer(keystroke->keyswitch, MAX_TAP_DURATION);
-//         } else {
-//             callbacks_cancel(keystroke->keyswitch);
-//         }
-//         break;
-//     case KEYSTROKE_FINISH:
-//         if (callback_called_on_timeout(keystroke->keyswitch)) {
-//             actions[tap_count].fcn(keystroke, actions[tap_count].arg);
-//             callbacks_tap_count_clear(keystroke->keyswitch);
-//         } else {
-//             callbacks_tap_count_increment(keystroke->keyswitch);
-//             callbacks_set_mode(keystroke->keyswitch, CALL_FINISH);
-//         }
-//         break;
-//     }
-//     //on every press set the down action of the corresponding action to start after the timeout or when another key is pressed
-//     //if on the release the action has been triggered, send the up event of the action and start everything over
-//     //if on the release the action has not been triggered, set the action to start as well as finish with the same conditions
-// }
+void actions_none(keystroke_t *keystroke, const __flash void *arg)
+{
+}
+
+void actions_tap_dance(keystroke_t *keystroke, const __flash void *arg)
+{
+    const __flash action_t *actions = arg;
+    static uint8_t action_count, tap_count, tap_action_modifiers;
+    action_t action;
+
+    switch (keystroke->state) {
+    case KEYSTROKE_START:
+        if (!action_count) {
+            tap_action_modifiers = modifiers_get_permanent();
+            do
+                ++action_count;
+            while (actions[action_count].fcn != actions_none);
+        } else if (keystroke->previous_state == KEYSTROKE_FINISH)
+            if (tap_count < action_count)
+                ++tap_count;
+        break;
+    case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
+    case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
+    case KEYSTROKE_FINISH | KEYSTROKE_INTERRUPTED:
+    case KEYSTROKE_FINISH | KEYSTROKE_TIMED_OUT:
+        if (action_count) {
+            action = actions[tap_count];
+            keystroke->state = KEYSTROKE_START;
+            modifiers_add_permanent(tap_action_modifiers);
+            action.fcn(keystroke, action.arg);
+            modifiers_delete_permanent(tap_action_modifiers);
+            keystroke->state = KEYSTROKE_FINISH;
+            action.fcn(keystroke, action.arg);
+            action_count = 0;
+            tap_count = 0;
+        }
+        break;
+    }
+}
 
 void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
 {

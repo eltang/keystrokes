@@ -25,8 +25,7 @@ static void keystrokes_execute(uint8_t keyswitch, uint8_t previous_state)
     keystroke.interruptions = keystroke_interruptions[keyswitch];
     keystroke.state = keystroke_states[keyswitch];
     keystroke.previous_state = previous_state;
-    if (action.fcn)
-        action.fcn(&keystroke, action.arg);
+    action.fcn(&keystroke, action.arg);
 }
 
 void keystrokes_process(raw_keystroke_t *raw_keystroke)
