@@ -2,14 +2,15 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#include "reset.h"
 #include <LUFA/Common/Common.h>
 #include <LUFA/Drivers/USB/USB.h>
+
+#include "reset.h"
 
 uint32_t Boot_Key ATTR_NO_INIT;
 
 #define MAGIC_BOOT_KEY            0xDC42ACCA
-#define FLASH_SIZE_BYTES (FLASHEND + (uint32_t)1)
+#define FLASH_SIZE_BYTES          ((uint32_t)FLASHEND + 1)
 #define BOOTLOADER_START_ADDRESS  ((FLASH_SIZE_BYTES - BOOTLOADER_SEC_SIZE_BYTES) >> 1)
 
 void Bootloader_Jump_Check(void) ATTR_INIT_SECTION(3);
