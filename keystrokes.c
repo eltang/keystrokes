@@ -8,11 +8,9 @@
 #include "modifiers.h"
 
 static uint8_t keystroke_states[ROWS * COLUMNS];
-static uint8_t previous_keystroke_states[ROWS * COLUMNS];
 static uint16_t keystroke_timestamps[ROWS * COLUMNS];
-static uint8_t keystroke_interruptions[ROWS * COLUMNS];
 
-static void keystrokes_execute(uint8_t keyswitch, uint8_t previous_state)
+static void keystrokes_execute(uint8_t keyswitch)
 {
     action_t action;
     keystroke_t keystroke;
@@ -22,18 +20,16 @@ static void keystrokes_execute(uint8_t keyswitch, uint8_t previous_state)
     layer = layers_get_source_layer(keyswitch, new_keystroke);
     action = layout[layer][keyswitch];
     keystroke.keyswitch = keyswitch;
-    keystroke.interruptions = keystroke_interruptions[keyswitch];
     keystroke.state = keystroke_states[keyswitch];
-    keystroke.previous_state = previous_state;
     action.fcn(&keystroke, action.arg);
 }
 
-void keystrokes_process(raw_keystroke_t *raw_keystroke)
+void keystrokes_process(keystroke_t *keystroke)
 {
     uint16_t timer_count = timer_read();
-    uint8_t *keystroke_state, previous_keystroke_state;
+    uint8_t *keystroke_state;
     bool keystroke_in_progress, keystroke_is_not_tap;
-    bool keystroke_interrupted = raw_keystroke && raw_keystroke->state == KEYSTROKE_START;
+    bool keystroke_interrupted = keystroke && keystroke->state == KEYSTROKE_START;
 
     if (keystroke_interrupted) {
         if (USB_DeviceState == DEVICE_STATE_Suspended)
@@ -42,35 +38,27 @@ void keystrokes_process(raw_keystroke_t *raw_keystroke)
         modifiers_clear_temporary();
     }
     for (uint8_t i = ROWS * COLUMNS; i--;) {
-        if (raw_keystroke && raw_keystroke->keyswitch == i)
+        if (keystroke && keystroke->keyswitch == i)
             continue;
         keystroke_state = &keystroke_states[i];
         keystroke_in_progress = *keystroke_state & KEYSTROKE_START;
         keystroke_is_not_tap = *keystroke_state & KEYSTROKE_IS_NOT_TAP;
+
         if (keystroke_interrupted) {
             if (keystroke_in_progress || !keystroke_is_not_tap) {
-                ++keystroke_interruptions[i];
                 *keystroke_state |= KEYSTROKE_INTERRUPTED;
-                goto execute_keystroke;
+                keystrokes_execute(i);
             }
-        } else {
-            if (!keystroke_is_not_tap)
-                if (timer_count - keystroke_timestamps[i] > MAX_TAP_DURATION) {
-                    *keystroke_state |= KEYSTROKE_TIMED_OUT;
-                    goto execute_keystroke;
-                }
-        }
-        continue;
-execute_keystroke:
-        previous_keystroke_state = *keystroke_state;
-        keystrokes_execute(i, previous_keystroke_state);
+        } else if (!keystroke_is_not_tap)
+            if (timer_count - keystroke_timestamps[i] > MAX_TAP_DURATION) {
+                *keystroke_state |= KEYSTROKE_TIMED_OUT;
+                keystrokes_execute(i);
+            }
     }
-    if (raw_keystroke) {
-        previous_keystroke_state = keystroke_states[raw_keystroke->keyswitch];
-        keystroke_states[raw_keystroke->keyswitch] = raw_keystroke->state;
-        keystroke_interruptions[raw_keystroke->keyswitch] = 0;
-        keystroke_timestamps[raw_keystroke->keyswitch] = timer_count;
-        keystrokes_execute(raw_keystroke->keyswitch, previous_keystroke_state);
+    if (keystroke) {
+        keystroke_states[keystroke->keyswitch] = keystroke->state;
+        keystroke_timestamps[keystroke->keyswitch] = timer_count;
+        keystrokes_execute(keystroke->keyswitch);
     }
 }
 

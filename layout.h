@@ -56,19 +56,31 @@ const __flash leader_key_dictionary_entry_t leader_key_dictionary[] = { \
 #define TD(...) \
 { \
     actions_tap_dance, \
-    (const __flash action_t []){ __VA_ARGS__, { actions_none } } \
+    &(const __flash actions_tap_dance_data_t){ \
+        (const __flash action_t []){ __VA_ARGS__, NO_ACTION }, \
+        &(actions_tap_dance_storage_t){ 0 }, \
+        sizeof (action_t []){ __VA_ARGS__ } / sizeof(action_t), \
+    } \
 }
 
 #define HT(hold_action, tap_action) \
 { \
     actions_hold_tap, \
-    (const __flash action_t []){ hold_action, tap_action } \
+    &(const __flash actions_hold_tap_data_t){ \
+        hold_action, \
+        tap_action, \
+        &(actions_hold_tap_storage_t){ 0 } \
+    } \
 }
 
 #define TH(tap_action, hold_action) \
 { \
     actions_tap_hold, \
-    (const __flash action_t []){ tap_action, hold_action } \
+    &(const __flash actions_tap_hold_data_t){ \
+        tap_action, \
+        hold_action, \
+        &(actions_tap_hold_storage_t){ 0 } \
+    } \
 }
 
 #define MA(...) \

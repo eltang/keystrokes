@@ -82,9 +82,9 @@ void matrix_init(void)
         matrix_init_input(i);
 }
 
-raw_keystroke_t *matrix_scan(void)
+keystroke_t *matrix_scan(void)
 {
-    static raw_keystroke_t raw_keystroke;
+    static keystroke_t keystroke;
     keyswitch_state_t *keyswitch_state;
     bool keyswitch_was_closed, keyswitch_is_closed;
 
@@ -106,12 +106,12 @@ raw_keystroke_t *matrix_scan(void)
             matrix_deactivate_output(i, 1);
             keyswitch_state->state ^= KEYSWITCH_WAS_CLOSED;
 #ifdef BACKWARDS_DIODES
-            raw_keystroke.keyswitch = j * COLUMNS + i;
+            keystroke.keyswitch = j * COLUMNS + i;
 #else
-            raw_keystroke.keyswitch = i * COLUMNS + j;
+            keystroke.keyswitch = i * COLUMNS + j;
 #endif
-            raw_keystroke.state = keyswitch_is_closed;
-            return &raw_keystroke;
+            keystroke.state = keyswitch_is_closed;
+            return &keystroke;
         }
         matrix_deactivate_output(i, 0);
     }

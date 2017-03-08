@@ -94,44 +94,61 @@ void actions_none(keystroke_t *keystroke, const __flash void *arg)
 
 void actions_tap_dance(keystroke_t *keystroke, const __flash void *arg)
 {
-    const __flash action_t *actions = arg;
-    static uint8_t action_count, tap_count, tap_action_modifiers;
-    action_t action;
+    const __flash actions_tap_dance_data_t *data = arg;
+    static uint8_t tap_action_modifiers;
+    action_t action = data->actions[data->storage->tap_count];
+    uint8_t previous_keystroke_state = keystroke->state;
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
-        if (!action_count) {
+        if (!data->storage->alive) {
             tap_action_modifiers = modifiers_get_permanent();
-            do
-                ++action_count;
-            while (actions[action_count].fcn != actions_none);
-        } else if (keystroke->previous_state == KEYSTROKE_FINISH)
-            if (tap_count < action_count)
-                ++tap_count;
+            data->storage->alive = 1;
+            data->storage->tap_count = 0;
+        } else
+            if (data->storage->previous_keystroke_state == KEYSTROKE_FINISH)
+                if (data->storage->tap_count < data->action_count)
+                    ++data->storage->tap_count;
         break;
     case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
     case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
+        if (data->storage->alive) {
+            keystroke->state = KEYSTROKE_START;
+            modifiers_add_permanent(tap_action_modifiers);
+            action.fcn(keystroke, action.arg);
+            modifiers_delete_permanent(tap_action_modifiers);
+            data->storage->alive = 0;
+        }
+        break;
+    case KEYSTROKE_FINISH:
+        switch (data->storage->previous_keystroke_state) {
+        case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
+        case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
+        case KEYSTROKE_START | KEYSTROKE_TIMED_OUT | KEYSTROKE_INTERRUPTED:
+            action.fcn(keystroke, action.arg);
+            break;
+        }
+        break;
     case KEYSTROKE_FINISH | KEYSTROKE_INTERRUPTED:
     case KEYSTROKE_FINISH | KEYSTROKE_TIMED_OUT:
-        if (action_count) {
-            action = actions[tap_count];
+        if (data->storage->alive) {
             keystroke->state = KEYSTROKE_START;
             modifiers_add_permanent(tap_action_modifiers);
             action.fcn(keystroke, action.arg);
             modifiers_delete_permanent(tap_action_modifiers);
             keystroke->state = KEYSTROKE_FINISH;
             action.fcn(keystroke, action.arg);
-            action_count = 0;
-            tap_count = 0;
+            data->storage->alive = 0;
         }
         break;
     }
+    data->storage->previous_keystroke_state = previous_keystroke_state;
 }
 
 void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
 {
-    const __flash action_t *actions = arg;
-    action_t action = actions[0];
+    const __flash actions_hold_tap_data_t *data = arg;
+    action_t action = data->hold_action;
     static uint8_t tap_action_modifiers;
 
     switch (keystroke->state) {
@@ -141,9 +158,9 @@ void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
         break;
     case KEYSTROKE_FINISH:
         action.fcn(keystroke, action.arg);
-        if (keystroke->previous_state != KEYSTROKE_START)
-            return;
-        action = actions[1];
+        if (data->storage->previous_keystroke_state != KEYSTROKE_START)
+            break;
+        action = data->tap_action;
         keystroke->state = KEYSTROKE_START;
         modifiers_add_permanent(tap_action_modifiers);
         action.fcn(keystroke, action.arg);
@@ -152,53 +169,57 @@ void actions_hold_tap(keystroke_t *keystroke, const __flash void *arg)
         action.fcn(keystroke, action.arg);
         break;
     }
+    data->storage->previous_keystroke_state = keystroke->state;
 }
 
 void actions_tap_hold(keystroke_t *keystroke, const __flash void *arg)
 {
-    const __flash action_t *actions = arg;
+    const __flash actions_tap_hold_data_t *data = arg;
     action_t action;
     static uint8_t tap_action_modifiers;
+    uint8_t previous_keystroke_state = keystroke->state;
 
     switch (keystroke->state) {
     case KEYSTROKE_START:
         tap_action_modifiers = modifiers_get_permanent();
         break;
     case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
-        action = actions[1];
+        action = data->hold_action;
         keystroke->state = KEYSTROKE_START;
         action.fcn(keystroke, action.arg);
         break;
     case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
-        if (keystroke->interruptions == 1) {
-            action = actions[0];
+        if (!data->storage->interrupted) {
+            data->storage->interrupted = 1;
+            action = data->tap_action;
             keystroke->state = KEYSTROKE_START;
             action.fcn(keystroke, action.arg);
         }
         break;
     case KEYSTROKE_FINISH:
-        action = actions[0];
-        keystroke->state = KEYSTROKE_FINISH;
-        switch (keystroke->previous_state) {
-            case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
-                action.fcn(keystroke, action.arg);
-                break;
-            case KEYSTROKE_START:
-                keystroke->state = KEYSTROKE_START;
-                modifiers_add_permanent(tap_action_modifiers);
-                action.fcn(keystroke, action.arg);
-                modifiers_delete_permanent(tap_action_modifiers);
-                keystroke->state = KEYSTROKE_FINISH;
-                action.fcn(keystroke, action.arg);
-                break;
-            case KEYSTROKE_START | KEYSTROKE_TIMED_OUT | KEYSTROKE_INTERRUPTED:
-            case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
-                action = actions[1];
-                action.fcn(keystroke, action.arg);
-                break;
+        action = data->tap_action;
+        data->storage->interrupted = 0;
+        switch (data->storage->previous_keystroke_state) {
+        case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
+            action.fcn(keystroke, action.arg);
+            break;
+        case KEYSTROKE_START:
+            keystroke->state = KEYSTROKE_START;
+            modifiers_add_permanent(tap_action_modifiers);
+            action.fcn(keystroke, action.arg);
+            modifiers_delete_permanent(tap_action_modifiers);
+            keystroke->state = KEYSTROKE_FINISH;
+            action.fcn(keystroke, action.arg);
+            break;
+        case KEYSTROKE_START | KEYSTROKE_TIMED_OUT | KEYSTROKE_INTERRUPTED:
+        case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
+            action = data->hold_action;
+            action.fcn(keystroke, action.arg);
+            break;
         }
         break;
     }
+    data->storage->previous_keystroke_state = previous_keystroke_state;
 }
 
 void actions_leader_key_start(keystroke_t *keystroke, const __flash void *arg)

@@ -6,14 +6,7 @@
 
 typedef struct {
     uint8_t keyswitch;
-    bool state;
-} raw_keystroke_t;
-
-typedef struct {
-    uint8_t keyswitch;
     uint8_t state;
-    uint8_t previous_state;
-    uint8_t interruptions;
 } keystroke_t;
 
 enum {
@@ -24,7 +17,7 @@ enum {
     KEYSTROKE_IS_NOT_TAP = KEYSTROKE_INTERRUPTED | KEYSTROKE_TIMED_OUT
 };
 
-void keystrokes_process(raw_keystroke_t *raw_keystroke);
+void keystrokes_process(keystroke_t *keystroke);
 void keystrokes_task(void);
 
 #endif
