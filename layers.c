@@ -3,11 +3,14 @@
 static uint8_t primary_layer, secondary_layer, source_layers[ROWS * COLUMNS];
 static uint8_t using_secondary_layer;
 
-uint8_t layers_get_source_layer(uint8_t keyswitch, bool new_keystroke)
+uint8_t layers_get_new_source_layer(uint8_t keyswitch)
 {
-    if (!new_keystroke)
-        return source_layers[keyswitch];
     return source_layers[keyswitch] = layers_get_active_layer();
+}
+
+uint8_t layers_get_old_source_layer(uint8_t keyswitch)
+{
+    return source_layers[keyswitch];
 }
 
 uint8_t layers_get_active_layer(void)

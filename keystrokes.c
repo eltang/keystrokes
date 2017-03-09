@@ -15,9 +15,11 @@ static void keystrokes_execute(uint8_t keyswitch)
     action_t action;
     keystroke_t keystroke;
     uint8_t layer;
-    bool new_keystroke = keystroke_states[keyswitch] == KEYSTROKE_START;
 
-    layer = layers_get_source_layer(keyswitch, new_keystroke);
+    if (keystroke_states[keyswitch] == KEYSTROKE_START)
+        layer = layers_get_new_source_layer(keyswitch);
+    else
+        layer = layers_get_old_source_layer(keyswitch);
     action = layout[layer][keyswitch];
     keystroke.keyswitch = keyswitch;
     keystroke.state = keystroke_states[keyswitch];
