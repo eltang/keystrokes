@@ -25,7 +25,8 @@ typedef struct {
 
 enum {
     KEYSWITCH_IS_CLOSED = 1,
-    KEYSWITCH_WAS_CLOSED = 1 << 1
+    KEYSWITCH_WAS_CLOSED = 1 << 1,
+    KEYSWITCH_HAS_BEEN_CLOSED = 1 << 2
 };
 
 static keyswitch_state_t keyswitch_states[OUTPUTS][INPUTS];
@@ -58,7 +59,7 @@ void matrix_activate_output(uint8_t output)
 }
 
 __attribute__((weak))
-void matrix_deactivate_output(uint8_t output, bool keystroke_detected)
+void matrix_deactivate_output(uint8_t output)
 {
     pin_t pin = output_pins[output];
 
@@ -82,38 +83,44 @@ void matrix_init(void)
         matrix_init_input(i);
 }
 
-keystroke_t *matrix_scan(void)
+void matrix_scan(void)
 {
-    static keystroke_t keystroke;
+    keystroke_t keystroke;
     keyswitch_state_t *keyswitch_state;
-    bool keyswitch_was_closed, keyswitch_is_closed;
 
     for (uint8_t i = OUTPUTS; i--;) {
         matrix_activate_output(i);
+        for (uint8_t j = INPUTS; j--;)
+            keyswitch_states[i][j].state |= !matrix_read_input(j, i);
+        matrix_deactivate_output(i);
+    }
+    for (uint8_t i = OUTPUTS; i--;)
         for (uint8_t j = INPUTS; j--;) {
             keyswitch_state = &keyswitch_states[i][j];
-            keyswitch_is_closed = keyswitch_state->state & KEYSWITCH_IS_CLOSED;
-            if (!keyswitch_is_closed != matrix_read_input(j, i)) {
-                keyswitch_state->state ^= KEYSWITCH_IS_CLOSED;
+            switch (keyswitch_state->state & (KEYSWITCH_WAS_CLOSED | KEYSWITCH_IS_CLOSED)) {
+            case KEYSWITCH_IS_CLOSED:
+            case KEYSWITCH_WAS_CLOSED:
+                keyswitch_state->state ^= KEYSWITCH_WAS_CLOSED;
                 keyswitch_state->timestamp = timer_read();
-                continue;
-            }
-            keyswitch_was_closed = keyswitch_state->state & KEYSWITCH_WAS_CLOSED;
-            if (keyswitch_was_closed == keyswitch_is_closed)
-                continue;
-            if ((uint8_t)(timer_read() - keyswitch_state->timestamp) <= KEYSWITCH_BOUNCE_TIME)
-                continue;
-            matrix_deactivate_output(i, 1);
-            keyswitch_state->state ^= KEYSWITCH_WAS_CLOSED;
+                break;
+            default:
+                switch (keyswitch_state->state & (KEYSWITCH_HAS_BEEN_CLOSED | KEYSWITCH_WAS_CLOSED)) {
+                case KEYSWITCH_WAS_CLOSED:
+                case KEYSWITCH_HAS_BEEN_CLOSED:
+                    if ((uint8_t)(timer_read() - keyswitch_state->timestamp) <= KEYSWITCH_BOUNCE_TIME)
+                        break;
+                    keyswitch_state->state ^= KEYSWITCH_HAS_BEEN_CLOSED;
 #ifdef BACKWARDS_DIODES
-            keystroke.keyswitch = j * COLUMNS + i;
+                    keystroke.keyswitch = j * COLUMNS + i;
 #else
-            keystroke.keyswitch = i * COLUMNS + j;
+                    keystroke.keyswitch = i * COLUMNS + j;
 #endif
-            keystroke.state = keyswitch_is_closed;
-            return &keystroke;
+                    keystroke.state = !!(keyswitch_state->state & KEYSWITCH_HAS_BEEN_CLOSED);
+                    keystrokes_process(&keystroke);
+                    break;
+                }
+                break;
+            }
+            keyswitch_state->state &= ~KEYSWITCH_IS_CLOSED;
         }
-        matrix_deactivate_output(i, 0);
-    }
-    return 0;
 }

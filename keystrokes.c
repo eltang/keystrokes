@@ -65,5 +65,7 @@ void keystrokes_process(keystroke_t *keystroke)
 
 void keystrokes_task(void)
 {
+    matrix_scan();
+    keystrokes_process(0);
     leader_key_task();
 }

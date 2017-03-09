@@ -160,7 +160,6 @@ int main(void)
 		CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
 #endif
 
-        keystrokes_process(matrix_scan());
         keystrokes_task();
     }
 }
