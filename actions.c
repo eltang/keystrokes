@@ -124,7 +124,6 @@ void actions_tap_dance(keystroke_t *keystroke, const __flash void *arg)
         switch (data->storage->previous_keystroke_state) {
         case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
         case KEYSTROKE_START | KEYSTROKE_INTERRUPTED:
-        case KEYSTROKE_START | KEYSTROKE_TIMED_OUT | KEYSTROKE_INTERRUPTED:
             action.fcn(keystroke, action.arg);
             break;
         }
@@ -211,7 +210,6 @@ void actions_tap_hold(keystroke_t *keystroke, const __flash void *arg)
             keystroke->state = KEYSTROKE_FINISH;
             action.fcn(keystroke, action.arg);
             break;
-        case KEYSTROKE_START | KEYSTROKE_TIMED_OUT | KEYSTROKE_INTERRUPTED:
         case KEYSTROKE_START | KEYSTROKE_TIMED_OUT:
             action = data->hold_action;
             action.fcn(keystroke, action.arg);
