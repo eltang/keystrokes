@@ -4,20 +4,32 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct {
+struct keystroke {
+    uint8_t execution_mode;
+    uint8_t layer;
     uint8_t keyswitch;
-    uint8_t state;
-} keystroke_t;
+};
+
+struct irq {
+    struct irq *next;
+    const __flash struct action *action;
+    struct keystroke keystroke;
+    uint8_t interrupts;
+};
 
 enum {
     KEYSTROKE_FINISH,
-    KEYSTROKE_START,
-    KEYSTROKE_INTERRUPTED = 1 << 1,
-    KEYSTROKE_TIMED_OUT = 1 << 2,
-    KEYSTROKE_IS_NOT_TAP = KEYSTROKE_INTERRUPTED | KEYSTROKE_TIMED_OUT
+    KEYSTROKE_START
 };
 
-void keystrokes_process(keystroke_t *keystroke);
+enum {
+    INTERRUPT_MANUAL_KEYSTROKE_START = 1 << 1,
+    INTERRUPT_MANUAL_KEYSTROKE_FINISH = 1 << 2,
+    INTERRUPT_UNCONDITIONAL = 1 << 3
+};
+
+void keystrokes_process(struct keystroke *keystroke);
 void keystrokes_task(void);
+void keystrokes_add_irq(struct irq *irq);
 
 #endif

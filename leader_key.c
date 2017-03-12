@@ -11,23 +11,20 @@ static struct {
     };
     uint8_t index;
 } sequence;
-static uint8_t leader_key_keyswitch;
+static struct keystroke leader_key_keystroke;
 static uint16_t leader_key_timestamp;
 
 static void leader_key_end(void)
 {
-    keystroke_t keystroke;
-    const __flash leader_key_dictionary_entry_t *entry;
+    const __flash struct leader_key_dictionary_entry *entry;
 
     leader_key_active = 0;
     entry = leader_key_dictionary;
     while (entry->sequence) {
         if (entry->sequence == sequence.raw) {
-            keystroke.keyswitch = leader_key_keyswitch;
-            keystroke.state = KEYSTROKE_START;
-            entry->action.fcn(&keystroke, entry->action.arg);
-            keystroke.state = KEYSTROKE_FINISH;
-            entry->action.fcn(&keystroke, entry->action.arg);
+            entry->action.fcn(&leader_key_keystroke, &entry->action);
+            leader_key_keystroke.execution_mode = KEYSTROKE_FINISH;
+            entry->action.fcn(&leader_key_keystroke, &entry->action);
             break;
         }
         entry++;
@@ -36,12 +33,12 @@ static void leader_key_end(void)
     sequence.index = 0;
 }
 
-void leader_key_start(uint8_t keyswitch)
+void leader_key_start(struct keystroke *keystroke)
 {
     if (leader_key_active)
         return;
     leader_key_active = 1;
-    leader_key_keyswitch = keyswitch;
+    leader_key_keystroke = *keystroke;
     leader_key_timestamp = timer_read();
 }
 

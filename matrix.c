@@ -115,7 +115,7 @@ void matrix_scan(void)
 #else
                     keystroke.keyswitch = i * COLUMNS + j;
 #endif
-                    keystroke.state = !!(keyswitch_state->state & KEYSWITCH_HAS_BEEN_CLOSED);
+                    keystroke.execution_mode = !!(keyswitch_state->state & KEYSWITCH_HAS_BEEN_CLOSED);
                     keystrokes_process(&keystroke);
                     break;
                 }

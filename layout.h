@@ -24,19 +24,19 @@ enum {
     KEY_TRANSPARENT
 };
 
-extern const __flash action_t layout[][ROWS * COLUMNS];
+extern const __flash struct action layout[][ROWS * COLUMNS];
 __attribute__((weak))
-extern const __flash leader_key_dictionary_entry_t leader_key_dictionary[];
+extern const __flash struct leader_key_dictionary_entry leader_key_dictionary[];
 
 #define NO_ACTION { actions_none }
 #define LAYOUT(...) \
-const __flash action_t layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
-#define LEADER_KEY { actions_leader_key_start }
+const __flash struct action layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
+#define LEADER_KEY { actions_leader_key }
 #define TRANSPARENT { uint8_transparent }
 
 
 #define LEADER_KEY_DICTIONARY(...) \
-const __flash leader_key_dictionary_entry_t leader_key_dictionary[] = { \
+const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     __VA_ARGS__, \
     LEADER_KEY_DICTIONARY_ENTRY( \
         LEADER_KEY_SEQUENCE(0, 0, 0, 0), \
@@ -56,37 +56,37 @@ const __flash leader_key_dictionary_entry_t leader_key_dictionary[] = { \
 #define TD(...) \
 { \
     actions_tap_dance, \
-    &(const __flash actions_tap_dance_data_t){ \
-        (const __flash action_t []){ __VA_ARGS__, NO_ACTION }, \
-        &(actions_tap_dance_storage_t){ 0 }, \
-        sizeof (action_t []){ __VA_ARGS__ } / sizeof(action_t), \
+    &(const __flash struct actions_tap_dance_data){ \
+        (const __flash struct action []){ __VA_ARGS__, NO_ACTION }, \
+        &(struct actions_tap_dance_storage){ { 0 } }, \
+        sizeof (struct action []){ __VA_ARGS__ } / sizeof(struct action), \
     } \
 }
 
 #define HT(hold_action, tap_action) \
 { \
     actions_hold_tap, \
-    &(const __flash actions_hold_tap_data_t){ \
+    &(const __flash struct actions_hold_tap_data){ \
         hold_action, \
         tap_action, \
-        &(actions_hold_tap_storage_t){ 0 } \
+        &(struct actions_hold_tap_storage){ { 0 } } \
     } \
 }
 
 #define TH(tap_action, hold_action) \
 { \
     actions_tap_hold, \
-    &(const __flash actions_tap_hold_data_t){ \
+    &(const __flash struct actions_tap_hold_data){ \
         tap_action, \
         hold_action, \
-        &(actions_tap_hold_storage_t){ 0 } \
+        &(struct actions_tap_hold_storage){ { 0 } } \
     } \
 }
 
 #define MA(...) \
 { \
     actions_multiple_actions, \
-    (const __flash action_t []){ __VA_ARGS__, { actions_none } } \
+    (const __flash struct action []){ __VA_ARGS__, { actions_none } } \
 }
 
 #define CC(case_number) \
