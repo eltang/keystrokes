@@ -2,11 +2,11 @@
 #include "pins.h"
 #include "avr/power.h"
 
-static const __flash pin_t unused_pins[] = UNUSED_PINS;
+static const __flash struct pin unused_pins[] = UNUSED_PINS;
 
 void power_init(void)
 {
-    pin_t pin;
+    struct pin pin;
     uint8_t temp = 0;
 
     for (uint8_t i = sizeof(unused_pins) / sizeof(unused_pins[0]); i--;) {

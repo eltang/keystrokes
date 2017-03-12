@@ -18,10 +18,10 @@
 
 #endif
 
-typedef struct {
+struct keyswitch_state {
     uint8_t timestamp;
     uint8_t state;
-} keyswitch_state_t;
+};
 
 enum {
     KEYSWITCH_IS_CLOSED = 1,
@@ -29,14 +29,14 @@ enum {
     KEYSWITCH_HAS_BEEN_CLOSED = 1 << 2
 };
 
-static keyswitch_state_t keyswitch_states[OUTPUTS][INPUTS];
-static const __flash pin_t output_pins[OUTPUTS] = OUTPUT_PINS;
-static const __flash pin_t input_pins[INPUTS] = INPUT_PINS;
+static struct keyswitch_state keyswitch_states[OUTPUTS][INPUTS];
+static const __flash struct pin output_pins[OUTPUTS] = OUTPUT_PINS;
+static const __flash struct pin input_pins[INPUTS] = INPUT_PINS;
 
 __attribute__((weak))
 void matrix_init_output(uint8_t output)
 {
-    pin_t pin = output_pins[output];
+    struct pin pin = output_pins[output];
 
     pin.port->ddr |= pin.mask;
     pin.port->port |= pin.mask;
@@ -45,7 +45,7 @@ void matrix_init_output(uint8_t output)
 __attribute__((weak))
 void matrix_init_input(uint8_t input)
 {
-    pin_t pin = input_pins[input];
+    struct pin pin = input_pins[input];
 
     pin.port->port |= pin.mask;
 }
@@ -53,7 +53,7 @@ void matrix_init_input(uint8_t input)
 __attribute__((weak))
 void matrix_activate_output(uint8_t output)
 {
-    pin_t pin = output_pins[output];
+    struct pin pin = output_pins[output];
 
     pin.port->port &= ~pin.mask;
 }
@@ -61,7 +61,7 @@ void matrix_activate_output(uint8_t output)
 __attribute__((weak))
 void matrix_deactivate_output(uint8_t output)
 {
-    pin_t pin = output_pins[output];
+    struct pin pin = output_pins[output];
 
     pin.port->port |= pin.mask;
 }
@@ -69,7 +69,7 @@ void matrix_deactivate_output(uint8_t output)
 __attribute__((weak))
 bool matrix_read_input(uint8_t input, uint8_t output)
 {
-    pin_t pin = input_pins[input];
+    struct pin pin = input_pins[input];
 
     return pin.port->pin & pin.mask;
 }
@@ -85,8 +85,8 @@ void matrix_init(void)
 
 void matrix_scan(void)
 {
-    keystroke_t keystroke;
-    keyswitch_state_t *keyswitch_state;
+    struct keystroke keystroke;
+    struct keyswitch_state *keyswitch_state;
 
     for (uint8_t i = OUTPUTS; i--;) {
         matrix_activate_output(i);

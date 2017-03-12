@@ -4,17 +4,17 @@
 #include <stdint.h>
 #include <avr/io.h>
 
-#define PIN(port, pin) { (port_t *)&PIN ## port, 1 << pin }
+#define PIN(letter, number) { (struct port *)&PIN ## letter, 1 << number }
 
-typedef struct {
+struct port {
     volatile uint8_t pin;
     volatile uint8_t ddr;
     volatile uint8_t port;
-} port_t;
+};
 
-typedef struct {
-    port_t *port;
+struct pin {
+    struct port *port;
     uint8_t mask;
-} pin_t;
+};
 
 #endif
