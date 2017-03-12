@@ -6,10 +6,10 @@
 #include "leader_key.h"
 #include "timer.h"
 
-void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    uint8_t code = ((const __flash uint8_t *)parent_action->data)[0];
-    uint8_t modifiers = ((const __flash uint8_t *)parent_action->data)[1];
+    uint8_t code = ((const __flash uint8_t *)source_action->data)[0];
+    uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[1];
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
@@ -23,9 +23,9 @@ void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash s
     }
 }
 
-void actions_modifiers(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_modifiers(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    uint8_t modifiers = *(const __flash uint8_t *)parent_action->data;
+    uint8_t modifiers = *(const __flash uint8_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
@@ -37,9 +37,9 @@ void actions_modifiers(struct keystroke *keystroke, const __flash struct action 
     }
 }
 
-void actions_scancode(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    uint8_t code = *(const __flash uint8_t *)parent_action->data;
+    uint8_t code = *(const __flash uint8_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
@@ -51,19 +51,19 @@ void actions_scancode(struct keystroke *keystroke, const __flash struct action *
     }
 }
 
-void actions_layers_goto(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_layers_goto(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     uint8_t layer;
 
     if (keystroke->execution_mode == KEYSTROKE_START) {
-        layer = *(const __flash uint8_t *)parent_action->data;
+        layer = *(const __flash uint8_t *)source_action->data;
         layers_set_primary_layer(layer);
     }
 }
 
-void actions_layers_visit(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_layers_visit(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    uint8_t layer = *(const __flash uint8_t *)parent_action->data;
+    uint8_t layer = *(const __flash uint8_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
@@ -75,27 +75,27 @@ void actions_layers_visit(struct keystroke *keystroke, const __flash struct acti
     }
 }
 
-void actions_reset(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_reset(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     if (keystroke->execution_mode == KEYSTROKE_START)
         Jump_To_Bootloader();
 }
 
-void actions_multiple_actions(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_multiple_actions(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    const __flash struct action *action = parent_action->data;
+    const __flash struct action *action = source_action->data;
 
     while (action++->fcn)
         action->fcn(keystroke, action);
 }
 
-void actions_none(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_none(struct keystroke *keystroke, const __flash struct action *source_action)
 {
 }
 
-void actions_tap_dance(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_tap_dance(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    const __flash struct actions_tap_dance_data *data = parent_action->data;
+    const __flash struct actions_tap_dance_data *data = source_action->data;
     static uint8_t tap_action_modifiers;
     const __flash struct action *action;
     static uint16_t timestamp;
@@ -110,7 +110,7 @@ void actions_tap_dance(struct keystroke *keystroke, const __flash struct action 
             data->storage->tap_count = 0;
             data->storage->irq.interrupts = INTERRUPT_MANUAL_KEYSTROKE_START;
             data->storage->irq.interrupts |= INTERRUPT_UNCONDITIONAL;
-            data->storage->irq.action = parent_action;
+            data->storage->irq.action = source_action;
             data->storage->irq.keystroke = *keystroke;
             keystrokes_add_irq(&data->storage->irq);
         }
@@ -144,9 +144,9 @@ void actions_tap_dance(struct keystroke *keystroke, const __flash struct action 
     }
 }
 
-void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    const __flash struct actions_hold_tap_data *data = parent_action->data;
+    const __flash struct actions_hold_tap_data *data = source_action->data;
     const __flash struct action *action = &data->hold_action;
     static uint8_t tap_action_modifiers;
     static uint16_t timestamp;
@@ -157,7 +157,7 @@ void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *
         action->fcn(keystroke, action);
         data->storage->irq.interrupts = INTERRUPT_MANUAL_KEYSTROKE_START;
         data->storage->irq.interrupts |= INTERRUPT_UNCONDITIONAL;
-        data->storage->irq.action = parent_action;
+        data->storage->irq.action = source_action;
         data->storage->irq.keystroke = *keystroke;
         keystrokes_add_irq(&data->storage->irq);
         timestamp = timer_read();
@@ -184,9 +184,9 @@ void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *
     }
 }
 
-void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    const __flash struct actions_tap_hold_data *data = parent_action->data;
+    const __flash struct actions_tap_hold_data *data = source_action->data;
     const __flash struct action *action;
     static uint8_t tap_action_modifiers;
     static uint16_t timestamp;
@@ -197,7 +197,7 @@ void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *
         tap_action_modifiers = modifiers_get_permanent();
         data->storage->irq.interrupts = INTERRUPT_MANUAL_KEYSTROKE_START;
         data->storage->irq.interrupts |= INTERRUPT_UNCONDITIONAL;
-        data->storage->irq.action = parent_action;
+        data->storage->irq.action = source_action;
         data->storage->irq.keystroke = *keystroke;
         data->storage->last_interrupt = 0;
         keystrokes_add_irq(&data->storage->irq);
@@ -243,16 +243,16 @@ void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *
     }
 }
 
-void actions_leader_key(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_leader_key(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     if (keystroke->execution_mode == KEYSTROKE_START)
         leader_key_start(keystroke);
 }
 
-void actions_modifiers_and_power_management(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_modifiers_and_power_management(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    uint8_t code = ((const __flash uint8_t *)parent_action->data)[0];
-    uint8_t modifiers = ((const __flash uint8_t *)parent_action->data)[1];
+    uint8_t code = ((const __flash uint8_t *)source_action->data)[0];
+    uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[1];
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
@@ -266,9 +266,9 @@ void actions_modifiers_and_power_management(struct keystroke *keystroke, const _
     }
 }
 
-void actions_power_management(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_power_management(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    uint8_t code = *(const __flash uint8_t *)parent_action->data;
+    uint8_t code = *(const __flash uint8_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
@@ -280,10 +280,10 @@ void actions_power_management(struct keystroke *keystroke, const __flash struct 
     }
 }
 
-void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    uint8_t code = ((const __flash uint16_t *)parent_action->data)[0];
-    uint8_t modifiers = ((const __flash uint8_t *)parent_action->data)[2];
+    uint8_t code = ((const __flash uint16_t *)source_action->data)[0];
+    uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[2];
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
@@ -297,9 +297,9 @@ void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash
     }
 }
 
-void actions_multimedia(struct keystroke *keystroke, const __flash struct action *parent_action)
+void actions_multimedia(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    uint8_t code = *(const __flash uint16_t *)parent_action->data;
+    uint8_t code = *(const __flash uint16_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:

@@ -41,24 +41,25 @@ struct actions_tap_dance_data {
     uint8_t action_count;
 };
 
-void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_modifiers(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_scancode(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_multiple_actions(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_tap_dance(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_layers_goto(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_layers_visit(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_reset(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_none(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_multiple_actions(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_tap_dance(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_leader_key(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_modifiers_and_power_management(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_power_management(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash struct action *parent_action);
-void actions_multimedia(struct keystroke *keystroke, const __flash struct action *parent_action);
+void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_modifiers(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_multiple_actions(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_tap_dance(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_layers_goto(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_layers_visit(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_reset(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_none(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_multiple_actions(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_tap_dance(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_leader_key(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_modifiers_and_power_management(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_power_management(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_multimedia(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_oneshot(struct keystroke *keystroke, const __flash struct action *source_action);
 
 #endif
