@@ -6,14 +6,12 @@
 
 struct keystroke {
     uint8_t execution_mode;
-    uint8_t layer;
     uint8_t keyswitch;
 };
 
 struct irq {
     struct irq *next;
     const __flash struct action *action;
-    struct keystroke keystroke;
     uint8_t interrupts;
 };
 
@@ -23,9 +21,11 @@ enum {
 };
 
 enum {
-    INTERRUPT_MANUAL_KEYSTROKE_START = 1 << 1,
-    INTERRUPT_MANUAL_KEYSTROKE_FINISH = 1 << 2,
-    INTERRUPT_UNCONDITIONAL = 1 << 3
+    INTERRUPT_KEYSTROKE_START_EARLY = 1 << 1,
+    INTERRUPT_KEYSTROKE_START_LATE = 1 << 2,
+    INTERRUPT_KEYSTROKE_FINISH_EARLY = 1 << 3,
+    INTERRUPT_KEYSTROKE_FINISH_LATE = 1 << 4,
+    INTERRUPT_UNCONDITIONAL = 1 << 5
 };
 
 void keystrokes_process(struct keystroke *keystroke);

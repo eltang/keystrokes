@@ -8,18 +8,12 @@ struct action {
     const __flash void *data;
 };
 
-struct actions_hold_tap_storage {
-    struct irq irq;
-};
-
 struct actions_hold_tap_data {
     struct action hold_action;
     struct action tap_action;
-    struct actions_hold_tap_storage *storage;
 };
 
 struct actions_tap_hold_storage {
-    struct irq irq;
     uint8_t last_interrupt;
 };
 
@@ -30,8 +24,7 @@ struct actions_tap_hold_data {
 };
 
 struct actions_tap_dance_storage {
-    struct irq irq;
-    bool pressed;
+    bool alive;
     uint8_t tap_count;
 };
 
@@ -39,6 +32,18 @@ struct actions_tap_dance_data {
     const __flash struct action *actions;
     struct actions_tap_dance_storage *storage;
     uint8_t action_count;
+};
+
+struct actions_oneshot_storage {
+    struct irq irq;
+    struct keystroke keystroke;
+    uint8_t state;
+    uint16_t last_timestamp;
+};
+
+struct actions_oneshot_data {
+    struct action action;
+    struct actions_oneshot_storage *storage;
 };
 
 void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *source_action);

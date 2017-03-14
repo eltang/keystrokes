@@ -34,6 +34,14 @@ const __flash struct action layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
 #define LEADER_KEY { actions_leader_key }
 #define TRANSPARENT { uint8_transparent }
 
+#define OS(action) \
+{ \
+    actions_oneshot, \
+    &(const __flash struct actions_oneshot_data){ \
+        action, \
+        &(struct actions_oneshot_storage){ { 0 } } \
+    } \
+}
 
 #define LEADER_KEY_DICTIONARY(...) \
 const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
@@ -58,7 +66,7 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     actions_tap_dance, \
     &(const __flash struct actions_tap_dance_data){ \
         (const __flash struct action []){ __VA_ARGS__, NO_ACTION }, \
-        &(struct actions_tap_dance_storage){ { 0 } }, \
+        &(struct actions_tap_dance_storage){ 0 }, \
         sizeof (struct action []){ __VA_ARGS__ } / sizeof(struct action), \
     } \
 }
@@ -69,7 +77,6 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     &(const __flash struct actions_hold_tap_data){ \
         hold_action, \
         tap_action, \
-        &(struct actions_hold_tap_storage){ { 0 } } \
     } \
 }
 
@@ -79,7 +86,7 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     &(const __flash struct actions_tap_hold_data){ \
         tap_action, \
         hold_action, \
-        &(struct actions_tap_hold_storage){ { 0 } } \
+        &(struct actions_tap_hold_storage){ 0 } \
     } \
 }
 
