@@ -348,12 +348,14 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
 {
     const __flash struct actions_oneshot_data *data = source_action->data;
     static uint16_t timestamp;
-    static uint8_t interrupting_keystroke_keyswitch;
+    static uint8_t interrupting_keystroke_keyswitch, oneshot_keystroke_keyswitch;
 
     switch (keystroke->execution_mode) {
     case INTERRUPT_KEYSTROKE_START_EARLY:
         switch (data->storage->state) {
         case ONESHOT_WAITING:
+            if (keystroke->keyswitch == oneshot_keystroke_keyswitch)
+                break;
             data->storage->state = ONESHOT_APPLIED;
             break;
         case ONESHOT_APPLIED:
@@ -373,9 +375,10 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
             data->action.fcn(keystroke, &data->action);
             data->storage->keystroke = *keystroke;
             timestamp = timer_read();
-            data->storage->last_timestamp = timestamp;
+            oneshot_keystroke_keyswitch = keystroke->keyswitch;
+            data->storage->keyswitch = oneshot_keystroke_keyswitch;
             break;
-        case ONESHOT_APPLIED:
+        case ONESHOT_WAITING:
             data->storage->state = ONESHOT_LOCKED;
             data->storage->irq.interrupts = 0;
             break;
@@ -387,8 +390,7 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
     case INTERRUPT_KEYSTROKE_START_LATE:
         if (data->storage->state != ONESHOT_APPLIED)
             break;
-        if (data->storage->last_timestamp != timestamp) {
-            data->storage->last_timestamp = timestamp;
+        if (data->storage->keyswitch != oneshot_keystroke_keyswitch) {
             data->storage->state = ONESHOT_WAITING;
             break;
         }
