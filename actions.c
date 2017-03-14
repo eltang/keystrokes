@@ -340,7 +340,6 @@ void actions_multimedia(struct keystroke *keystroke, const __flash struct action
 enum {
     ONESHOT_NONE,
     ONESHOT_WAITING,
-    ONESHOT_TENTATIVELY_APPLIED,
     ONESHOT_APPLIED,
     ONESHOT_LOCKED
 };
@@ -352,6 +351,16 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
     static uint8_t interrupting_keystroke_keyswitch;
 
     switch (keystroke->execution_mode) {
+    case INTERRUPT_KEYSTROKE_START_EARLY:
+        switch (data->storage->state) {
+        case ONESHOT_WAITING:
+            data->storage->state = ONESHOT_APPLIED;
+            break;
+        case ONESHOT_APPLIED:
+            goto finish;
+            break;
+        }
+        break;
     case KEYSTROKE_START:
         switch (data->storage->state) {
         case ONESHOT_NONE:
@@ -366,7 +375,7 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
             timestamp = timer_read();
             data->storage->last_timestamp = timestamp;
             break;
-        case ONESHOT_TENTATIVELY_APPLIED:
+        case ONESHOT_APPLIED:
             data->storage->state = ONESHOT_LOCKED;
             data->storage->irq.interrupts = 0;
             break;
@@ -375,24 +384,14 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
             break;
         }
         break;
-    case INTERRUPT_KEYSTROKE_START_EARLY:
-        switch (data->storage->state) {
-        case ONESHOT_WAITING:
-            data->storage->state = ONESHOT_TENTATIVELY_APPLIED;
-            break;
-        case ONESHOT_APPLIED:
-            goto finish;
-            break;
-        }
-        break;
     case INTERRUPT_KEYSTROKE_START_LATE:
-        if (data->storage->state != ONESHOT_TENTATIVELY_APPLIED)
+        if (data->storage->state != ONESHOT_APPLIED)
             break;
         if (data->storage->last_timestamp != timestamp) {
             data->storage->last_timestamp = timestamp;
+            data->storage->state = ONESHOT_WAITING;
             break;
         }
-        data->storage->state = ONESHOT_APPLIED;
         data->storage->irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
         data->storage->irq.interrupts |= INTERRUPT_KEYSTROKE_FINISH_EARLY;
         interrupting_keystroke_keyswitch = keystroke->keyswitch;
