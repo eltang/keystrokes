@@ -96,7 +96,7 @@ void actions_none(struct keystroke *keystroke, const __flash struct action *sour
 void actions_tap_dance(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     static const __flash struct actions_tap_dance_data *data;
-    static uint8_t tap_action_modifiers;
+    static uint8_t saved_modifiers;
     const __flash struct action *action;
     static uint16_t timestamp;
     static struct keystroke saved_keystroke;
@@ -116,14 +116,14 @@ void actions_tap_dance(struct keystroke *keystroke, const __flash struct action 
                 break;
             }
             action = &data->actions[data->storage->tap_count];
-            modifiers_add_permanent(tap_action_modifiers);
+            modifiers_add_permanent(saved_modifiers);
             action->fcn(&saved_keystroke, action);
-            modifiers_delete_permanent(tap_action_modifiers);
+            modifiers_delete_permanent(saved_modifiers);
             saved_keystroke.execution_mode = KEYSTROKE_FINISH;
             action->fcn(&saved_keystroke, action);
         }
         data = source_action->data;
-        tap_action_modifiers = modifiers_get_permanent();
+        saved_modifiers = modifiers_get_permanent();
         data->storage->tap_count = 0;
         data->storage->alive = 1;
         saved_keystroke = *keystroke;
@@ -135,23 +135,12 @@ void actions_tap_dance(struct keystroke *keystroke, const __flash struct action 
         keystrokes_add_irq(&irq);
         break;
     case INTERRUPT_UNCONDITIONAL:
-        if ((uint16_t)timer_read() - timestamp <= MAX_TAP_DURATION)
-            break;
+        if ((uint16_t)timer_read() - timestamp > MAX_TAP_DURATION)
+            goto finish;
+        break;
     case INTERRUPT_KEYSTROKE_START_EARLY:
-        if (keystroke->execution_mode == INTERRUPT_KEYSTROKE_START_EARLY)
-            if (keystroke->keyswitch == saved_keystroke.keyswitch)
-                break;
-        data = source_action->data;
-        action = &data->actions[data->storage->tap_count];
-        modifiers_add_permanent(tap_action_modifiers);
-        action->fcn(&saved_keystroke, action);
-        modifiers_delete_permanent(tap_action_modifiers);
-        if (!tap_dance_key_pressed) {
-            saved_keystroke.execution_mode = KEYSTROKE_FINISH;
-            action->fcn(&saved_keystroke, action);
-        }
-        irq.interrupts = 0;
-        data->storage->alive = 0;
+        if (keystroke->keyswitch != saved_keystroke.keyswitch)
+            goto finish;
         break;
     case KEYSTROKE_FINISH:
         data = source_action->data;
@@ -164,6 +153,18 @@ void actions_tap_dance(struct keystroke *keystroke, const __flash struct action 
             action->fcn(keystroke, action);
         }
         break;
+    finish:
+        data = source_action->data;
+        action = &data->actions[data->storage->tap_count];
+        modifiers_add_permanent(saved_modifiers);
+        action->fcn(&saved_keystroke, action);
+        modifiers_delete_permanent(saved_modifiers);
+        if (!tap_dance_key_pressed) {
+            saved_keystroke.execution_mode = KEYSTROKE_FINISH;
+            action->fcn(&saved_keystroke, action);
+        }
+        irq.interrupts = 0;
+        data->storage->alive = 0;
     }
 }
 
@@ -171,14 +172,14 @@ void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *
 {
     const __flash struct actions_hold_tap_data *data = source_action->data;
     const __flash struct action *action = &data->hold_action;
-    static uint8_t tap_action_modifiers;
+    static uint8_t saved_modifiers;
     static uint16_t timestamp;
     static struct irq irq;
     static uint8_t most_recent_keyswitch;
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
-        tap_action_modifiers = modifiers_get_permanent();
+        saved_modifiers = modifiers_get_permanent();
         action->fcn(keystroke, action);
         irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
         irq.interrupts |= INTERRUPT_UNCONDITIONAL;
@@ -199,10 +200,10 @@ void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *
             break;
         irq.interrupts = 0;
         action = &data->tap_action;
-        modifiers_add_permanent(tap_action_modifiers);
+        modifiers_add_permanent(saved_modifiers);
         keystroke->execution_mode = KEYSTROKE_START;
         action->fcn(keystroke, action);
-        modifiers_delete_permanent(tap_action_modifiers);
+        modifiers_delete_permanent(saved_modifiers);
         keystroke->execution_mode = KEYSTROKE_FINISH;
         action->fcn(keystroke, action);
         break;
@@ -213,7 +214,7 @@ void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *
 {
     const __flash struct actions_tap_hold_data *data = source_action->data;
     const __flash struct action *action;
-    static uint8_t tap_action_modifiers;
+    static uint8_t saved_modifiers;
     static uint16_t timestamp;
     static struct keystroke saved_keystroke;
     static struct irq irq;
@@ -221,7 +222,7 @@ void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *
     switch (keystroke->execution_mode) {
     case KEYSTROKE_START:
         timestamp = timer_read();
-        tap_action_modifiers = modifiers_get_permanent();
+        saved_modifiers = modifiers_get_permanent();
         irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
         irq.interrupts |= INTERRUPT_UNCONDITIONAL;
         irq.action = source_action;
@@ -251,10 +252,10 @@ void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *
             break;
         case 0:
             action = &data->tap_action;
-            modifiers_add_permanent(tap_action_modifiers);
+            modifiers_add_permanent(saved_modifiers);
             keystroke->execution_mode = KEYSTROKE_START;
             action->fcn(keystroke, action);
-            modifiers_delete_permanent(tap_action_modifiers);
+            modifiers_delete_permanent(saved_modifiers);
             keystroke->execution_mode = KEYSTROKE_FINISH;
             action->fcn(keystroke, action);
             irq.interrupts = 0;

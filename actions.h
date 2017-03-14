@@ -37,8 +37,8 @@ struct actions_tap_dance_data {
 struct actions_oneshot_storage {
     struct irq irq;
     struct keystroke keystroke;
-    uint8_t state;
     uint16_t last_timestamp;
+    uint8_t state;
 };
 
 struct actions_oneshot_data {
