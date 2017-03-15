@@ -339,9 +339,11 @@ void actions_multimedia(struct keystroke *keystroke, const __flash struct action
 
 enum {
     ONESHOT_NONE,
-    ONESHOT_WAITING,
+    ONESHOT_STARTED,
+    ONESHOT_STRETCHED,
     ONESHOT_APPLIED,
-    ONESHOT_LOCKED
+    ONESHOT_LOCKED,
+    ONESHOT_MYSTERY_KEYSTROKE_STARTED
 };
 
 void actions_oneshot(struct keystroke *keystroke, const __flash struct action *source_action)
@@ -349,14 +351,16 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
     const __flash struct actions_oneshot_data *data = source_action->data;
     static uint16_t timestamp;
     static uint8_t interrupting_keystroke_keyswitch, oneshot_keystroke_keyswitch;
+    static uint8_t oneshot_layer;
 
     switch (keystroke->execution_mode) {
     case INTERRUPT_KEYSTROKE_START_EARLY:
         switch (data->storage->state) {
-        case ONESHOT_WAITING:
+        case ONESHOT_STARTED:
             if (keystroke->keyswitch == oneshot_keystroke_keyswitch)
                 break;
-            data->storage->state = ONESHOT_APPLIED;
+        case ONESHOT_STRETCHED:
+            data->storage->state = ONESHOT_MYSTERY_KEYSTROKE_STARTED;
             break;
         case ONESHOT_APPLIED:
             goto finish;
@@ -366,7 +370,6 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
     case KEYSTROKE_START:
         switch (data->storage->state) {
         case ONESHOT_NONE:
-            data->storage->state = ONESHOT_WAITING;
             data->storage->irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
             data->storage->irq.interrupts |= INTERRUPT_KEYSTROKE_START_LATE;
             data->storage->irq.interrupts |= INTERRUPT_UNCONDITIONAL;
@@ -374,11 +377,15 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
             keystrokes_add_irq(&data->storage->irq);
             data->action.fcn(keystroke, &data->action);
             data->storage->keystroke = *keystroke;
+        case ONESHOT_MYSTERY_KEYSTROKE_STARTED:
+            data->storage->state = ONESHOT_STARTED;
             timestamp = timer_read();
             oneshot_keystroke_keyswitch = keystroke->keyswitch;
-            data->storage->keyswitch = oneshot_keystroke_keyswitch;
+            data->storage->oneshot_keystroke_keyswitch = oneshot_keystroke_keyswitch;
+            oneshot_layer = layers_get_active_layer();
+            data->storage->oneshot_layer = oneshot_layer;
             break;
-        case ONESHOT_WAITING:
+        case ONESHOT_STARTED:
             data->storage->state = ONESHOT_LOCKED;
             data->storage->irq.interrupts = 0;
             break;
@@ -388,15 +395,19 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
         }
         break;
     case INTERRUPT_KEYSTROKE_START_LATE:
-        if (data->storage->state != ONESHOT_APPLIED)
+        if (data->storage->state != ONESHOT_MYSTERY_KEYSTROKE_STARTED)
             break;
-        if (data->storage->keyswitch != oneshot_keystroke_keyswitch) {
-            data->storage->state = ONESHOT_WAITING;
-            break;
-        }
-        data->storage->irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
-        data->storage->irq.interrupts |= INTERRUPT_KEYSTROKE_FINISH_EARLY;
-        interrupting_keystroke_keyswitch = keystroke->keyswitch;
+        if (data->storage->oneshot_keystroke_keyswitch == oneshot_keystroke_keyswitch)
+            if (data->storage->oneshot_layer == oneshot_layer) {
+                data->storage->irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
+                data->storage->irq.interrupts |= INTERRUPT_KEYSTROKE_FINISH_EARLY;
+                interrupting_keystroke_keyswitch = keystroke->keyswitch;
+                data->storage->state = ONESHOT_APPLIED;
+                break;
+            }
+        data->storage->state = ONESHOT_STRETCHED;
+        data->storage->oneshot_layer = oneshot_layer;
+        data->storage->oneshot_keystroke_keyswitch = oneshot_keystroke_keyswitch;
         break;
     case INTERRUPT_UNCONDITIONAL:
         if ((uint16_t)timer_read() - timestamp > MAX_TAP_DURATION)
