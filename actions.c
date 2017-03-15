@@ -337,17 +337,17 @@ void actions_multimedia(struct keystroke *keystroke, const __flash struct action
     }
 }
 
-enum {
-    ONESHOT_NONE,
-    ONESHOT_STARTED,
-    ONESHOT_STRETCHED,
-    ONESHOT_APPLIED,
-    ONESHOT_LOCKED,
-    ONESHOT_MYSTERY_KEYSTROKE_STARTED
-};
-
 void actions_oneshot(struct keystroke *keystroke, const __flash struct action *source_action)
 {
+    enum {
+        ONESHOT_NONE,
+        ONESHOT_STARTED,
+        ONESHOT_CHAINED,
+        ONESHOT_APPLIED,
+        ONESHOT_LOCKED,
+        ONESHOT_INTERRUPTED
+    };
+
     const __flash struct actions_oneshot_data *data = source_action->data;
     static uint16_t timestamp;
     static uint8_t interrupting_keystroke_keyswitch, oneshot_keystroke_keyswitch;
@@ -359,8 +359,8 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
         case ONESHOT_STARTED:
             if (keystroke->keyswitch == oneshot_keystroke_keyswitch)
                 break;
-        case ONESHOT_STRETCHED:
-            data->storage->state = ONESHOT_MYSTERY_KEYSTROKE_STARTED;
+        case ONESHOT_CHAINED:
+            data->storage->state = ONESHOT_INTERRUPTED;
             break;
         case ONESHOT_APPLIED:
             goto finish;
@@ -377,7 +377,7 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
             keystrokes_add_irq(&data->storage->irq);
             data->action.fcn(keystroke, &data->action);
             data->storage->keystroke = *keystroke;
-        case ONESHOT_MYSTERY_KEYSTROKE_STARTED:
+        case ONESHOT_INTERRUPTED:
             data->storage->state = ONESHOT_STARTED;
             timestamp = timer_read();
             oneshot_keystroke_keyswitch = keystroke->keyswitch;
@@ -395,7 +395,7 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
         }
         break;
     case INTERRUPT_KEYSTROKE_START_LATE:
-        if (data->storage->state != ONESHOT_MYSTERY_KEYSTROKE_STARTED)
+        if (data->storage->state != ONESHOT_INTERRUPTED)
             break;
         if (data->storage->oneshot_keystroke_keyswitch == oneshot_keystroke_keyswitch)
             if (data->storage->oneshot_layer == oneshot_layer) {
@@ -405,7 +405,7 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
                 data->storage->state = ONESHOT_APPLIED;
                 break;
             }
-        data->storage->state = ONESHOT_STRETCHED;
+        data->storage->state = ONESHOT_CHAINED;
         data->storage->oneshot_layer = oneshot_layer;
         data->storage->oneshot_keystroke_keyswitch = oneshot_keystroke_keyswitch;
         break;
