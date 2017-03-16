@@ -7,24 +7,24 @@
 #include "modifiers.h"
 
 static uint8_t keystroke_source_layers[ROWS * COLUMNS];
-static struct irq *irq_list_head;
+static struct irq *irqs;
 
 static void keystrokes_fulfill_irqs(uint8_t interrupt, struct keystroke *keystroke)
 {
-    struct irq **irq = &irq_list_head;
+    struct irq **current = &irqs;
     uint8_t saved_keystroke_execution_mode;
 
-    while (*irq) {
-        if ((*irq)->interrupts & interrupt) {
+    while (*current) {
+        if ((*current)->interrupts & interrupt) {
             saved_keystroke_execution_mode = keystroke->execution_mode;
             keystroke->execution_mode = interrupt;
-            (*irq)->action->fcn(keystroke, (*irq)->action);
+            (*current)->action->fcn(keystroke, (*current)->action);
             keystroke->execution_mode = saved_keystroke_execution_mode;
         }
-        if ((*irq)->interrupts)
-            irq = &(*irq)->next;
+        if ((*current)->interrupts)
+            current = &(*current)->next;
         else
-            *irq = (*irq)->next;
+            *current = (*current)->next;
     }
 }
 
@@ -60,6 +60,10 @@ void keystrokes_task(void)
 
 void keystrokes_add_irq(struct irq *irq)
 {
-    irq->next = irq_list_head;
-    irq_list_head = irq;
+    struct irq **current = &irqs;
+
+    while (*current)
+        current = &(*current)->next;
+    *current = irq;
+    irq->next = 0;
 }
