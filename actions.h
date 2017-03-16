@@ -47,6 +47,11 @@ struct actions_oneshot_data {
     struct actions_oneshot_storage *storage;
 };
 
+struct actions_multiple_actions_data {
+    const __flash struct action *actions;
+    uint8_t action_count;
+};
+
 void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_modifiers(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action);

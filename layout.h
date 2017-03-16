@@ -93,7 +93,10 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
 #define MA(...) \
 { \
     actions_multiple_actions, \
-    (const __flash struct action []){ __VA_ARGS__, { actions_none } } \
+    &(const __flash struct actions_multiple_actions_data){ \
+        (const __flash struct action []){ __VA_ARGS__ }, \
+        sizeof (struct action []){ __VA_ARGS__ } / sizeof(struct action), \
+    } \
 }
 
 #define CC(case_number) \

@@ -83,10 +83,15 @@ void actions_reset(struct keystroke *keystroke, const __flash struct action *sou
 
 void actions_multiple_actions(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    const __flash struct action *action = source_action->data;
+    const __flash struct actions_multiple_actions_data *data = source_action->data;
 
-    while (action++->fcn)
-        action->fcn(keystroke, action);
+    if (keystroke->execution_mode == KEYSTROKE_START)
+        for (uint8_t i = 0; i < data->action_count; ++i) {
+            data->actions[i].fcn(keystroke, &data->actions[i]);
+            keystroke->execution_mode = KEYSTROKE_FINISH;
+            data->actions[i].fcn(keystroke, &data->actions[i]);
+            keystroke->execution_mode = KEYSTROKE_START;
+        }
 }
 
 void actions_none(struct keystroke *keystroke, const __flash struct action *source_action)
