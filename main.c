@@ -41,6 +41,7 @@
 #include "i2cmaster/i2cmaster.h"
 #include "timer.h"
 #include "keystrokes.h"
+#include "power.h"
 
 #ifdef VIRTUAL_SERIAL_ENABLE
 /** LUFA CDC Class driver interface configuration and state information. This structure is
