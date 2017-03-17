@@ -52,10 +52,16 @@ struct actions_sequential_actions_data {
     uint8_t action_count;
 };
 
+struct actions_concurrent_actions_data {
+    const __flash struct action *actions;
+    uint8_t action_count;
+};
+
 void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_modifiers(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_sequential_actions(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_concurrent_actions(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_begin_action(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_end_action(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct action *source_action);

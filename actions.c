@@ -94,6 +94,22 @@ void actions_sequential_actions(struct keystroke *keystroke, const __flash struc
         }
 }
 
+void actions_concurrent_actions(struct keystroke *keystroke, const __flash struct action *source_action)
+{
+    const __flash struct actions_concurrent_actions_data *data = source_action->data;
+
+    switch (keystroke->execution_mode) {
+    case KEYSTROKE_BEGIN:
+        for (uint8_t i = 0; i < data->action_count; ++i)
+            data->actions[i].fcn(keystroke, &data->actions[i]);
+        break;
+    case KEYSTROKE_END:
+        for (uint8_t i = data->action_count; i--;)
+            data->actions[i].fcn(keystroke, &data->actions[i]);
+        break;
+    }
+}
+
 void actions_begin_action(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     const __flash struct action *action;

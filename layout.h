@@ -99,6 +99,15 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     } \
 }
 
+#define CA(...) \
+{ \
+    actions_concurrent_actions, \
+    &(const __flash struct actions_concurrent_actions_data){ \
+        (const __flash struct action []){ __VA_ARGS__ }, \
+        sizeof (struct action []){ __VA_ARGS__ } / sizeof(struct action), \
+    } \
+}
+
 #define BA(action) \
 { \
     actions_begin_action, \
