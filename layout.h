@@ -99,6 +99,18 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     } \
 }
 
+#define S(action) \
+{ \
+    actions_start_action, \
+    (const __flash struct action []){ action } \
+}
+
+#define F(action) \
+{ \
+    actions_finish_action, \
+    (const __flash struct action []){ action } \
+}
+
 #define CC(case_number) \
 { \
     actions_custom_code, \

@@ -94,6 +94,27 @@ void actions_multiple_actions(struct keystroke *keystroke, const __flash struct 
         }
 }
 
+void actions_start_action(struct keystroke *keystroke, const __flash struct action *source_action)
+{
+    const __flash struct action *action;
+
+    if (keystroke->execution_mode == KEYSTROKE_START) {
+        action = source_action->data;
+        action->fcn(keystroke, action);
+    }
+}
+
+void actions_finish_action(struct keystroke *keystroke, const __flash struct action *source_action)
+{
+    const __flash struct action *action;
+
+    if (keystroke->execution_mode == KEYSTROKE_START) {
+        action = source_action->data;
+        keystroke->execution_mode = KEYSTROKE_FINISH;
+        action->fcn(keystroke, action);
+    }
+}
+
 void actions_none(struct keystroke *keystroke, const __flash struct action *source_action)
 {
 }
