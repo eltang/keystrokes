@@ -32,22 +32,22 @@ void keystrokes_process(struct keystroke *keystroke)
 {
     const __flash struct action *action;
 
-    if (keystroke->execution_mode == KEYSTROKE_START) {
+    if (keystroke->execution_mode == KEYSTROKE_BEGIN) {
         if (USB_DeviceState == DEVICE_STATE_Suspended)
             if (USB_Device_RemoteWakeupEnabled)
                 USB_Device_SendRemoteWakeup();
         modifiers_clear_temporary();
-        keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_START_EARLY, keystroke);
+        keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_BEGIN_EARLY, keystroke);
         keystroke_source_layers[keystroke->keyswitch] = layers_get_active_layer();
     } else {
-        keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_FINISH_EARLY, keystroke);
+        keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_END_EARLY, keystroke);
     }
     action = &layout[keystroke_source_layers[keystroke->keyswitch]][keystroke->keyswitch];
     action->fcn(keystroke, action);
-    if (keystroke->execution_mode == KEYSTROKE_START)
-        keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_START_LATE, keystroke);
+    if (keystroke->execution_mode == KEYSTROKE_BEGIN)
+        keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_BEGIN_LATE, keystroke);
     else
-        keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_FINISH_LATE, keystroke);
+        keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_END_LATE, keystroke);
 }
 
 void keystrokes_task(void)

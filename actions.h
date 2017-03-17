@@ -56,8 +56,8 @@ void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash s
 void actions_modifiers(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_multiple_actions(struct keystroke *keystroke, const __flash struct action *source_action);
-void actions_start_action(struct keystroke *keystroke, const __flash struct action *source_action);
-void actions_finish_action(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_begin_action(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_end_action(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_hold_tap_actions(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_layers_goto(struct keystroke *keystroke, const __flash struct action *source_action);

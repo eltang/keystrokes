@@ -99,15 +99,15 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     } \
 }
 
-#define SA(action) \
+#define BA(action) \
 { \
-    actions_start_action, \
+    actions_begin_action, \
     (const __flash struct action []){ action } \
 }
 
-#define FA(action) \
+#define EA(action) \
 { \
-    actions_finish_action, \
+    actions_end_action, \
     (const __flash struct action []){ action } \
 }
 

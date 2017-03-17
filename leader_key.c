@@ -23,7 +23,7 @@ static void leader_key_end(void)
     while (entry->sequence) {
         if (entry->sequence == sequence.raw) {
             entry->action.fcn(&leader_key_keystroke, &entry->action);
-            leader_key_keystroke.execution_mode = KEYSTROKE_FINISH;
+            leader_key_keystroke.execution_mode = KEYSTROKE_END;
             entry->action.fcn(&leader_key_keystroke, &entry->action);
             break;
         }

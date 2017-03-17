@@ -12,11 +12,11 @@ void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash s
     uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[1];
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         modifiers_set_temporary(modifiers);
         keys_add_scancode(code);
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         modifiers_unset_temporary(modifiers);;
         keys_delete_scancode(code);
         break;
@@ -28,10 +28,10 @@ void actions_modifiers(struct keystroke *keystroke, const __flash struct action 
     uint8_t modifiers = *(const __flash uint8_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         modifiers_add_permanent(modifiers);
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         modifiers_delete_permanent(modifiers);
         break;
     }
@@ -42,10 +42,10 @@ void actions_scancode(struct keystroke *keystroke, const __flash struct action *
     uint8_t code = *(const __flash uint8_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         keys_add_scancode(code);
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         keys_delete_scancode(code);
         break;
     }
@@ -55,7 +55,7 @@ void actions_layers_goto(struct keystroke *keystroke, const __flash struct actio
 {
     uint8_t layer;
 
-    if (keystroke->execution_mode == KEYSTROKE_START) {
+    if (keystroke->execution_mode == KEYSTROKE_BEGIN) {
         layer = *(const __flash uint8_t *)source_action->data;
         layers_set_primary_layer(layer);
     }
@@ -66,10 +66,10 @@ void actions_layers_visit(struct keystroke *keystroke, const __flash struct acti
     uint8_t layer = *(const __flash uint8_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         layers_activate_secondary_layer(layer);
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         layers_deactivate_secondary_layer(layer);
         break;
     }
@@ -77,7 +77,7 @@ void actions_layers_visit(struct keystroke *keystroke, const __flash struct acti
 
 void actions_reset(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    if (keystroke->execution_mode == KEYSTROKE_START)
+    if (keystroke->execution_mode == KEYSTROKE_BEGIN)
         Jump_To_Bootloader();
 }
 
@@ -85,32 +85,32 @@ void actions_multiple_actions(struct keystroke *keystroke, const __flash struct 
 {
     const __flash struct actions_multiple_actions_data *data = source_action->data;
 
-    if (keystroke->execution_mode == KEYSTROKE_START)
+    if (keystroke->execution_mode == KEYSTROKE_BEGIN)
         for (uint8_t i = 0; i < data->action_count; ++i) {
             data->actions[i].fcn(keystroke, &data->actions[i]);
-            keystroke->execution_mode = KEYSTROKE_FINISH;
+            keystroke->execution_mode = KEYSTROKE_END;
             data->actions[i].fcn(keystroke, &data->actions[i]);
-            keystroke->execution_mode = KEYSTROKE_START;
+            keystroke->execution_mode = KEYSTROKE_BEGIN;
         }
 }
 
-void actions_start_action(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_begin_action(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     const __flash struct action *action;
 
-    if (keystroke->execution_mode == KEYSTROKE_START) {
+    if (keystroke->execution_mode == KEYSTROKE_BEGIN) {
         action = source_action->data;
         action->fcn(keystroke, action);
     }
 }
 
-void actions_finish_action(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_end_action(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     const __flash struct action *action;
 
-    if (keystroke->execution_mode == KEYSTROKE_START) {
+    if (keystroke->execution_mode == KEYSTROKE_BEGIN) {
         action = source_action->data;
-        keystroke->execution_mode = KEYSTROKE_FINISH;
+        keystroke->execution_mode = KEYSTROKE_END;
         action->fcn(keystroke, action);
     }
 }
@@ -131,7 +131,7 @@ void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct
     static bool tap_dance_key_pressed;
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         timestamp = timer_read();
         tap_dance_key_pressed = 1;
         if (irq.interrupts) {
@@ -145,7 +145,7 @@ void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct
             modifiers_add_permanent(saved_modifiers);
             action->fcn(&saved_keystroke, action);
             modifiers_delete_permanent(saved_modifiers);
-            saved_keystroke.execution_mode = KEYSTROKE_FINISH;
+            saved_keystroke.execution_mode = KEYSTROKE_END;
             action->fcn(&saved_keystroke, action);
         }
         data = source_action->data;
@@ -156,7 +156,7 @@ void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct
         irq.action = source_action;
         if (irq.interrupts)
             break;
-        irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
+        irq.interrupts = INTERRUPT_KEYSTROKE_BEGIN_EARLY;
         irq.interrupts |= INTERRUPT_UNCONDITIONAL;
         keystrokes_add_irq(&irq);
         break;
@@ -164,11 +164,11 @@ void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct
         if ((uint16_t)timer_read() - timestamp > MAX_TAP_DURATION)
             goto finish;
         break;
-    case INTERRUPT_KEYSTROKE_START_EARLY:
+    case INTERRUPT_KEYSTROKE_BEGIN_EARLY:
         if (keystroke->keyswitch != saved_keystroke.keyswitch)
             goto finish;
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         data = source_action->data;
         if (data->storage->alive) {
             timestamp = timer_read();
@@ -186,7 +186,7 @@ void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct
         action->fcn(&saved_keystroke, action);
         modifiers_delete_permanent(saved_modifiers);
         if (!tap_dance_key_pressed) {
-            saved_keystroke.execution_mode = KEYSTROKE_FINISH;
+            saved_keystroke.execution_mode = KEYSTROKE_END;
             action->fcn(&saved_keystroke, action);
         }
         irq.interrupts = 0;
@@ -204,10 +204,10 @@ void actions_hold_tap_actions(struct keystroke *keystroke, const __flash struct 
     static uint8_t most_recent_keyswitch;
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         saved_modifiers = modifiers_get_permanent();
         action->fcn(keystroke, action);
-        irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
+        irq.interrupts = INTERRUPT_KEYSTROKE_BEGIN_EARLY;
         irq.interrupts |= INTERRUPT_UNCONDITIONAL;
         irq.action = source_action;
         keystrokes_add_irq(&irq);
@@ -217,20 +217,20 @@ void actions_hold_tap_actions(struct keystroke *keystroke, const __flash struct 
     case INTERRUPT_UNCONDITIONAL:
         if ((uint16_t)timer_read() - timestamp <= MAX_TAP_DURATION)
             break;
-    case INTERRUPT_KEYSTROKE_START_EARLY:
+    case INTERRUPT_KEYSTROKE_BEGIN_EARLY:
         irq.interrupts = 0;
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         action->fcn(keystroke, action);
         if (!irq.interrupts || keystroke->keyswitch != most_recent_keyswitch)
             break;
         irq.interrupts = 0;
         action = &data->tap_action;
         modifiers_add_permanent(saved_modifiers);
-        keystroke->execution_mode = KEYSTROKE_START;
+        keystroke->execution_mode = KEYSTROKE_BEGIN;
         action->fcn(keystroke, action);
         modifiers_delete_permanent(saved_modifiers);
-        keystroke->execution_mode = KEYSTROKE_FINISH;
+        keystroke->execution_mode = KEYSTROKE_END;
         action->fcn(keystroke, action);
         break;
     }
@@ -246,21 +246,21 @@ void actions_tap_hold_actions(struct keystroke *keystroke, const __flash struct 
     static struct irq irq;
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         timestamp = timer_read();
         saved_modifiers = modifiers_get_permanent();
-        irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
+        irq.interrupts = INTERRUPT_KEYSTROKE_BEGIN_EARLY;
         irq.interrupts |= INTERRUPT_UNCONDITIONAL;
         irq.action = source_action;
         data->storage->last_interrupt = 0;
         keystrokes_add_irq(&irq);
         saved_keystroke = *keystroke;
         break;
-    case INTERRUPT_KEYSTROKE_START_EARLY:
+    case INTERRUPT_KEYSTROKE_BEGIN_EARLY:
         action = &data->tap_action;
         action->fcn(&saved_keystroke, action);
         irq.interrupts = 0;
-        data->storage->last_interrupt = INTERRUPT_KEYSTROKE_START_EARLY;
+        data->storage->last_interrupt = INTERRUPT_KEYSTROKE_BEGIN_EARLY;
         break;
     case INTERRUPT_UNCONDITIONAL:
         if ((uint16_t)timer_read() - timestamp <= MAX_TAP_DURATION)
@@ -270,19 +270,19 @@ void actions_tap_hold_actions(struct keystroke *keystroke, const __flash struct 
         irq.interrupts = 0;
         data->storage->last_interrupt = INTERRUPT_UNCONDITIONAL;
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         switch (data->storage->last_interrupt) {
-        case INTERRUPT_KEYSTROKE_START_EARLY:
+        case INTERRUPT_KEYSTROKE_BEGIN_EARLY:
             action = &data->tap_action;
             action->fcn(keystroke, action);
             break;
         case 0:
             action = &data->tap_action;
             modifiers_add_permanent(saved_modifiers);
-            keystroke->execution_mode = KEYSTROKE_START;
+            keystroke->execution_mode = KEYSTROKE_BEGIN;
             action->fcn(keystroke, action);
             modifiers_delete_permanent(saved_modifiers);
-            keystroke->execution_mode = KEYSTROKE_FINISH;
+            keystroke->execution_mode = KEYSTROKE_END;
             action->fcn(keystroke, action);
             irq.interrupts = 0;
             break;
@@ -297,7 +297,7 @@ void actions_tap_hold_actions(struct keystroke *keystroke, const __flash struct 
 
 void actions_leader_key(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    if (keystroke->execution_mode == KEYSTROKE_START)
+    if (keystroke->execution_mode == KEYSTROKE_BEGIN)
         leader_key_start(keystroke);
 }
 
@@ -307,11 +307,11 @@ void actions_modifiers_and_power_management(struct keystroke *keystroke, const _
     uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[1];
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         modifiers_set_temporary(modifiers);
         keys_add_power_management(code);
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         modifiers_unset_temporary(modifiers);;
         keys_delete_power_management(code);
         break;
@@ -323,10 +323,10 @@ void actions_power_management(struct keystroke *keystroke, const __flash struct 
     uint8_t code = *(const __flash uint8_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         keys_add_power_management(code);
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         keys_delete_power_management(code);
         break;
     }
@@ -338,11 +338,11 @@ void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash
     uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[2];
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         modifiers_set_temporary(modifiers);
         keys_add_multimedia(code);
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         modifiers_unset_temporary(modifiers);;
         keys_delete_multimedia(code);
         break;
@@ -354,10 +354,10 @@ void actions_multimedia(struct keystroke *keystroke, const __flash struct action
     uint8_t code = *(const __flash uint16_t *)source_action->data;
 
     switch (keystroke->execution_mode) {
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         keys_add_multimedia(code);
         break;
-    case KEYSTROKE_FINISH:
+    case KEYSTROKE_END:
         keys_delete_multimedia(code);
         break;
     }
@@ -380,7 +380,7 @@ void actions_oneshot_action(struct keystroke *keystroke, const __flash struct ac
     static uint8_t oneshot_layer;
 
     switch (keystroke->execution_mode) {
-    case INTERRUPT_KEYSTROKE_START_EARLY:
+    case INTERRUPT_KEYSTROKE_BEGIN_EARLY:
         switch (data->storage->state) {
         case ONESHOT_STARTED:
             if (keystroke->keyswitch == oneshot_keystroke_keyswitch)
@@ -393,11 +393,11 @@ void actions_oneshot_action(struct keystroke *keystroke, const __flash struct ac
             break;
         }
         break;
-    case KEYSTROKE_START:
+    case KEYSTROKE_BEGIN:
         switch (data->storage->state) {
         case ONESHOT_NONE:
-            data->storage->irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
-            data->storage->irq.interrupts |= INTERRUPT_KEYSTROKE_START_LATE;
+            data->storage->irq.interrupts = INTERRUPT_KEYSTROKE_BEGIN_EARLY;
+            data->storage->irq.interrupts |= INTERRUPT_KEYSTROKE_BEGIN_LATE;
             data->storage->irq.interrupts |= INTERRUPT_UNCONDITIONAL;
             data->storage->irq.action = source_action;
             keystrokes_add_irq(&data->storage->irq);
@@ -420,13 +420,13 @@ void actions_oneshot_action(struct keystroke *keystroke, const __flash struct ac
             break;
         }
         break;
-    case INTERRUPT_KEYSTROKE_START_LATE:
+    case INTERRUPT_KEYSTROKE_BEGIN_LATE:
         if (data->storage->state != ONESHOT_INTERRUPTED)
             break;
         if (data->storage->oneshot_keystroke_keyswitch == oneshot_keystroke_keyswitch)
             if (data->storage->oneshot_layer == oneshot_layer) {
-                data->storage->irq.interrupts = INTERRUPT_KEYSTROKE_START_EARLY;
-                data->storage->irq.interrupts |= INTERRUPT_KEYSTROKE_FINISH_EARLY;
+                data->storage->irq.interrupts = INTERRUPT_KEYSTROKE_BEGIN_EARLY;
+                data->storage->irq.interrupts |= INTERRUPT_KEYSTROKE_END_EARLY;
                 interrupting_keystroke_keyswitch = keystroke->keyswitch;
                 data->storage->state = ONESHOT_APPLIED;
                 break;
@@ -439,12 +439,12 @@ void actions_oneshot_action(struct keystroke *keystroke, const __flash struct ac
         if ((uint16_t)timer_read() - timestamp > MAX_TAP_DURATION)
             goto finish;
         break;
-    case INTERRUPT_KEYSTROKE_FINISH_EARLY:
+    case INTERRUPT_KEYSTROKE_END_EARLY:
         if (keystroke->keyswitch == interrupting_keystroke_keyswitch)
             goto finish;
         break;
     finish:
-        data->storage->keystroke.execution_mode = KEYSTROKE_FINISH;
+        data->storage->keystroke.execution_mode = KEYSTROKE_END;
         data->action.fcn(&data->storage->keystroke, &data->action);
         data->storage->state = ONESHOT_NONE;
         data->storage->irq.interrupts = 0;
