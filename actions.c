@@ -119,9 +119,9 @@ void actions_none(struct keystroke *keystroke, const __flash struct action *sour
 {
 }
 
-void actions_tap_dance(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    static const __flash struct actions_tap_dance_data *data;
+    static const __flash struct actions_tap_dance_actions_data *data;
     static uint8_t saved_modifiers;
     const __flash struct action *action;
     static uint16_t timestamp;
@@ -194,9 +194,9 @@ void actions_tap_dance(struct keystroke *keystroke, const __flash struct action 
     }
 }
 
-void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_hold_tap_actions(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    const __flash struct actions_hold_tap_data *data = source_action->data;
+    const __flash struct actions_hold_tap_actions_data *data = source_action->data;
     const __flash struct action *action = &data->hold_action;
     static uint8_t saved_modifiers;
     static uint16_t timestamp;
@@ -236,9 +236,9 @@ void actions_hold_tap(struct keystroke *keystroke, const __flash struct action *
     }
 }
 
-void actions_tap_hold(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_tap_hold_actions(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    const __flash struct actions_tap_hold_data *data = source_action->data;
+    const __flash struct actions_tap_hold_actions_data *data = source_action->data;
     const __flash struct action *action;
     static uint8_t saved_modifiers;
     static uint16_t timestamp;
@@ -363,7 +363,7 @@ void actions_multimedia(struct keystroke *keystroke, const __flash struct action
     }
 }
 
-void actions_oneshot(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_oneshot_action(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     enum {
         ONESHOT_NONE,
@@ -374,7 +374,7 @@ void actions_oneshot(struct keystroke *keystroke, const __flash struct action *s
         ONESHOT_INTERRUPTED
     };
 
-    const __flash struct actions_oneshot_data *data = source_action->data;
+    const __flash struct actions_oneshot_action_data *data = source_action->data;
     static uint16_t timestamp;
     static uint8_t interrupting_keystroke_keyswitch, oneshot_keystroke_keyswitch;
     static uint8_t oneshot_layer;

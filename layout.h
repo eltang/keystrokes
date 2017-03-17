@@ -34,12 +34,12 @@ const __flash struct action layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
 #define LEADER_KEY { actions_leader_key }
 #define TRANSPARENT { uint8_transparent }
 
-#define OS(action) \
+#define OSA(action) \
 { \
-    actions_oneshot, \
-    &(const __flash struct actions_oneshot_data){ \
+    actions_oneshot_action, \
+    &(const __flash struct actions_oneshot_action_data){ \
         action, \
-        &(struct actions_oneshot_storage){ { 0 } } \
+        &(struct actions_oneshot_action_storage){ { 0 } } \
     } \
 }
 
@@ -61,32 +61,32 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
 #define LEADER_KEY_SEQUENCE(one, two, three, four) \
 ((uint64_t)four << 48 | (uint64_t)three << 32 | (uint64_t)two << 16 | one)
 
-#define TD(...) \
+#define TDA(...) \
 { \
-    actions_tap_dance, \
-    &(const __flash struct actions_tap_dance_data){ \
+    actions_tap_dance_actions, \
+    &(const __flash struct actions_tap_dance_actions_data){ \
         (const __flash struct action []){ __VA_ARGS__, NO_ACTION }, \
-        &(struct actions_tap_dance_storage){ 0 }, \
+        &(struct actions_tap_dance_actions_storage){ 0 }, \
         sizeof (struct action []){ __VA_ARGS__ } / sizeof(struct action), \
     } \
 }
 
-#define HT(hold_action, tap_action) \
+#define HTA(hold_action, tap_action) \
 { \
-    actions_hold_tap, \
-    &(const __flash struct actions_hold_tap_data){ \
+    actions_hold_tap_actions, \
+    &(const __flash struct actions_hold_tap_actions_data){ \
         hold_action, \
         tap_action, \
     } \
 }
 
-#define TH(tap_action, hold_action) \
+#define THA(tap_action, hold_action) \
 { \
-    actions_tap_hold, \
-    &(const __flash struct actions_tap_hold_data){ \
+    actions_tap_hold_actions, \
+    &(const __flash struct actions_tap_hold_actions_data){ \
         tap_action, \
         hold_action, \
-        &(struct actions_tap_hold_storage){ 0 } \
+        &(struct actions_tap_hold_actions_storage){ 0 } \
     } \
 }
 
@@ -99,13 +99,13 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     } \
 }
 
-#define S(action) \
+#define SA(action) \
 { \
     actions_start_action, \
     (const __flash struct action []){ action } \
 }
 
-#define F(action) \
+#define FA(action) \
 { \
     actions_finish_action, \
     (const __flash struct action []){ action } \
