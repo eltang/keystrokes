@@ -209,12 +209,6 @@ enum {
     APP
 };
 
-enum input_sources {
-    US,
-    US_DVORAK,
-    US_COLEMAK,
-};
-
 #define US_CODE_TO_SCANCODE(code) \
 ((((code) & 0xFFFFFFFFFF) == BKSP ? HID_KEYBOARD_SC_BACKSPACE : \
 ((code) & 0xFFFFFFFFFF) == ENTER ? CODE_GET_DISAMBIGUATION(code) & NK_VALUE ? HID_KEYBOARD_SC_KEYPAD_ENTER : HID_KEYBOARD_SC_ENTER : \
@@ -443,9 +437,8 @@ actions_power_management)
 #define SC_ASSEMBLE(code) \
 (CODE_GET_MODIFIER(code) << 8 | CODE_GET_SCANCODE(code))
 
-#define SC(country, code) \
-SC_ASSEMBLE((country == US ? US_CODE_TO_SCANCODE(code) : \
-country == US_DVORAK ? US_DVORAK_CODE_TO_SCANCODE(code) : 0))
+#define US_SC(code) SC_ASSEMBLE(US_CODE_TO_SCANCODE(code))
+#define US_DVORAK_SC(code) SC_ASSEMBLE(US_DVORAK_CODE_TO_SCANCODE(code))
 
 #define PM(code) \
 { \

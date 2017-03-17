@@ -2,32 +2,32 @@
 
 LAYOUT(
     {
-        K(SC(US, TAB)), K(SC(US, 'q')), K(SC(US, 'w')), K(SC(US, 'e')), K(SC(US, 'r')), K(SC(US, 't')), K(SC(US, 'y')), K(SC(US, 'u')), K(SC(US, 'i')), K(SC(US, 'o')), K(SC(US, 'p')), K(SC(US, BKSP)),
-        K(SC(US, ESC)), TD(K(SC(US, 'a')), K(SC(US, 'q'))), K(SC(US, 's')), K(SC(US, 'd')), TH(K(SC(US, 'f')), K(SC(US, R_ALT))), K(SC(US, 'g')), K(SC(US, 'h')), TH(K(SC(US, 'j')), K(SC(US, R_ALT))), K(SC(US, 'k')), K(SC(US, 'l')), TD(K(SC(US, ';')), K(SC(US, 'p'))), K(SC(US, '\'')),
-        HT(K(SC(US, L_SHIFT)), K(SC(US, '('))), K(SC(US, 'z')), K(SC(US, 'x')), K(SC(US, 'c')), K(SC(US, 'v')), K(SC(US, 'b')), K(SC(US, 'n')), K(SC(US, 'm')), K(SC(US, ',')), K(SC(US, '.')), K(SC(US, '/')), HT(K(SC(US, R_SHIFT)), K(SC(US, ENTER))),
-        LEADER_KEY, K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)), L(VISIT, 1), K(SC(US, ' ')), K(SC(US, ' ')), L(VISIT, 2), OS(K(SC(US, R_CTRL))), OS(K(SC(US, R_SHIFT))), OS(K(SC(US, R_ALT))), OS(K(SC(US, R_GUI)))
+        K(US_SC(TAB)), K(US_SC('q')), K(US_SC('w')), K(US_SC('e')), K(US_SC('r')), K(US_SC('t')), K(US_SC('y')), K(US_SC('u')), K(US_SC('i')), K(US_SC('o')), K(US_SC('p')), K(US_SC(BKSP)),
+        K(US_SC(ESC)), TD(K(US_SC('a')), K(US_SC('q'))), K(US_SC('s')), K(US_SC('d')), TH(K(US_SC('f')), K(US_SC(R_ALT))), K(US_SC('g')), K(US_SC('h')), TH(K(US_SC('j')), K(US_SC(R_ALT))), K(US_SC('k')), K(US_SC('l')), TD(K(US_SC(';')), K(US_SC('p'))), K(US_SC('\'')),
+        HT(K(US_SC(L_SHIFT)), K(US_SC('('))), K(US_SC('z')), K(US_SC('x')), K(US_SC('c')), K(US_SC('v')), K(US_SC('b')), K(US_SC('n')), K(US_SC('m')), K(US_SC(',')), K(US_SC('.')), K(US_SC('/')), HT(K(US_SC(R_SHIFT)), K(US_SC(ENTER))),
+        LEADER_KEY, K(US_SC(L_CTRL)), K(US_SC(L_ALT)), K(US_SC(L_GUI)), L(VISIT, 1), K(US_SC(' ')), K(US_SC(' ')), L(VISIT, 2), MA(K(US_SC('a')), K(US_SC('b'))), HT(K(US_SC(R_SHIFT)), TD(K(US_SC('a')), K(US_SC('b')))), OS(K(US_SC(R_ALT))), HT(K(US_SC(R_GUI)), TD(NO_ACTION, OS(K(US_SC(R_SHIFT)))))
     },
     {
-        K(SC(US, '~')), K(SC(US, '!')), K(SC(US, '@')), K(SC(US, '#')), K(SC(US, '$')), K(SC(US, '%')), K(SC(US, '^')), K(SC(US, '&')), K(SC(US, '*')), K(SC(US, '(')), K(SC(US, ')')), K(SC(US, BKSP)),
-        K(SC(US, DELETE)), K(SC(US, F1)), K(SC(US, F2)), K(SC(US, F3)), K(SC(US, F4)), K(SC(US, F5)), K(SC(US, F6)), K(SC(US, '_')), K(SC(US, '+')), K(SC(US, '{')), K(SC(US, '}')), K(SC(US, '|')),
-        K(SC(US, L_SHIFT)), K(SC(US, F7)), K(SC(US, F8)), K(SC(US, F9)), K(SC(US, F10)), K(SC(US, F11)), K(SC(US, F12)), NO_ACTION, NO_ACTION, K(SC(US, HOME)), K(SC(US, END)), K(SC(US, ENTER)),
-        RESET, K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)), L(VISIT, 1), K(SC(US, ' ')), K(SC(US, ' ')), L(VISIT, 2), OS(K(SC(US, R_CTRL))), OS(K(SC(US, R_SHIFT))), OS(K(SC(US, R_ALT))), OS(K(SC(US, R_GUI)))
+        K(US_SC('~')), K(US_SC('!')), K(US_SC('@')), K(US_SC('#')), K(US_SC('$')), K(US_SC('%')), K(US_SC('^')), K(US_SC('&')), K(US_SC('*')), K(US_SC('(')), K(US_SC(')')), K(US_SC(BKSP)),
+        K(US_SC(DELETE)), K(US_SC(F1)), K(US_SC(F2)), K(US_SC(F3)), K(US_SC(F4)), K(US_SC(F5)), K(US_SC(F6)), K(US_SC('_')), K(US_SC('+')), K(US_SC('{')), K(US_SC('}')), K(US_SC('|')),
+        K(US_SC(L_SHIFT)), K(US_SC(F7)), K(US_SC(F8)), K(US_SC(F9)), K(US_SC(F10)), K(US_SC(F11)), K(US_SC(F12)), NO_ACTION, NO_ACTION, K(US_SC(HOME)), K(US_SC(END)), K(US_SC(ENTER)),
+        RESET, K(US_SC(L_CTRL)), K(US_SC(L_ALT)), K(US_SC(L_GUI)), L(VISIT, 1), K(US_SC(' ')), K(US_SC(' ')), L(VISIT, 2), OS(K(US_SC(R_CTRL))), OS(K(US_SC(R_SHIFT))), OS(K(US_SC(R_ALT))), OS(K(US_SC(R_GUI)))
     },
     {
-        K(SC(US, '`')), K(SC(US, '1')), K(SC(US, '2')), K(SC(US, '3')), K(SC(US, '4')), K(SC(US, '5')), K(SC(US, '6')), K(SC(US, '7')), K(SC(US, '8')), K(SC(US, '9')), K(SC(US, '0')), K(SC(US, BKSP)),
-        K(SC(US, DELETE)), TD(K(SC(US, F1)), K(SC(US, 'q'))), K(SC(US, F2)), K(SC(US, F3)), K(SC(US, F4)), K(SC(US, F5)), K(SC(US, F6)), K(SC(US, '-')), K(SC(US, '=')), K(SC(US, '[')), K(SC(US, ']')), K(SC(US, '\\')),
-        K(SC(US, L_SHIFT)), K(SC(US, F7)), K(SC(US, F8)), K(SC(US, F9)), K(SC(US, F10)), K(SC(US, F11)), K(SC(US, F12)), NO_ACTION, NO_ACTION, K(SC(US, PG_UP)), K(SC(US, PG_DN)), K(SC(US, ENTER)),
-        PM(0x81), K(SC(US, L_CTRL)), K(SC(US, L_ALT)), K(SC(US, L_GUI)), L(VISIT, 1), K(SC(US, ' ')), K(SC(US, ' ')), L(VISIT, 2), M(0xB5), M(0xEA), M(0xE9), M(0xCD)
+        K(US_SC('`')), K(US_SC('1')), K(US_SC('2')), K(US_SC('3')), K(US_SC('4')), K(US_SC('5')), K(US_SC('6')), K(US_SC('7')), K(US_SC('8')), K(US_SC('9')), K(US_SC('0')), K(US_SC(BKSP)),
+        K(US_SC(DELETE)), TD(K(US_SC(F1)), K(US_SC('q'))), K(US_SC(F2)), K(US_SC(F3)), K(US_SC(F4)), K(US_SC(F5)), K(US_SC(F6)), K(US_SC('-')), K(US_SC('=')), K(US_SC('[')), K(US_SC(']')), K(US_SC('\\')),
+        K(US_SC(L_SHIFT)), K(US_SC(F7)), K(US_SC(F8)), K(US_SC(F9)), K(US_SC(F10)), K(US_SC(F11)), K(US_SC(F12)), NO_ACTION, NO_ACTION, K(US_SC(PG_UP)), K(US_SC(PG_DN)), K(US_SC(ENTER)),
+        PM(0x81), K(US_SC(L_CTRL)), K(US_SC(L_ALT)), K(US_SC(L_GUI)), L(VISIT, 1), K(US_SC(' ')), K(US_SC(' ')), L(VISIT, 2), M(0xB5), M(0xEA), M(0xE9), M(0xCD)
     }
 );
 
 LEADER_KEY_DICTIONARY(
     LEADER_KEY_DICTIONARY_ENTRY(
-        LEADER_KEY_SEQUENCE(SC(US, 'w'), 0, 0, 0),
-        K(SC(US, L_A(F4)))
+        LEADER_KEY_SEQUENCE(US_SC('w'), 0, 0, 0),
+        K(US_SC(L_A(F4)))
     ),
     LEADER_KEY_DICTIONARY_ENTRY(
-        LEADER_KEY_SEQUENCE(SC(US, 'o'), 0, 0, 0),
-        K(SC(US, L_C('O')))
+        LEADER_KEY_SEQUENCE(US_SC('o'), 0, 0, 0),
+        K(US_SC(L_C('O')))
     )
 );
