@@ -57,6 +57,15 @@ struct actions_concurrent_actions_data {
     uint8_t action_count;
 };
 
+struct actions_shift_switch_actions_storage {
+    bool switched;
+};
+
+struct actions_shift_switch_actions_data {
+    struct action primary_action, secondary_action;
+    struct actions_shift_switch_actions_storage *storage;
+};
+
 void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_modifiers(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
@@ -77,5 +86,6 @@ void actions_power_management(struct keystroke *keystroke, const __flash struct 
 void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_multimedia(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_oneshot_action(struct keystroke *keystroke, const __flash struct action *source_action);
+void actions_shift_switch_actions(struct keystroke *keystroke, const __flash struct action *source_action);
 
 #endif

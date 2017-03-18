@@ -136,6 +136,16 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     (const __flash uint8_t){ case_number } \
 }
 
+#define SSA(primary_action, secondary_action) \
+{ \
+    actions_shift_switch_actions, \
+    &(const __flash struct actions_shift_switch_actions_data){ \
+        primary_action, \
+        secondary_action, \
+        &(struct actions_shift_switch_actions_storage){ 0 } \
+    } \
+}
+
 enum layer_operations {
     VISIT,
     GOTO

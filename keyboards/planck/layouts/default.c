@@ -5,7 +5,7 @@ LAYOUT(
         K(US_SC(TAB)), K(US_SC('q')), K(US_SC('w')), K(US_SC('e')), K(US_SC('r')), K(US_SC('t')), K(US_SC('y')), K(US_SC('u')), K(US_SC('i')), K(US_SC('o')), K(US_SC('p')), K(US_SC(BKSP)),
         K(US_SC(ESC)),  TDA(K(US_SC('a')), K(US_SC('q'))), K(US_SC('s')), K(US_SC('d')), THA(K(US_SC('f')), K(US_SC(R_ALT))), K(US_SC('g')), K(US_SC('h')), THA(K(US_SC('j')), K(US_SC(R_ALT))), K(US_SC('k')), K(US_SC('l')),  TDA(K(US_SC(';')), K(US_SC('p'))), K(US_SC('\'')),
         HTA(K(US_SC(L_SHIFT)), K(US_SC('('))), K(US_SC('z')), K(US_SC('x')), K(US_SC('c')), K(US_SC('v')), K(US_SC('b')), K(US_SC('n')), K(US_SC('m')), K(US_SC(',')), K(US_SC('.')), K(US_SC('/')), HTA(K(US_SC(R_SHIFT)), K(US_SC(ENTER))),
-        LEADER_KEY, K(US_SC(L_CTRL)), K(US_SC(L_ALT)), K(US_SC(L_GUI)), L(VISIT, 1), K(US_SC(' ')), K(US_SC(' ')), L(VISIT, 2), SA(K(US_SC('a')), K(US_SC('b'))), ATDA(K(US_SC(R_SHIFT)), NO_ACTION, K(US_SC('a')), K(US_SC('b'))),  OSA(K(US_SC(R_ALT))), TDA(K(US_SC(R_GUI)), OSA(K(US_SC(R_SHIFT))))
+        LEADER_KEY, K(US_SC(L_CTRL)), K(US_SC(L_ALT)), K(US_SC(L_GUI)), L(VISIT, 1), SSA(K(US_SC(' ')), K(US_SC('a'))), SSA(K(US_SC(' ')), K(US_SC('A'))), L(VISIT, 2), SA(K(US_SC('a')), K(US_SC('b'))), ATDA(K(US_SC(R_SHIFT)), NO_ACTION, K(US_SC('a')), K(US_SC('b'))),  OSA(K(US_SC(R_ALT))), TDA(K(US_SC(R_GUI)), OSA(K(US_SC(R_SHIFT))))
     },
     {
         K(US_SC('~')), K(US_SC('!')), K(US_SC('@')), K(US_SC('#')), K(US_SC('$')), K(US_SC('%')), K(US_SC('^')), K(US_SC('&')), K(US_SC('*')), K(US_SC('(')), K(US_SC(')')), K(US_SC(BKSP)),

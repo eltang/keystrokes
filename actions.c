@@ -1,3 +1,5 @@
+#include <LUFA/Drivers/USB/USB.h>
+
 #include "actions.h"
 #include "modifiers.h"
 #include "keys.h"
@@ -470,5 +472,28 @@ void actions_oneshot_action(struct keystroke *keystroke, const __flash struct ac
         data->action.fcn(&data->storage->keystroke, &data->action);
         data->storage->state = ONESHOT_NONE;
         data->storage->irq.interrupts = 0;
+    }
+}
+
+void actions_shift_switch_actions(struct keystroke *keystroke, const __flash struct action *source_action)
+{
+    const __flash struct actions_shift_switch_actions_data *data = source_action->data;
+
+    switch (keystroke->execution_mode) {
+    case KEYSTROKE_BEGIN:
+        data->storage->switched = modifiers_get() & (HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT);
+        if (data->storage->switched) {
+            modifiers_stash(HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT);
+            data->secondary_action.fcn(keystroke, &data->secondary_action);
+            modifiers_pop_stash();
+        } else
+            data->primary_action.fcn(keystroke, &data->primary_action);
+        break;
+    case KEYSTROKE_END:
+        if (data->storage->switched)
+            data->secondary_action.fcn(keystroke, &data->secondary_action);
+        else
+            data->primary_action.fcn(keystroke, &data->primary_action);
+        break;
     }
 }
