@@ -7,23 +7,32 @@ static struct {
 } permanent_modifiers;
 
 static uint8_t temporary_modifiers;
+static uint8_t temporary_modifiers_activations;
 
 void modifiers_set_temporary(uint8_t modifiers)
 {
+    if (temporary_modifiers == modifiers) {
+        ++temporary_modifiers_activations;
+        return;
+    }
     temporary_modifiers = modifiers;
+    temporary_modifiers_activations = 1;
     SendKeyboardReport();
 }
 
 void modifiers_unset_temporary(uint8_t modifiers)
 {
-    if (temporary_modifiers != modifiers)
-        return;
-    modifiers_clear_temporary();
+    if (temporary_modifiers == modifiers)
+        if (!--temporary_modifiers_activations) {
+            temporary_modifiers = 0;
+            SendKeyboardReport();
+        }
 }
 
 void modifiers_clear_temporary(void)
 {
     temporary_modifiers = 0;
+    temporary_modifiers_activations = 0;
     SendKeyboardReport();
 }
 
