@@ -153,16 +153,17 @@ void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct
         if (irq.interrupts) {
             if (layers_get_active_layer() == old_layer) {
                 data = source_action->data;
-                if (data->storage->tap_count < data->action_count)
-                    ++data->storage->tap_count;
+                ++data->storage->tap_count;
                 break;
             }
-            action = &data->actions[data->storage->tap_count];
-            modifiers_add_permanent(saved_modifiers);
-            action->fcn(&saved_keystroke, action);
-            modifiers_delete_permanent(saved_modifiers);
-            saved_keystroke.execution_mode = KEYSTROKE_END;
-            action->fcn(&saved_keystroke, action);
+            if (data->storage->tap_count < data->max_taps) {
+                action = &data->actions[data->storage->tap_count + data->max_taps];
+                modifiers_add_permanent(saved_modifiers);
+                action->fcn(&saved_keystroke, action);
+                modifiers_delete_permanent(saved_modifiers);
+                saved_keystroke.execution_mode = KEYSTROKE_END;
+                action->fcn(&saved_keystroke, action);
+            }
         }
         data = source_action->data;
         saved_modifiers = modifiers_get_permanent();
@@ -197,7 +198,14 @@ void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct
         break;
     finish:
         data = source_action->data;
-        action = &data->actions[data->storage->tap_count];
+        irq.interrupts = 0;
+        data->storage->alive = 0;
+        if (data->storage->tap_count >= data->max_taps)
+            break;
+        if (tap_dance_key_pressed)
+            action = &data->actions[data->storage->tap_count];
+        else
+            action = &data->actions[data->storage->tap_count + data->max_taps];
         modifiers_add_permanent(saved_modifiers);
         action->fcn(&saved_keystroke, action);
         modifiers_delete_permanent(saved_modifiers);
@@ -205,8 +213,6 @@ void actions_tap_dance_actions(struct keystroke *keystroke, const __flash struct
             saved_keystroke.execution_mode = KEYSTROKE_END;
             action->fcn(&saved_keystroke, action);
         }
-        irq.interrupts = 0;
-        data->storage->alive = 0;
     }
 }
 

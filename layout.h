@@ -65,9 +65,19 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
 { \
     actions_tap_dance_actions, \
     &(const __flash struct actions_tap_dance_actions_data){ \
-        (const __flash struct action []){ __VA_ARGS__, NO_ACTION }, \
+        (const __flash struct action []){ __VA_ARGS__, __VA_ARGS__ }, \
         &(struct actions_tap_dance_actions_storage){ 0 }, \
         sizeof (struct action []){ __VA_ARGS__ } / sizeof(struct action), \
+    } \
+}
+
+#define ATDA(...) \
+{ \
+    actions_tap_dance_actions, \
+    &(const __flash struct actions_tap_dance_actions_data){ \
+        (const __flash struct action []){ __VA_ARGS__ }, \
+        &(struct actions_tap_dance_actions_storage){ 0 }, \
+        sizeof (struct action []){ __VA_ARGS__ } / 2 / sizeof(struct action), \
     } \
 }
 

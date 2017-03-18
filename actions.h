@@ -31,7 +31,7 @@ struct actions_tap_dance_actions_storage {
 struct actions_tap_dance_actions_data {
     const __flash struct action *actions;
     struct actions_tap_dance_actions_storage *storage;
-    uint8_t action_count;
+    uint8_t max_taps;
 };
 
 struct actions_oneshot_action_storage {
