@@ -112,27 +112,6 @@ void actions_concurrent_actions(struct keystroke *keystroke, const __flash struc
     }
 }
 
-void actions_begin_action(struct keystroke *keystroke, const __flash struct action *source_action)
-{
-    const __flash struct action *action;
-
-    if (keystroke->execution_mode == KEYSTROKE_BEGIN) {
-        action = source_action->data;
-        action->fcn(keystroke, action);
-    }
-}
-
-void actions_end_action(struct keystroke *keystroke, const __flash struct action *source_action)
-{
-    const __flash struct action *action;
-
-    if (keystroke->execution_mode == KEYSTROKE_BEGIN) {
-        action = source_action->data;
-        keystroke->execution_mode = KEYSTROKE_END;
-        action->fcn(keystroke, action);
-    }
-}
-
 void actions_none(struct keystroke *keystroke, const __flash struct action *source_action)
 {
 }

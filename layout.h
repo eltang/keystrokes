@@ -118,18 +118,6 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     } \
 }
 
-#define BA(action) \
-{ \
-    actions_begin_action, \
-    (const __flash struct action []){ action } \
-}
-
-#define EA(action) \
-{ \
-    actions_end_action, \
-    (const __flash struct action []){ action } \
-}
-
 #define SSA(primary_action, secondary_action) \
 { \
     actions_shift_switch_actions, \
