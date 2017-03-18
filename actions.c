@@ -96,9 +96,9 @@ void actions_sequential_actions(struct keystroke *keystroke, const __flash struc
         }
 }
 
-void actions_concurrent_actions(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_nested_actions(struct keystroke *keystroke, const __flash struct action *source_action)
 {
-    const __flash struct actions_concurrent_actions_data *data = source_action->data;
+    const __flash struct actions_nested_actions_data *data = source_action->data;
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
