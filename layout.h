@@ -130,12 +130,6 @@ const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     (const __flash struct action []){ action } \
 }
 
-#define CC(case_number) \
-{ \
-    actions_custom_code, \
-    (const __flash uint8_t){ case_number } \
-}
-
 #define SSA(primary_action, secondary_action) \
 { \
     actions_shift_switch_actions, \
