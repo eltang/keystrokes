@@ -4,7 +4,6 @@
 #include "actions.h"
 #include "layers.h"
 #include "layout.h"
-#include "modifiers.h"
 
 static uint8_t keystroke_source_layers[ROWS * COLUMNS];
 static struct irq *irqs;
@@ -36,7 +35,6 @@ void keystrokes_process(struct keystroke *keystroke)
         if (USB_DeviceState == DEVICE_STATE_Suspended)
             if (USB_Device_RemoteWakeupEnabled)
                 USB_Device_SendRemoteWakeup();
-        modifiers_clear_temporary();
         keystrokes_fulfill_irqs(INTERRUPT_KEYSTROKE_BEGIN_EARLY, keystroke);
         keystroke_source_layers[keystroke->keyswitch] = layers_get_active_layer();
     } else {
