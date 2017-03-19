@@ -4,8 +4,9 @@
 #include "actions.h"
 
 struct leader_key_dictionary_entry {
-    uint64_t sequence;
     struct action action;
+    const __flash uint16_t *sequence;
+    uint8_t sequence_length;
 };
 
 void leader_key_start(struct keystroke *keystroke);

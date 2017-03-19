@@ -64,11 +64,11 @@ LAYOUT(
 
 LEADER_KEY_DICTIONARY(
     LEADER_KEY_DICTIONARY_ENTRY(
-        LEADER_KEY_SEQUENCE(US_SC('w'), 0, 0, 0),
+        LEADER_KEY_SEQUENCE(US_SC('w')),
         K(US_SC(L_A(F4)))
     ),
     LEADER_KEY_DICTIONARY_ENTRY(
-        LEADER_KEY_SEQUENCE(US_SC('o'), 0, 0, 0),
+        LEADER_KEY_SEQUENCE(US_SC('o')),
         K(US_SC(L_C('O')))
     )
 );

@@ -27,6 +27,7 @@ enum {
 extern const __flash struct action layout[][ROWS * COLUMNS];
 __attribute__((weak))
 extern const __flash struct leader_key_dictionary_entry leader_key_dictionary[];
+extern const __flash uint8_t leader_key_dictionary_length;
 
 #define NO_ACTION { actions_none }
 #define LAYOUT(...) \
@@ -44,22 +45,20 @@ const __flash struct action layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
 }
 
 #define LEADER_KEY_DICTIONARY(...) \
+const __flash uint8_t leader_key_dictionary_length = sizeof (struct leader_key_dictionary_entry []){ __VA_ARGS__ } / sizeof(struct leader_key_dictionary_entry); \
+ \
 const __flash struct leader_key_dictionary_entry leader_key_dictionary[] = { \
     __VA_ARGS__, \
-    LEADER_KEY_DICTIONARY_ENTRY( \
-        LEADER_KEY_SEQUENCE(0, 0, 0, 0), \
-        NO_ACTION \
-    ) \
 }
 
 #define LEADER_KEY_DICTIONARY_ENTRY(sequence, action) \
 { \
-    sequence, \
-    action \
+    action, \
+    (const __flash uint16_t [])sequence, \
+    sizeof (uint16_t [])sequence / sizeof(uint16_t), \
 }
 
-#define LEADER_KEY_SEQUENCE(one, two, three, four) \
-((uint64_t)four << 48 | (uint64_t)three << 32 | (uint64_t)two << 16 | one)
+#define LEADER_KEY_SEQUENCE(...) { __VA_ARGS__ }
 
 #define TDA(...) \
 { \

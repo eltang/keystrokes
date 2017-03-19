@@ -1,36 +1,33 @@
+#include <avr/pgmspace.h>
+
 #include "leader_key.h"
 #include "modifiers.h"
 #include "layout.h"
 #include "timer.h"
 
+#ifndef MAX_LEADER_KEY_SEQUENCE_LENGTH
+#define MAX_LEADER_KEY_SEQUENCE_LENGTH 8
+#endif
+
 static bool leader_key_active;
-static struct {
-    union {
-        uint16_t codes[4];
-        uint64_t raw;
-    };
-    uint8_t index;
-} sequence;
+static uint16_t sequence[MAX_LEADER_KEY_SEQUENCE_LENGTH];
+static uint8_t sequence_index;
 static struct keystroke leader_key_keystroke;
 static uint16_t leader_key_timestamp;
 
 static void leader_key_end(void)
 {
-    const __flash struct leader_key_dictionary_entry *entry;
-
     leader_key_active = 0;
-    entry = leader_key_dictionary;
-    while (entry->sequence) {
-        if (entry->sequence == sequence.raw) {
-            entry->action.fcn(&leader_key_keystroke, &entry->action);
-            leader_key_keystroke.execution_mode = KEYSTROKE_END;
-            entry->action.fcn(&leader_key_keystroke, &entry->action);
-            break;
-        }
-        entry++;
-    }
-    sequence.raw = 0;
-    sequence.index = 0;
+    for (uint8_t i = leader_key_dictionary_length; i--;)
+        if (sequence_index == leader_key_dictionary[i].sequence_length)
+            if (!memcmp_P(sequence, leader_key_dictionary[i].sequence, 2 * sequence_index)) {
+                leader_key_dictionary[i].action.fcn(&leader_key_keystroke, &leader_key_dictionary[i].action);
+                leader_key_keystroke.execution_mode = KEYSTROKE_END;
+                leader_key_dictionary[i].action.fcn(&leader_key_keystroke, &leader_key_dictionary[i].action);
+                break;
+            }
+    while (sequence_index)
+        sequence[--sequence_index] = 0;
 }
 
 void leader_key_start(struct keystroke *keystroke)
@@ -49,9 +46,9 @@ bool leader_key_is_active(void)
 
 void leader_key_process(uint8_t code)
 {
-    if (sequence.index == 4)
+    if (sequence_index == MAX_LEADER_KEY_SEQUENCE_LENGTH)
         return;
-    sequence.codes[sequence.index++] = code | modifiers_get() << 8;
+    sequence[sequence_index++] = code | modifiers_get() << 8;
     leader_key_timestamp = timer_read();
 }
 
