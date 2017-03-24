@@ -29,6 +29,7 @@ uint8_t modifiers_get(void)
             modifiers |= 1 << i;
     return modifiers;
 }
+
 void modifiers_stash(uint8_t modifiers)
 {
     for (uint8_t i = 8; i--;)
@@ -39,6 +40,7 @@ void modifiers_stash(uint8_t modifiers)
     stashed_modifiers = modifiers;
     SendKeyboardReport();
 }
+
 void modifiers_pop_stash(void)
 {
     for (uint8_t i = 8; i--;)
