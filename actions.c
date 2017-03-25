@@ -15,12 +15,12 @@ void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash s
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
-        modifiers_add(modifiers);
+        modifiers_set_temporary(modifiers, source_action);
         keys_add_scancode(code);
-        modifiers_delete(modifiers);
         break;
     case KEYSTROKE_END:
         keys_delete_scancode(code);
+        modifiers_unset_temporary(source_action);
         break;
     }
 }
@@ -31,6 +31,7 @@ void actions_modifiers(struct keystroke *keystroke, const __flash struct action 
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
+        modifiers_set_temporary(0, source_action);
         modifiers_add(modifiers);
         break;
     case KEYSTROKE_END:
@@ -45,6 +46,7 @@ void actions_scancode(struct keystroke *keystroke, const __flash struct action *
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
+        modifiers_set_temporary(0, source_action);
         keys_add_scancode(code);
         break;
     case KEYSTROKE_END:
@@ -311,12 +313,12 @@ void actions_modifiers_and_power_management(struct keystroke *keystroke, const _
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
-        modifiers_add(modifiers);
+        modifiers_set_temporary(modifiers, source_action);
         keys_add_power_management(code);
-        modifiers_delete(modifiers);
         break;
     case KEYSTROKE_END:
         keys_delete_power_management(code);
+        modifiers_unset_temporary(source_action);;
         break;
     }
 }
@@ -327,6 +329,7 @@ void actions_power_management(struct keystroke *keystroke, const __flash struct 
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
+        modifiers_set_temporary(0, source_action);
         keys_add_power_management(code);
         break;
     case KEYSTROKE_END:
@@ -342,12 +345,12 @@ void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
-        modifiers_add(modifiers);
+        modifiers_set_temporary(modifiers, source_action);
         keys_add_multimedia(code);
-        modifiers_delete(modifiers);
         break;
     case KEYSTROKE_END:
         keys_delete_multimedia(code);
+        modifiers_unset_temporary(source_action);
         break;
     }
 }
@@ -358,6 +361,7 @@ void actions_multimedia(struct keystroke *keystroke, const __flash struct action
 
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
+        modifiers_set_temporary(0, source_action);
         keys_add_multimedia(code);
         break;
     case KEYSTROKE_END:
@@ -461,11 +465,9 @@ void actions_shift_switch_actions(struct keystroke *keystroke, const __flash str
     switch (keystroke->execution_mode) {
     case KEYSTROKE_BEGIN:
         data->storage->switched = modifiers_get() & (HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT);
-        if (data->storage->switched) {
-            modifiers_stash(HID_KEYBOARD_MODIFIER_LEFTSHIFT | HID_KEYBOARD_MODIFIER_RIGHTSHIFT);
+        if (data->storage->switched)
             data->secondary_action.fcn(keystroke, &data->secondary_action);
-            modifiers_pop_stash();
-        } else
+        else
             data->primary_action.fcn(keystroke, &data->primary_action);
         break;
     case KEYSTROKE_END:

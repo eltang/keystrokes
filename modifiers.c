@@ -1,14 +1,14 @@
 #include "modifiers.h"
 #include "main.h"
 
-static uint8_t current_modifier_quantities[8];
-static uint8_t stashed_modifier_quantities[8], stashed_modifiers;
+static uint8_t regular_modifiers[8], temporary_modifiers;
+static const __flash struct action *temporary_modifiers_action;
 
 void modifiers_add(uint8_t modifiers)
 {
     for (uint8_t i = 8; i--;)
         if (modifiers & 1 << i)
-            ++current_modifier_quantities[i];
+            ++regular_modifiers[i];
     SendKeyboardReport();
 }
 
@@ -16,35 +16,31 @@ void modifiers_delete(uint8_t modifiers)
 {
     for (uint8_t i = 8; i--;)
         if (modifiers & 1 << i)
-            --current_modifier_quantities[i];
+            --regular_modifiers[i];
     SendKeyboardReport();
 }
 
 uint8_t modifiers_get(void)
 {
-    uint8_t modifiers = 0;
+    uint8_t modifiers = temporary_modifiers;
 
     for (uint8_t i = 8; i--;)
-        if (current_modifier_quantities[i])
+        if (regular_modifiers[i])
             modifiers |= 1 << i;
     return modifiers;
 }
 
-void modifiers_stash(uint8_t modifiers)
+void modifiers_set_temporary(uint8_t modifiers, const __flash struct action *action)
 {
-    for (uint8_t i = 8; i--;)
-        if (modifiers & 1 << i) {
-            stashed_modifier_quantities[i] = current_modifier_quantities[i];
-            current_modifier_quantities[i] = 0;
-        }
-    stashed_modifiers = modifiers;
+    temporary_modifiers_action = action;
+    temporary_modifiers = modifiers;
     SendKeyboardReport();
 }
 
-void modifiers_pop_stash(void)
+void modifiers_unset_temporary(const __flash struct action *action)
 {
-    for (uint8_t i = 8; i--;)
-        if (stashed_modifiers & 1 << i)
-            current_modifier_quantities[i] = stashed_modifier_quantities[i];
+    if (temporary_modifiers_action != action)
+        return;
+    temporary_modifiers = 0;
     SendKeyboardReport();
 }
