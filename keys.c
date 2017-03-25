@@ -26,6 +26,7 @@ void keys_add_scancode(uint8_t code)
     for (i = 6; i--;)
         if (!keyboard_codes[i])
            goto add_code;
+    return;
 add_code:
     keyboard_codes[i] = code;
     ++keyboard_code_activations[i];
