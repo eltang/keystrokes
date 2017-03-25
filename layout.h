@@ -424,7 +424,7 @@ US_CODE_TO_SCANCODE(code)) | ((code) & ~(uint64_t)0xFFFFFFFFFF))
 ((code) & 0xFFFFFFFFFF) == 't' ? HID_KEYBOARD_SC_F : \
 ((code) & 0xFFFFFFFFFF) == 'u' ? HID_KEYBOARD_SC_I : \
 ((code) & 0xFFFFFFFFFF) == 'y' ? HID_KEYBOARD_SC_O : \
-US_PRINTING_CODE_TO_SCANCODE(code)) | ((code) & ~(uint64_t)0xFFFFFFFFFF))
+US_CODE_TO_SCANCODE(code)) | ((code) & ~(uint64_t)0xFFFFFFFFFF))
 
 #define K_CREATE_FCN(code) \
 ((code) >> 8 && (code) & 0xFF ? actions_modifiers_and_scancode : \
@@ -461,6 +461,7 @@ actions_power_management)
 
 #define US_SC(code) SC_ASSEMBLE(US_CODE_TO_SCANCODE(code))
 #define US_DVORAK_SC(code) SC_ASSEMBLE(US_DVORAK_CODE_TO_SCANCODE(code))
+#define US_COLEMAK_SC(code) SC_ASSEMBLE(US_COLEMAK_CODE_TO_SCANCODE(code))
 
 #define PM(code) \
 { \
