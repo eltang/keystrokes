@@ -27,6 +27,7 @@ enum {
 extern const __flash struct action layout[][ROWS * COLUMNS];
 __attribute__((weak))
 extern const __flash struct leader_key_dictionary_entry leader_key_dictionary[];
+__attribute__((weak))
 extern const __flash uint8_t leader_key_dictionary_length;
 
 #define NO_ACTION { actions_none }
