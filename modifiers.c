@@ -1,11 +1,12 @@
 #include "modifiers.h"
 #include "main.h"
 
-static uint8_t regular_modifiers[8], temporary_modifiers;
+static uint8_t regular_modifiers[8], all_regular_modifiers, temporary_modifiers;
 static const __flash struct action *temporary_modifiers_action;
 
 void modifiers_add(uint8_t modifiers)
 {
+    all_regular_modifiers |= modifiers;
     for (uint8_t i = 8; i--;)
         if (modifiers & 1 << i)
             ++regular_modifiers[i];
@@ -16,18 +17,14 @@ void modifiers_delete(uint8_t modifiers)
 {
     for (uint8_t i = 8; i--;)
         if (modifiers & 1 << i)
-            --regular_modifiers[i];
+            if (!--regular_modifiers[i])
+                all_regular_modifiers &= ~(1 << i);
     SendKeyboardReport();
 }
 
 uint8_t modifiers_get(void)
 {
-    uint8_t modifiers = temporary_modifiers;
-
-    for (uint8_t i = 8; i--;)
-        if (regular_modifiers[i])
-            modifiers |= 1 << i;
-    return modifiers;
+    return all_regular_modifiers | temporary_modifiers;
 }
 
 void modifiers_set_temporary(uint8_t modifiers, const __flash struct action *action)
