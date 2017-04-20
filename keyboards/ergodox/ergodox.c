@@ -35,20 +35,14 @@
 // The address of the slave which controls the left LED strip is 0x42.
 // There are 15 leds connected to pin D7.
 
-static uint8_t OLATA_state = 0xFF, OLATB_state, GPIOB_state = 0xFF;
+static uint8_t GPIOB_state = 0xFF;
 
 void matrix_init(void)
 {
-    DDRB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
-    PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
-    DDRD |= 1 << 3 | 1 << 2;
-    PORTD |= 1 << 3 | 1 << 2;
-    DDRC |= 1 << 6;
-    PORTC |= 1 << 6;
     PORTF |= ~(1 << 3 | 1 << 2);
     i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
     i2c_write(IODIRA);
-    i2c_write(0);
+    i2c_write((uint8_t)~(1 << 7));
     i2c_write((uint8_t)~(1 << 6 | 1 << 7));
     i2c_stop();
     i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
@@ -81,30 +75,30 @@ void matrix_activate_output(uint8_t output)
 {
     switch (output) {
     case 7:
-        PORTB &= ~1;
+        DDRB |= 1;
         break;
     case 8:
-        PORTB &= ~(1 << 1);
+        DDRB |= 1 << 1;
         break;
     case 9:
-        PORTB &= ~(1 << 2);
+        DDRB |= 1 << 2;
         break;
     case 10:
-        PORTB &= ~(1 << 3);
+        DDRB |= 1 << 3;
         break;
     case 11:
-        PORTD &= ~(1 << 2);
+        DDRD |= 1 << 2;
         break;
     case 12:
-        PORTD &= ~(1 << 3);
+        DDRD |= 1 << 3;
         break;
     case 13:
-        PORTC &= ~(1 << 6);
+        DDRC |= 1 << 6;
         break;
     default:
         i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
-        i2c_write(OLATA);
-        i2c_write(OLATA_state &= ~(1 << output));
+        i2c_write(IODIRA);
+        i2c_write(~(1 << 7 | 1 << output));
         i2c_stop();
         i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
         i2c_write(GPIOB);
@@ -118,23 +112,20 @@ void matrix_activate_output(uint8_t output)
 void matrix_deactivate_output(uint8_t output)
 {
     switch (output) {
+    case 0:
+        i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
+        i2c_write(IODIRA);
+        i2c_write(~(1 << 7));
+        i2c_stop();
+        break;
     case 7 ... 10:
-        PORTB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
+        DDRB &= ~(1 << 3 | 1 << 2 | 1 << 1 | 1);
         break;
     case 11 ... 12:
-        PORTD |= 1 << 3 | 1 << 2;
+        DDRD &= ~(1 << 3 | 1 << 2);
         break;
     case 13:
-        PORTC |= 1 << 6;
-        break;
-    default:
-        OLATA_state |= ~(1 << 7);
-        if (output)
-            break;
-        i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
-        i2c_write(OLATA);
-        i2c_write(OLATA_state);
-        i2c_stop();
+        DDRC &= ~(1 << 6);
         break;
     }
 }

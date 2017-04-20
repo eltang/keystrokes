@@ -36,10 +36,6 @@ static const __flash struct pin input_pins[INPUTS] = INPUT_PINS;
 __attribute__((weak))
 void matrix_init_output(uint8_t output)
 {
-    struct pin pin = output_pins[output];
-
-    pin.port->ddr |= pin.mask;
-    pin.port->port |= pin.mask;
 }
 
 __attribute__((weak))
@@ -55,7 +51,7 @@ void matrix_activate_output(uint8_t output)
 {
     struct pin pin = output_pins[output];
 
-    pin.port->port &= ~pin.mask;
+    pin.port->ddr |= pin.mask;
 }
 
 __attribute__((weak))
@@ -63,7 +59,7 @@ void matrix_deactivate_output(uint8_t output)
 {
     struct pin pin = output_pins[output];
 
-    pin.port->port |= pin.mask;
+    pin.port->ddr &= ~pin.mask;
 }
 
 __attribute__((weak))
