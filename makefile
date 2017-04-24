@@ -33,7 +33,8 @@ SRC          = $(TARGET).c \
 			   layers.c \
 			   keystrokes.c \
 			   leader_key.c \
-			   power.c
+			   power.c \
+			   pins.c
 
 
 LUFA_PATH    = lufa/LUFA
