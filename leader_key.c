@@ -48,7 +48,7 @@ void leader_key_process(uint8_t code)
 {
     if (sequence_index == MAX_LEADER_KEY_SEQUENCE_LENGTH)
         return;
-    sequence[sequence_index++] = code | modifiers_get() << 8;
+    sequence[sequence_index++] = code;
     leader_key_timestamp = timer_read();
 }
 

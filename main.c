@@ -261,7 +261,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
     {
 		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
-        KeyboardReport->Modifier = modifiers_get();
+        KeyboardReport->Modifier = modifiers_get_disguised_modifiers();
         memcpy(KeyboardReport->KeyCode, keys_get_scancode(), 6);
 
 		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
