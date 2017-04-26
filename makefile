@@ -17,6 +17,7 @@ BOARD        = NONE
 F_CPU        = 16000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
+JUMP_TABLES  = Y
 TARGET       = main
 SRC          = $(TARGET).c \
                descriptors.c \
