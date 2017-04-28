@@ -19,9 +19,6 @@
 #ifndef _USB_MAIN_H_
 #define _USB_MAIN_H_
 
-// TESTING
-// extern uint8_t blinkLed;
-
 #include "ch.h"
 #include "hal.h"
 
@@ -50,26 +47,11 @@ void send_remote_wakeup(USBDriver *usbp);
 #define KBD_EPSIZE      8
 #define KBD_REPORT_KEYS (KBD_EPSIZE - 2)
 
-/* secondary keyboard */
-#ifdef NKRO_ENABLE
-#define NKRO_INTERFACE    4
-#define NKRO_ENDPOINT     5
-#define NKRO_EPSIZE       16
-#define NKRO_REPORT_KEYS  (NKRO_EPSIZE - 1)
-#endif
-
-/* extern report_keyboard_t keyboard_report_sent; */
-
 /* keyboard IN request callback handler */
 void kbd_in_cb(USBDriver *usbp, usbep_t ep);
 
 /* start-of-frame handler */
 void kbd_sof_cb(USBDriver *usbp);
-
-#ifdef NKRO_ENABLE
-/* nkro IN callback hander */
-void nkro_in_cb(USBDriver *usbp, usbep_t ep);
-#endif /* NKRO_ENABLE */
 
 /* ------------
  * Mouse header
@@ -106,34 +88,5 @@ typedef struct {
   uint16_t usage;
 } __attribute__ ((packed)) report_extra_t;
 #endif /* EXTRAKEY_ENABLE */
-
-/* --------------
- * Console header
- * --------------
- */
-
-#ifdef CONSOLE_ENABLE
-
-#define CONSOLE_INTERFACE      2
-#define CONSOLE_ENDPOINT       3
-#define CONSOLE_EPSIZE         16
-
-/* Number of IN reports that can be stored inside the output queue */
-#define CONSOLE_QUEUE_CAPACITY 4
-
-/* Console flush time */
-#define CONSOLE_FLUSH_MS 50
-
-/* Putchar over the USB console */
-int8_t sendchar(uint8_t c);
-
-/* Flush output (send everything immediately) */
-void console_flush_output(void);
-
-/* console IN request callback handler */
-void console_in_cb(USBDriver *usbp, usbep_t ep);
-#endif /* CONSOLE_ENABLE */
-
-void sendchar_pf(void *p, char c);
 
 #endif /* _USB_MAIN_H_ */
