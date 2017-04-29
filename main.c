@@ -49,30 +49,30 @@
  *  within a device can be differentiated from one another.
  */
 USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
-	{
-		.Config =
-			{
-				.ControlInterfaceNumber         = INTERFACE_ID_CDC_CCI,
-				.DataINEndpoint                 =
-					{
-						.Address                = CDC_TX_EPADDR,
-						.Size                   = CDC_TXRX_EPSIZE,
-						.Banks                  = 1,
-					},
-				.DataOUTEndpoint                =
-					{
-						.Address                = CDC_RX_EPADDR,
-						.Size                   = CDC_TXRX_EPSIZE,
-						.Banks                  = 1,
-					},
-				.NotificationEndpoint           =
-					{
-						.Address                = CDC_NOTIFICATION_EPADDR,
-						.Size                   = CDC_NOTIFICATION_EPSIZE,
-						.Banks                  = 1,
-					},
-			},
-	};
+    {
+        .Config =
+            {
+                .ControlInterfaceNumber         = INTERFACE_ID_CDC_CCI,
+                .DataINEndpoint                 =
+                    {
+                        .Address                = CDC_TX_EPADDR,
+                        .Size                   = CDC_TXRX_EPSIZE,
+                        .Banks                  = 1,
+                    },
+                .DataOUTEndpoint                =
+                    {
+                        .Address                = CDC_RX_EPADDR,
+                        .Size                   = CDC_TXRX_EPSIZE,
+                        .Banks                  = 1,
+                    },
+                .NotificationEndpoint           =
+                    {
+                        .Address                = CDC_NOTIFICATION_EPADDR,
+                        .Size                   = CDC_NOTIFICATION_EPSIZE,
+                        .Banks                  = 1,
+                    },
+            },
+    };
 #endif
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
@@ -91,20 +91,20 @@ static uint8_t KeyboardReportCounter, MouseReportCounter, EnhancedKeyboardReport
  *  interface within the device.
  */
 USB_ClassInfo_HID_Device_t Keyboard_HID_Interface =
-	{
-		.Config =
-			{
-				.InterfaceNumber              = INTERFACE_ID_Keyboard,
-				.ReportINEndpoint             =
-					{
-						.Address              = KEYBOARD_EPADDR,
-						.Size                 = HID_EPSIZE,
-						.Banks                = 1,
-					},
-				.PrevReportINBuffer           = PrevKeyboardHIDReportBuffer,
-				.PrevReportINBufferSize       = sizeof(PrevKeyboardHIDReportBuffer),
-			},
-	};
+    {
+        .Config =
+            {
+                .InterfaceNumber              = INTERFACE_ID_Keyboard,
+                .ReportINEndpoint             =
+                    {
+                        .Address              = KEYBOARD_EPADDR,
+                        .Size                 = HID_EPSIZE,
+                        .Banks                = 1,
+                    },
+                .PrevReportINBuffer           = PrevKeyboardHIDReportBuffer,
+                .PrevReportINBufferSize       = sizeof(PrevKeyboardHIDReportBuffer),
+            },
+    };
 
 /** LUFA HID Class driver interface configuration and state information. This structure is
  *  passed to all HID Class driver functions, so that multiple instances of the same class
@@ -112,53 +112,53 @@ USB_ClassInfo_HID_Device_t Keyboard_HID_Interface =
  *  interface within the device.
  */
 USB_ClassInfo_HID_Device_t Mouse_HID_Interface =
-	{
-		.Config =
-			{
-				.InterfaceNumber              = INTERFACE_ID_Mouse,
-				.ReportINEndpoint             =
-					{
-						.Address              = MOUSE_EPADDR,
-						.Size                 = HID_EPSIZE,
-						.Banks                = 1,
-					},
-				.PrevReportINBuffer           = PrevMouseHIDReportBuffer,
-				.PrevReportINBufferSize       = sizeof(PrevMouseHIDReportBuffer),
-			},
-	};
+    {
+        .Config =
+            {
+                .InterfaceNumber              = INTERFACE_ID_Mouse,
+                .ReportINEndpoint             =
+                    {
+                        .Address              = MOUSE_EPADDR,
+                        .Size                 = HID_EPSIZE,
+                        .Banks                = 1,
+                    },
+                .PrevReportINBuffer           = PrevMouseHIDReportBuffer,
+                .PrevReportINBufferSize       = sizeof(PrevMouseHIDReportBuffer),
+            },
+    };
 
 USB_ClassInfo_HID_Device_t EnhancedKeyboard_HID_Interface =
-	{
-		.Config =
-			{
-				.InterfaceNumber              = INTERFACE_ID_EnhancedKeyboard,
-				.ReportINEndpoint             =
-					{
-						.Address              = ENHANCEDKEYBOARD_EPADDR,
-						.Size                 = HID_EPSIZE,
-						.Banks                = 1,
-					},
-				.PrevReportINBuffer           = PrevEnhancedKeyboardHIDReportBuffer,
-				.PrevReportINBufferSize       = sizeof(PrevEnhancedKeyboardHIDReportBuffer),
-			},
-	};
+    {
+        .Config =
+            {
+                .InterfaceNumber              = INTERFACE_ID_EnhancedKeyboard,
+                .ReportINEndpoint             =
+                    {
+                        .Address              = ENHANCEDKEYBOARD_EPADDR,
+                        .Size                 = HID_EPSIZE,
+                        .Banks                = 1,
+                    },
+                .PrevReportINBuffer           = PrevEnhancedKeyboardHIDReportBuffer,
+                .PrevReportINBufferSize       = sizeof(PrevEnhancedKeyboardHIDReportBuffer),
+            },
+    };
 
 /** Main program entry point. This routine contains the overall program flow, including initial
  *  setup of all components and the main program loop.
  */
 int main(void)
 {
-	SetupHardware();
+    SetupHardware();
 
-	GlobalInterruptEnable();
+    GlobalInterruptEnable();
 
-	for (;;)
-	{
+    for (;;)
+    {
 #ifdef VIRTUAL_SERIAL_ENABLE
         /* Must throw away unused bytes from the host, or it will lock up while waiting for the device */
-		CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
+        CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
 
-		CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
+        CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
 #endif
 
         keystrokes_task();
@@ -169,30 +169,30 @@ int main(void)
 void SetupHardware()
 {
 #if (ARCH == ARCH_AVR8)
-	/* Disable clock division */
-	clock_prescale_set(clock_div_1);
+    /* Disable clock division */
+    clock_prescale_set(clock_div_1);
 
     MCUCR |= 1 << JTD;
     MCUCR |= 1 << JTD;
 #elif (ARCH == ARCH_XMEGA)
-	/* Start the PLL to multiply the 2MHz RC oscillator to 32MHz and switch the CPU core to run from it */
-	XMEGACLK_StartPLL(CLOCK_SRC_INT_RC2MHZ, 2000000, F_CPU);
-	XMEGACLK_SetCPUClockSource(CLOCK_SRC_PLL);
+    /* Start the PLL to multiply the 2MHz RC oscillator to 32MHz and switch the CPU core to run from it */
+    XMEGACLK_StartPLL(CLOCK_SRC_INT_RC2MHZ, 2000000, F_CPU);
+    XMEGACLK_SetCPUClockSource(CLOCK_SRC_PLL);
 
-	/* Start the 32MHz internal RC oscillator and start the DFLL to increase it to 48MHz using the USB SOF as a reference */
-	XMEGACLK_StartInternalOscillator(CLOCK_SRC_INT_RC32MHZ);
-	XMEGACLK_StartDFLL(CLOCK_SRC_INT_RC32MHZ, DFLL_REF_INT_USBSOF, F_USB);
+    /* Start the 32MHz internal RC oscillator and start the DFLL to increase it to 48MHz using the USB SOF as a reference */
+    XMEGACLK_StartInternalOscillator(CLOCK_SRC_INT_RC32MHZ);
+    XMEGACLK_StartDFLL(CLOCK_SRC_INT_RC32MHZ, DFLL_REF_INT_USBSOF, F_USB);
 
-	PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
+    PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
 #endif
-	/* Hardware Initialization */
+    /* Hardware Initialization */
     power_init();
     timer_init();
 #ifdef USING_TWI
     i2c_init();
 #endif
     matrix_init();
-	USB_Init();
+    USB_Init();
 }
 
 /** Event handler for the library USB Connection event. */
@@ -208,35 +208,35 @@ void EVENT_USB_Device_Disconnect(void)
 /** Event handler for the library USB Configuration Changed event. */
 void EVENT_USB_Device_ConfigurationChanged(void)
 {
-	bool ConfigSuccess = true;
+    bool ConfigSuccess = true;
 
-	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
-	ConfigSuccess &= HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
-	ConfigSuccess &= HID_Device_ConfigureEndpoints(&EnhancedKeyboard_HID_Interface);
+    ConfigSuccess &= HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
+    ConfigSuccess &= HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
+    ConfigSuccess &= HID_Device_ConfigureEndpoints(&EnhancedKeyboard_HID_Interface);
 #ifdef VIRTUAL_SERIAL_ENABLE
-	ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
+    ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 #endif
 
-	USB_Device_EnableSOFEvents();
+    USB_Device_EnableSOFEvents();
 }
 
 /** Event handler for the library USB Control Request reception event. */
 void EVENT_USB_Device_ControlRequest(void)
 {
 #ifdef VIRTUAL_SERIAL_ENABLE
-	CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
+    CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
 #endif
-	HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
-	HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
-	HID_Device_ProcessControlRequest(&EnhancedKeyboard_HID_Interface);
+    HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);
+    HID_Device_ProcessControlRequest(&Mouse_HID_Interface);
+    HID_Device_ProcessControlRequest(&EnhancedKeyboard_HID_Interface);
 }
 
 /** Event handler for the USB device Start Of Frame event. */
 void EVENT_USB_Device_StartOfFrame(void)
 {
-	HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
-	HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
-	HID_Device_MillisecondElapsed(&EnhancedKeyboard_HID_Interface);
+    HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
+    HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
+    HID_Device_MillisecondElapsed(&EnhancedKeyboard_HID_Interface);
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
@@ -256,23 +256,23 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
                                          uint16_t* const ReportSize)
 {
 
-	/* Determine which interface must have its report generated */
-	if (HIDInterfaceInfo == &Keyboard_HID_Interface)
+    /* Determine which interface must have its report generated */
+    if (HIDInterfaceInfo == &Keyboard_HID_Interface)
     {
-		USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
+        USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
         KeyboardReport->Modifier = modifiers_get_disguised_modifiers();
         memcpy(KeyboardReport->KeyCode, keys_get_scancode(), 6);
 
-		*ReportSize = sizeof(USB_KeyboardReport_Data_t);
+        *ReportSize = sizeof(USB_KeyboardReport_Data_t);
         ++KeyboardReportCounter;
     }
     else if (HIDInterfaceInfo == &Mouse_HID_Interface)
     {
-		USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
+        USB_MouseReport_Data_t* MouseReport = (USB_MouseReport_Data_t*)ReportData;
 
 
-		*ReportSize = sizeof(USB_MouseReport_Data_t);
+        *ReportSize = sizeof(USB_MouseReport_Data_t);
         ++MouseReportCounter;
     }
     else
@@ -303,9 +303,9 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
                                           const uint16_t ReportSize)
 {
     if (HIDInterfaceInfo == &Keyboard_HID_Interface)
-	{
-		uint8_t* LEDReport = (uint8_t*)ReportData;
-	}
+    {
+        uint8_t* LEDReport = (uint8_t*)ReportData;
+    }
 }
 
 /** CDC class driver callback function the processing of changes to the virtual
@@ -315,13 +315,13 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
  */
 void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const CDCInterfaceInfo)
 {
-	/* You can get changes to the virtual CDC lines in this callback; a common
-	   use-case is to use the Data Terminal Ready (DTR) flag to enable and
-	   disable CDC communications in your application when set to avoid the
-	   application blocking while waiting for a host to become ready and read
-	   in the pending data from the USB endpoints.
-	*/
-	bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
+    /* You can get changes to the virtual CDC lines in this callback; a common
+       use-case is to use the Data Terminal Ready (DTR) flag to enable and
+       disable CDC communications in your application when set to avoid the
+       application blocking while waiting for a host to become ready and read
+       in the pending data from the USB endpoints.
+    */
+    bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
 }
 
 void SendKeyboardReport(void)
