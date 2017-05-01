@@ -92,10 +92,6 @@ void i2cObjectInit(I2CDriver *i2cp) {
  */
 void i2cStart(I2CDriver *i2cp, const I2CConfig *config) {
 
-  osalDbgCheck((i2cp != NULL) && (config != NULL));
-  osalDbgAssert((i2cp->state == I2C_STOP) || (i2cp->state == I2C_READY) ||
-                (i2cp->state == I2C_LOCKED), "invalid state");
-
   osalSysLock();
   i2cp->config = config;
   i2c_lld_start(i2cp);
@@ -112,12 +108,7 @@ void i2cStart(I2CDriver *i2cp, const I2CConfig *config) {
  */
 void i2cStop(I2CDriver *i2cp) {
 
-  osalDbgCheck(i2cp != NULL);
-
   osalSysLock();
-
-  osalDbgAssert((i2cp->state == I2C_STOP) || (i2cp->state == I2C_READY) ||
-                (i2cp->state == I2C_LOCKED), "invalid state");
 
   i2c_lld_stop(i2cp);
   i2cp->config = NULL;
@@ -135,8 +126,6 @@ void i2cStop(I2CDriver *i2cp) {
  * @api
  */
 i2cflags_t i2cGetErrors(I2CDriver *i2cp) {
-
-  osalDbgCheck(i2cp != NULL);
 
   return i2c_lld_get_errors(i2cp);
 }
@@ -175,13 +164,6 @@ msg_t i2cMasterTransmitTimeout(I2CDriver *i2cp,
                                size_t rxbytes,
                                systime_t timeout) {
   msg_t rdymsg;
-
-  osalDbgCheck((i2cp != NULL) && (addr != 0U) &&
-               (txbytes > 0U) && (txbuf != NULL) &&
-               ((rxbytes == 0U) || ((rxbytes > 0U) && (rxbuf != NULL))) &&
-               (timeout != TIME_IMMEDIATE));
-
-  osalDbgAssert(i2cp->state == I2C_READY, "not ready");
 
   osalSysLock();
   i2cp->errors = I2C_NO_ERROR;
@@ -225,12 +207,6 @@ msg_t i2cMasterReceiveTimeout(I2CDriver *i2cp,
                               systime_t timeout){
 
   msg_t rdymsg;
-
-  osalDbgCheck((i2cp != NULL) && (addr != 0U) &&
-               (rxbytes > 0U) && (rxbuf != NULL) &&
-               (timeout != TIME_IMMEDIATE));
-
-  osalDbgAssert(i2cp->state == I2C_READY, "not ready");
 
   osalSysLock();
   i2cp->errors = I2C_NO_ERROR;
