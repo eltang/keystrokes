@@ -19,15 +19,15 @@
  */
 
 /**
- * @file    hal_i2c.h
+ * @file    twi.h
  * @brief   I2C Driver macros and structures.
  *
  * @addtogroup I2C
  * @{
  */
 
-#ifndef HAL_I2C_H
-#define HAL_I2C_H
+#ifndef TWI_H
+#define TWI_H
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -304,6 +304,6 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_I2C_H */
+#endif /* TWI_H */
 
 /** @} */

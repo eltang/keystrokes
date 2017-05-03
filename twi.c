@@ -19,13 +19,13 @@
  */
 
 /**
- * @file    hal_i2c.c
+ * @file    twi.c
  * @brief   I2C Driver code.
  *
  * @addtogroup I2C
  * @{
  */
-#include "hal.h"
+#include "twi.h"
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
