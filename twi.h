@@ -29,6 +29,11 @@
 #ifndef TWI_H
 #define TWI_H
 
+#include <stdint.h>
+#include <avr/interrupt.h>
+#include <avr/io.h>
+#include <stddef.h>
+
 /*===========================================================================*/
 /* Driver constants.                                                         */
 /*===========================================================================*/
@@ -60,19 +65,6 @@
 /*===========================================================================*/
 /* Driver data structures and types.                                         */
 /*===========================================================================*/
-
-/**
- * @brief   Driver state machine possible states.
- */
-typedef enum {
-  I2C_UNINIT = 0,                           /**< Not initialized.           */
-  I2C_STOP = 1,                             /**< Stopped.                   */
-  I2C_READY = 2,                            /**< Ready.                     */
-  I2C_ACTIVE_TX = 3,                        /**< Transmitting.              */
-  I2C_ACTIVE_RX = 4,                        /**< Receiving.                 */
-  I2C_LOCKED = 5                            /**> Bus or driver locked.      */
-} i2cstate_t;
-
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -146,10 +138,6 @@ typedef struct {
  */
 struct I2CDriver {
   /**
-   * @brief   Driver state.
-   */
-  i2cstate_t                state;
-  /**
    * @brief   Current configuration data.
    */
   const I2CConfig           *config;
@@ -158,10 +146,6 @@ struct I2CDriver {
    */
   i2cflags_t                errors;
   /* End of the mandatory fields.*/
-  /**
-   * @brief   Thread waiting for I/O completion.
-   */
-  thread_reference_t        thread;
   /**
    * @brief   Address of slave device.
    */
@@ -222,13 +206,11 @@ extern "C" {
   void i2c_lld_init(void);
   void i2c_lld_start(I2CDriver *i2cp);
   void i2c_lld_stop(I2CDriver *i2cp);
-  msg_t i2c_lld_master_transmit_timeout(I2CDriver *i2cp, i2caddr_t addr,
+  void i2c_lld_master_transmit(I2CDriver *i2cp, i2caddr_t addr,
                                         const uint8_t *txbuf, size_t txbytes,
-                                        uint8_t *rxbuf, size_t rxbytes,
-                                        systime_t timeout);
-  msg_t i2c_lld_master_receive_timeout(I2CDriver *i2cp, i2caddr_t addr,
-                                       uint8_t *rxbuf, size_t rxbytes,
-                                       systime_t timeout);
+                                        uint8_t *rxbuf, size_t rxbytes);
+  void i2c_lld_master_receive(I2CDriver *i2cp, i2caddr_t addr,
+                                       uint8_t *rxbuf, size_t rxbytes);
 #ifdef __cplusplus
 }
 #endif
@@ -236,47 +218,6 @@ extern "C" {
 /*===========================================================================*/
 /* Driver macros.                                                            */
 /*===========================================================================*/
-
-/**
- * @brief   Wakes up the waiting thread notifying no errors.
- *
- * @param[in] i2cp      pointer to the @p I2CDriver object
- *
- * @notapi
- */
-#define _i2c_wakeup_isr(i2cp) do {                                          \
-  osalSysLockFromISR();                                                     \
-  osalThreadResumeI(&(i2cp)->thread, MSG_OK);                               \
-  osalSysUnlockFromISR();                                                   \
-} while(0)
-
-/**
- * @brief   Wakes up the waiting thread notifying errors.
- *
- * @param[in] i2cp      pointer to the @p I2CDriver object
- *
- * @notapi
- */
-#define _i2c_wakeup_error_isr(i2cp) do {                                    \
-  osalSysLockFromISR();                                                     \
-  osalThreadResumeI(&(i2cp)->thread, MSG_RESET);                            \
-  osalSysUnlockFromISR();                                                   \
-} while(0)
-
-/**
- * @brief   Wrap i2cMasterTransmitTimeout function with TIME_INFINITE timeout.
- * @api
- */
-#define i2cMasterTransmit(i2cp, addr, txbuf, txbytes, rxbuf, rxbytes)       \
-  (i2cMasterTransmitTimeout(i2cp, addr, txbuf, txbytes, rxbuf, rxbytes,     \
-                            TIME_INFINITE))
-
-/**
- * @brief   Wrap i2cMasterReceiveTimeout function with TIME_INFINITE timeout.
- * @api
- */
-#define i2cMasterReceive(i2cp, addr, rxbuf, rxbytes)                        \
-  (i2cMasterReceiveTimeout(i2cp, addr, rxbuf, rxbytes, TIME_INFINITE))
 
 /*===========================================================================*/
 /* External declarations.                                                    */
@@ -290,15 +231,13 @@ extern "C" {
   void i2cStart(I2CDriver *i2cp, const I2CConfig *config);
   void i2cStop(I2CDriver *i2cp);
   i2cflags_t i2cGetErrors(I2CDriver *i2cp);
-  msg_t i2cMasterTransmitTimeout(I2CDriver *i2cp,
+  void i2cMasterTransmit(I2CDriver *i2cp,
                                  i2caddr_t addr,
                                  const uint8_t *txbuf, size_t txbytes,
-                                 uint8_t *rxbuf, size_t rxbytes,
-                                 systime_t timeout);
-  msg_t i2cMasterReceiveTimeout(I2CDriver *i2cp,
+                                 uint8_t *rxbuf, size_t rxbytes);
+  void i2cMasterReceive(I2CDriver *i2cp,
                                 i2caddr_t addr,
-                                uint8_t *rxbuf, size_t rxbytes,
-                                systime_t timeout);
+                                uint8_t *rxbuf, size_t rxbytes);
 
 #ifdef __cplusplus
 }

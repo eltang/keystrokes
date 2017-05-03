@@ -55,8 +55,7 @@ I2CDriver I2CD1;
  *
  * @notapi
  */
-OSAL_IRQ_HANDLER(TWI_vect) {
-  OSAL_IRQ_PROLOGUE();
+ISR(TWI_vect) {
 
   I2CDriver *i2cp = &I2CD1;
 
@@ -81,7 +80,6 @@ OSAL_IRQ_HANDLER(TWI_vect) {
       }
       else {
         TWCR = ((1 << TWSTO) | (1 << TWINT) | (1 << TWEN));
-        _i2c_wakeup_isr(i2cp);
       }
     }
     break;
@@ -105,7 +103,6 @@ OSAL_IRQ_HANDLER(TWI_vect) {
   case TWI_MASTER_RX_DATA_NACK:
     i2cp->rxbuf[i2cp->rxidx] = TWDR;
     TWCR = ((1 << TWSTO) | (1 << TWINT) | (1 << TWEN));
-    _i2c_wakeup_isr(i2cp);
   case TWI_MASTER_TX_ADDR_NACK:
   case TWI_MASTER_TX_DATA_NACK:
   case TWI_MASTER_RX_ADDR_NACK:
@@ -120,15 +117,11 @@ OSAL_IRQ_HANDLER(TWI_vect) {
   default:
     /* FIXME: only gets here if there are other MASTERs in the bus */
     TWCR = ((1 << TWSTO) | (1 << TWINT) | (1 << TWEN));
-    _i2c_wakeup_error_isr(i2cp);
   }
 
   if (i2cp->errors != I2C_NO_ERROR) {
     TWCR = ((1 << TWSTO) | (1 << TWINT) | (1 << TWEN));
-    _i2c_wakeup_error_isr(i2cp);
   }
-
-  OSAL_IRQ_EPILOGUE();
 }
 
 /*===========================================================================*/
@@ -142,7 +135,6 @@ OSAL_IRQ_HANDLER(TWI_vect) {
  */
 void i2c_lld_init(void) {
   i2cObjectInit(&I2CD1);
-  I2CD1.thread = NULL;
 }
 
 /**
@@ -176,10 +168,8 @@ void i2c_lld_start(I2CDriver *i2cp) {
  */
 void i2c_lld_stop(I2CDriver *i2cp) {
 
-  if (i2cp->state != I2C_STOP) {
-    /* Disable TWI subsystem and stop all operations */
-    TWCR &= ~(1 << TWEN);
-  }
+  /* Disable TWI subsystem and stop all operations */
+  TWCR &= ~(1 << TWEN);
 }
 
 /**
@@ -203,9 +193,8 @@ void i2c_lld_stop(I2CDriver *i2cp) {
  *
  * @notapi
  */
-msg_t i2c_lld_master_receive_timeout(I2CDriver *i2cp, i2caddr_t addr,
-                                     uint8_t *rxbuf, size_t rxbytes,
-                                     systime_t timeout) {
+void i2c_lld_master_receive(I2CDriver *i2cp, i2caddr_t addr,
+                                     uint8_t *rxbuf, size_t rxbytes) {
   i2cp->errors = I2C_NO_ERROR;
   i2cp->addr = addr;
   i2cp->txbuf = NULL;
@@ -217,8 +206,6 @@ msg_t i2c_lld_master_receive_timeout(I2CDriver *i2cp, i2caddr_t addr,
 
   /* Send START */
   TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
-
-  return osalThreadSuspendTimeoutS(&i2cp->thread, TIME_INFINITE);
 }
 
 /**
@@ -244,10 +231,9 @@ msg_t i2c_lld_master_receive_timeout(I2CDriver *i2cp, i2caddr_t addr,
  *
  * @notapi
  */
-msg_t i2c_lld_master_transmit_timeout(I2CDriver *i2cp, i2caddr_t addr,
+void i2c_lld_master_transmit(I2CDriver *i2cp, i2caddr_t addr,
                                       const uint8_t *txbuf, size_t txbytes,
-                                      uint8_t *rxbuf, size_t rxbytes,
-                                      systime_t timeout) {
+                                      uint8_t *rxbuf, size_t rxbytes) {
   i2cp->errors = I2C_NO_ERROR;
   i2cp->addr = addr;
   i2cp->txbuf = txbuf;
@@ -258,8 +244,6 @@ msg_t i2c_lld_master_transmit_timeout(I2CDriver *i2cp, i2caddr_t addr,
   i2cp->rxidx = 0;
 
   TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
-
-  return osalThreadSuspendTimeoutS(&i2cp->thread, TIME_INFINITE);
 }
 
 /*===========================================================================*/
@@ -303,7 +287,6 @@ void i2cInit(void) {
  */
 void i2cObjectInit(I2CDriver *i2cp) {
 
-  i2cp->state  = I2C_STOP;
   i2cp->config = NULL;
 }
 
@@ -317,11 +300,8 @@ void i2cObjectInit(I2CDriver *i2cp) {
  */
 void i2cStart(I2CDriver *i2cp, const I2CConfig *config) {
 
-  osalSysLock();
   i2cp->config = config;
   i2c_lld_start(i2cp);
-  i2cp->state = I2C_READY;
-  osalSysUnlock();
 }
 
 /**
@@ -333,13 +313,8 @@ void i2cStart(I2CDriver *i2cp, const I2CConfig *config) {
  */
 void i2cStop(I2CDriver *i2cp) {
 
-  osalSysLock();
-
   i2c_lld_stop(i2cp);
   i2cp->config = NULL;
-  i2cp->state  = I2C_STOP;
-
-  osalSysUnlock();
 }
 
 /**
@@ -381,28 +356,16 @@ i2cflags_t i2cGetErrors(I2CDriver *i2cp) {
  *
  * @api
  */
-msg_t i2cMasterTransmitTimeout(I2CDriver *i2cp,
+void i2cMasterTransmit(I2CDriver *i2cp,
                                i2caddr_t addr,
                                const uint8_t *txbuf,
                                size_t txbytes,
                                uint8_t *rxbuf,
-                               size_t rxbytes,
-                               systime_t timeout) {
-  msg_t rdymsg;
+                               size_t rxbytes) {
 
-  osalSysLock();
   i2cp->errors = I2C_NO_ERROR;
-  i2cp->state = I2C_ACTIVE_TX;
-  rdymsg = i2c_lld_master_transmit_timeout(i2cp, addr, txbuf, txbytes,
-                                           rxbuf, rxbytes, timeout);
-  if (rdymsg == MSG_TIMEOUT) {
-    i2cp->state = I2C_LOCKED;
-  }
-  else {
-    i2cp->state = I2C_READY;
-  }
-  osalSysUnlock();
-  return rdymsg;
+  i2c_lld_master_transmit(i2cp, addr, txbuf, txbytes,
+                                           rxbuf, rxbytes);
 }
 
 /**
@@ -425,26 +388,13 @@ msg_t i2cMasterTransmitTimeout(I2CDriver *i2cp,
  *
  * @api
  */
-msg_t i2cMasterReceiveTimeout(I2CDriver *i2cp,
+void i2cMasterReceive(I2CDriver *i2cp,
                               i2caddr_t addr,
                               uint8_t *rxbuf,
-                              size_t rxbytes,
-                              systime_t timeout){
+                              size_t rxbytes){
 
-  msg_t rdymsg;
-
-  osalSysLock();
   i2cp->errors = I2C_NO_ERROR;
-  i2cp->state = I2C_ACTIVE_RX;
-  rdymsg = i2c_lld_master_receive_timeout(i2cp, addr, rxbuf, rxbytes, timeout);
-  if (rdymsg == MSG_TIMEOUT) {
-    i2cp->state = I2C_LOCKED;
-  }
-  else {
-    i2cp->state = I2C_READY;
-  }
-  osalSysUnlock();
-  return rdymsg;
+  i2c_lld_master_receive(i2cp, addr, rxbuf, rxbytes);
 }
 
 /** @} */
