@@ -35,12 +35,49 @@
 /* Driver exported variables.                                                */
 /*===========================================================================*/
 
-/** @brief I2C driver identifier.*/
-I2CDriver I2CD1;
-
 /*===========================================================================*/
 /* Driver local variables and types.                                         */
 /*===========================================================================*/
+
+struct {
+  /**
+    * @brief   Current configuration data.
+    */
+  const I2CConfig           *config;
+  /**
+    * @brief   Error flags.
+    */
+  uint8_t                errors;
+  /* End of the mandatory fields.*/
+  /**
+    * @brief   Address of slave device.
+    */
+  uint8_t                 addr;
+  /**
+    * @brief   Pointer to the buffer with data to send.
+    */
+  const uint8_t             *txbuf;
+  /**
+    * @brief   Number of bytes of data to send.
+    */
+  size_t                    txbytes;
+  /**
+    * @brief   Current index in buffer when sending data.
+    */
+  size_t                    txidx;
+  /**
+    * @brief   Pointer to the buffer to put received data.
+    */
+  uint8_t                   *rxbuf;
+  /**
+    * @brief   Number of bytes of data to receive.
+    */
+  size_t                    rxbytes;
+  /**
+    * @brief   Current index in buffer when receiving data.
+    */
+  size_t                    rxidx;
+} I2CDriver;
 
 /*===========================================================================*/
 /* Driver local functions.                                                   */
@@ -57,25 +94,23 @@ I2CDriver I2CD1;
  */
 ISR(TWI_vect) {
 
-  I2CDriver *i2cp = &I2CD1;
-
   switch (TWSR & 0xF8) {
   case TWI_START:
   case TWI_REPEAT_START:
-    TWDR = (i2cp->addr << 1);
-    if ((i2cp->txbuf == NULL) || (i2cp->txbytes == 0) || (i2cp->txidx == i2cp->txbytes)) {
+    TWDR = (I2CDriver.addr << 1);
+    if ((I2CDriver.txbuf == NULL) || (I2CDriver.txbytes == 0) || (I2CDriver.txidx == I2CDriver.txbytes)) {
       TWDR |= 0x01;
     }
     TWCR = ((1 << TWINT) | (1 << TWEN) | (1 << TWIE));
     break;
   case TWI_MASTER_TX_ADDR_ACK:
   case TWI_MASTER_TX_DATA_ACK:
-    if (i2cp->txidx < i2cp->txbytes) {
-      TWDR = i2cp->txbuf[i2cp->txidx++];
+    if (I2CDriver.txidx < I2CDriver.txbytes) {
+      TWDR = I2CDriver.txbuf[I2CDriver.txidx++];
       TWCR = ((1 << TWINT) | (1 << TWEN) | (1 << TWIE));
     }
     else {
-      if (i2cp->rxbuf && i2cp->rxbytes) {
+      if (I2CDriver.rxbuf && I2CDriver.rxbytes) {
         TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
       }
       else {
@@ -84,7 +119,7 @@ ISR(TWI_vect) {
     }
     break;
   case TWI_MASTER_RX_ADDR_ACK:
-    if (i2cp->rxidx == (i2cp->rxbytes - 1)) {
+    if (I2CDriver.rxidx == (I2CDriver.rxbytes - 1)) {
       TWCR = ((1 << TWINT) | (1 << TWEN) | (1 << TWIE));
     }
     else {
@@ -92,8 +127,8 @@ ISR(TWI_vect) {
     }
     break;
   case TWI_MASTER_RX_DATA_ACK:
-    i2cp->rxbuf[i2cp->rxidx++] = TWDR;
-    if (i2cp->rxidx == (i2cp->rxbytes - 1)) {
+    I2CDriver.rxbuf[I2CDriver.rxidx++] = TWDR;
+    if (I2CDriver.rxidx == (I2CDriver.rxbytes - 1)) {
       TWCR = ((1 << TWINT) | (1 << TWEN) | (1 << TWIE));
     }
     else {
@@ -101,166 +136,28 @@ ISR(TWI_vect) {
     }
     break;
   case TWI_MASTER_RX_DATA_NACK:
-    i2cp->rxbuf[i2cp->rxidx] = TWDR;
+    I2CDriver.rxbuf[I2CDriver.rxidx] = TWDR;
     TWCR = ((1 << TWSTO) | (1 << TWINT) | (1 << TWEN));
   case TWI_MASTER_TX_ADDR_NACK:
   case TWI_MASTER_TX_DATA_NACK:
   case TWI_MASTER_RX_ADDR_NACK:
-    i2cp->errors |= I2C_ACK_FAILURE;
+    I2CDriver.errors |= I2C_ACK_FAILURE;
     break;
   case TWI_ARBITRATION_LOST:
-    i2cp->errors |= I2C_ARBITRATION_LOST;
+    I2CDriver.errors |= I2C_ARBITRATION_LOST;
     break;
   case TWI_BUS_ERROR:
-    i2cp->errors |= I2C_BUS_ERROR;
+    I2CDriver.errors |= I2C_BUS_ERROR;
     break;
   default:
     /* FIXME: only gets here if there are other MASTERs in the bus */
     TWCR = ((1 << TWSTO) | (1 << TWINT) | (1 << TWEN));
   }
 
-  if (i2cp->errors != I2C_NO_ERROR) {
+  if (I2CDriver.errors != I2C_NO_ERROR) {
     TWCR = ((1 << TWSTO) | (1 << TWINT) | (1 << TWEN));
   }
 }
-
-/*===========================================================================*/
-/* Driver exported functions.                                                */
-/*===========================================================================*/
-
-/**
- * @brief   Low level I2C driver initialization.
- *
- * @notapi
- */
-void i2c_lld_init(void) {
-  i2cObjectInit(&I2CD1);
-}
-
-/**
- * @brief   Configures and activates the I2C peripheral.
- *
- * @param[in] i2cp  pointer to the @p I2CDriver object
- *
- * @notapi
- */
-void i2c_lld_start(I2CDriver *i2cp) {
-  uint32_t clock_speed = 100000;
-
-  /* TODO: Test TWI without external pull-ups (use internal) */
-
-  /* Configure prescaler to 1 */
-  TWSR &= 0xF8;
-
-  if (i2cp->config != NULL)
-    clock_speed = i2cp->config->clock_speed;
-
-  /* Configure baudrate */
-  TWBR = ((F_CPU / clock_speed) - 16) / 2;
-}
-
-/**
- * @brief   Deactivates the I2C peripheral.
- *
- * @param[in] i2cp  pointer to the @p I2CDriver object
- *
- * @notapi
- */
-void i2c_lld_stop(I2CDriver *i2cp) {
-
-  /* Disable TWI subsystem and stop all operations */
-  TWCR &= ~(1 << TWEN);
-}
-
-/**
- * @brief   Receives data via the I2C bus as master.
- *
- * @param[in]   i2cp      pointer to the @p I2CDriver object
- * @param[in]   addr      slave device address
- * @param[out]  rxbuf     pointer to the receive buffer
- * @param[in]   rxbytes   number of bytes to be received
- * @param[in]   timeout   the number of ticks before the operation timeouts,
- *                        the following special values are allowed:
- *                        - @a TIME_INFINITE no timeout.
- *
- * @return              The operation status.
- * @retval MSG_OK       if the function succeeded.
- * @retval MSG_RESET    if one or more I2C errors occurred, the errors can
- *                      be retrieved using @p i2cGetErrors().
- * @retval MSG_TIMEOUT  if a timeout occurred before operation end. <b>After a
- *                      timeout the driver must be stopped and restarted
- *                      because the bus is in an uncertain state</b>.
- *
- * @notapi
- */
-void i2c_lld_master_receive(I2CDriver *i2cp, i2caddr_t addr,
-                                     uint8_t *rxbuf, size_t rxbytes) {
-  i2cp->errors = I2C_NO_ERROR;
-  i2cp->addr = addr;
-  i2cp->txbuf = NULL;
-  i2cp->txbytes = 0;
-  i2cp->txidx = 0;
-  i2cp->rxbuf = rxbuf;
-  i2cp->rxbytes = rxbytes;
-  i2cp->rxidx = 0;
-
-  /* Send START */
-  TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
-}
-
-/**
- * @brief   Transmits data via the I2C bus as master.
- *
- * @param[in]   i2cp      pointer to the @p I2CDriver object
- * @param[in]   addr      slave device address
- * @param[in]   txbuf     pointer to the transmit buffer
- * @param[in]   txbytes   number of bytes to be transmitted
- * @param[out]  rxbuf     pointer to the receive buffer
- * @param[in]   rxbytes   number of bytes to be received
- * @param[in]   timeout   the number of ticks before the operation timeouts,
- *                        the following special values are allowed:
- *                        - @a TIME_INFINITE no timeout.
- *
- * @return              The operation status.
- * @retval MSG_OK       if the function succeeded.
- * @retval MSG_RESET    if one or more I2C errors occurred, the errors can
- *                      be retrieved using @p i2cGetErrors().
- * @retval MSG_TIMEOUT  if a timeout occurred before operation end. <b>After a
- *                      timeout the driver must be stopped and restarted
- *                      because the bus is in an uncertain state</b>.
- *
- * @notapi
- */
-void i2c_lld_master_transmit(I2CDriver *i2cp, i2caddr_t addr,
-                                      const uint8_t *txbuf, size_t txbytes,
-                                      uint8_t *rxbuf, size_t rxbytes) {
-  i2cp->errors = I2C_NO_ERROR;
-  i2cp->addr = addr;
-  i2cp->txbuf = txbuf;
-  i2cp->txbytes = txbytes;
-  i2cp->txidx = 0;
-  i2cp->rxbuf = rxbuf;
-  i2cp->rxbytes = rxbytes;
-  i2cp->rxidx = 0;
-
-  TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
-}
-
-/*===========================================================================*/
-/* Driver local definitions.                                                 */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver exported variables.                                                */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver local variables and types.                                         */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver local functions.                                                   */
-/*===========================================================================*/
 
 /*===========================================================================*/
 /* Driver exported functions.                                                */
@@ -275,7 +172,7 @@ void i2c_lld_master_transmit(I2CDriver *i2cp, i2caddr_t addr,
  */
 void i2cInit(void) {
 
-  i2c_lld_init();
+  i2cObjectInit();
 }
 
 /**
@@ -285,9 +182,9 @@ void i2cInit(void) {
  *
  * @init
  */
-void i2cObjectInit(I2CDriver *i2cp) {
+void i2cObjectInit(void) {
 
-  i2cp->config = NULL;
+  I2CDriver.config = NULL;
 }
 
 /**
@@ -298,10 +195,22 @@ void i2cObjectInit(I2CDriver *i2cp) {
  *
  * @api
  */
-void i2cStart(I2CDriver *i2cp, const I2CConfig *config) {
+void i2cStart(const I2CConfig *config) {
 
-  i2cp->config = config;
-  i2c_lld_start(i2cp);
+  I2CDriver.config = config;
+
+  uint32_t clock_speed = 100000;
+
+  /* TODO: Test TWI without external pull-ups (use internal) */
+
+  /* Configure prescaler to 1 */
+  TWSR &= 0xF8;
+
+  if (I2CDriver.config != NULL)
+    clock_speed = I2CDriver.config->clock_speed;
+
+  /* Configure baudrate */
+  TWBR = ((F_CPU / clock_speed) - 16) / 2;
 }
 
 /**
@@ -311,10 +220,10 @@ void i2cStart(I2CDriver *i2cp, const I2CConfig *config) {
  *
  * @api
  */
-void i2cStop(I2CDriver *i2cp) {
+void i2cStop(void) {
 
-  i2c_lld_stop(i2cp);
-  i2cp->config = NULL;
+  TWCR &= ~(1 << TWEN);
+  I2CDriver.config = NULL;
 }
 
 /**
@@ -325,9 +234,9 @@ void i2cStop(I2CDriver *i2cp) {
  *
  * @api
  */
-i2cflags_t i2cGetErrors(I2CDriver *i2cp) {
+uint8_t i2cGetErrors(void) {
 
-  return i2c_lld_get_errors(i2cp);
+  return I2CDriver.errors;
 }
 
 /**
@@ -356,16 +265,22 @@ i2cflags_t i2cGetErrors(I2CDriver *i2cp) {
  *
  * @api
  */
-void i2cMasterTransmit(I2CDriver *i2cp,
-                               i2caddr_t addr,
-                               const uint8_t *txbuf,
-                               size_t txbytes,
-                               uint8_t *rxbuf,
-                               size_t rxbytes) {
+void i2cMasterTransmit(uint8_t addr,
+                       const uint8_t *txbuf,
+                       size_t txbytes,
+                       uint8_t *rxbuf,
+                       size_t rxbytes) {
 
-  i2cp->errors = I2C_NO_ERROR;
-  i2c_lld_master_transmit(i2cp, addr, txbuf, txbytes,
-                                           rxbuf, rxbytes);
+  I2CDriver.errors = I2C_NO_ERROR;
+  I2CDriver.addr = addr;
+  I2CDriver.txbuf = txbuf;
+  I2CDriver.txbytes = txbytes;
+  I2CDriver.txidx = 0;
+  I2CDriver.rxbuf = rxbuf;
+  I2CDriver.rxbytes = rxbytes;
+  I2CDriver.rxidx = 0;
+
+  TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
 }
 
 /**
@@ -388,13 +303,19 @@ void i2cMasterTransmit(I2CDriver *i2cp,
  *
  * @api
  */
-void i2cMasterReceive(I2CDriver *i2cp,
-                              i2caddr_t addr,
-                              uint8_t *rxbuf,
-                              size_t rxbytes){
+void i2cMasterReceive(uint8_t addr, uint8_t *rxbuf, size_t rxbytes) {
 
-  i2cp->errors = I2C_NO_ERROR;
-  i2c_lld_master_receive(i2cp, addr, rxbuf, rxbytes);
+  I2CDriver.errors = I2C_NO_ERROR;
+  I2CDriver.addr = addr;
+  I2CDriver.txbuf = NULL;
+  I2CDriver.txbytes = 0;
+  I2CDriver.txidx = 0;
+  I2CDriver.rxbuf = rxbuf;
+  I2CDriver.rxbytes = rxbytes;
+  I2CDriver.rxidx = 0;
+
+  /* Send START */
+  TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
 }
 
 /** @} */

@@ -54,22 +54,6 @@
 #define I2C_SMB_ALERT              0x40    /**< @brief SMBus Alert.         */
 /** @} */
 
-/*===========================================================================*/
-/* Driver pre-compile time settings.                                         */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Derived constants and error checks.                                       */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver data structures and types.                                         */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver constants.                                                         */
-/*===========================================================================*/
-
 /** @brief   START transmitted.*/
 #define TWI_START                  0x08
 /** @brief   Repeated START transmitted.*/
@@ -110,16 +94,6 @@
 /*===========================================================================*/
 
 /**
- * @brief   Type representing I2C address.
- */
-typedef uint8_t i2caddr_t;
-
-/**
- * @brief   I2C Driver condition flags type.
- */
-typedef uint8_t i2cflags_t;
-
-/**
  * @brief   Driver configuration structure.
  * @note    Implementations may extend this structure to contain more,
  *          architecture dependent, fields.
@@ -133,88 +107,6 @@ typedef struct {
 
 } I2CConfig;
 
-/**
- * @brief   Structure representing an I2C driver.
- */
-struct I2CDriver {
-  /**
-   * @brief   Current configuration data.
-   */
-  const I2CConfig           *config;
-  /**
-   * @brief   Error flags.
-   */
-  i2cflags_t                errors;
-  /* End of the mandatory fields.*/
-  /**
-   * @brief   Address of slave device.
-   */
-  i2caddr_t                 addr;
-  /**
-   * @brief   Pointer to the buffer with data to send.
-   */
-  const uint8_t             *txbuf;
-  /**
-   * @brief   Number of bytes of data to send.
-   */
-  size_t                    txbytes;
-  /**
-   * @brief   Current index in buffer when sending data.
-   */
-  size_t                    txidx;
-  /**
-   * @brief   Pointer to the buffer to put received data.
-   */
-  uint8_t                   *rxbuf;
-  /**
-   * @brief   Number of bytes of data to receive.
-   */
-  size_t                    rxbytes;
-  /**
-   * @brief   Current index in buffer when receiving data.
-   */
-  size_t                    rxidx;
-};
-
-/**
- * @brief   Type of a structure representing an I2C driver.
- */
-typedef struct I2CDriver I2CDriver;
-
-/*===========================================================================*/
-/* Driver macros.                                                            */
-/*===========================================================================*/
-
-/**
- * @brief   Get errors from I2C driver.
- *
- * @param[in] i2cp  pointer to the @p I2CDriver object
- *
- * @notapi
- */
-#define i2c_lld_get_errors(i2cp) ((i2cp)->errors)
-
-/*===========================================================================*/
-/* External declarations.                                                    */
-/*===========================================================================*/
-
-extern I2CDriver I2CD1;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-  void i2c_lld_init(void);
-  void i2c_lld_start(I2CDriver *i2cp);
-  void i2c_lld_stop(I2CDriver *i2cp);
-  void i2c_lld_master_transmit(I2CDriver *i2cp, i2caddr_t addr,
-                                        const uint8_t *txbuf, size_t txbytes,
-                                        uint8_t *rxbuf, size_t rxbytes);
-  void i2c_lld_master_receive(I2CDriver *i2cp, i2caddr_t addr,
-                                       uint8_t *rxbuf, size_t rxbytes);
-#ifdef __cplusplus
-}
-#endif
-
 /*===========================================================================*/
 /* Driver macros.                                                            */
 /*===========================================================================*/
@@ -227,16 +119,14 @@ extern "C" {
 extern "C" {
 #endif
   void i2cInit(void);
-  void i2cObjectInit(I2CDriver *i2cp);
-  void i2cStart(I2CDriver *i2cp, const I2CConfig *config);
-  void i2cStop(I2CDriver *i2cp);
-  i2cflags_t i2cGetErrors(I2CDriver *i2cp);
-  void i2cMasterTransmit(I2CDriver *i2cp,
-                                 i2caddr_t addr,
+  void i2cObjectInit(void);
+  void i2cStart(const I2CConfig *config);
+  void i2cStop(void);
+  uint8_t i2cGetErrors(void);
+  void i2cMasterTransmit(uint8_t addr,
                                  const uint8_t *txbuf, size_t txbytes,
                                  uint8_t *rxbuf, size_t rxbytes);
-  void i2cMasterReceive(I2CDriver *i2cp,
-                                i2caddr_t addr,
+  void i2cMasterReceive(uint8_t addr,
                                 uint8_t *rxbuf, size_t rxbytes);
 
 #ifdef __cplusplus
