@@ -27,8 +27,6 @@
  */
 #include "hal.h"
 
-#if HAL_USE_I2C || defined(__DOXYGEN__)
-
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
 /*===========================================================================*/
@@ -38,9 +36,7 @@
 /*===========================================================================*/
 
 /** @brief I2C driver identifier.*/
-#if AVR_I2C_USE_I2C1 || defined(__DOXYGEN__)
 I2CDriver I2CD1;
-#endif
 
 /*===========================================================================*/
 /* Driver local variables and types.                                         */
@@ -54,7 +50,6 @@ I2CDriver I2CD1;
 /* Driver interrupt handlers.                                                */
 /*===========================================================================*/
 
-#if AVR_I2C_USE_I2C1 || defined(__DOXYGEN__)
 /**
  * @brief   I2C event interrupt handler.
  *
@@ -135,7 +130,6 @@ OSAL_IRQ_HANDLER(TWI_vect) {
 
   OSAL_IRQ_EPILOGUE();
 }
-#endif /* AVR_I2C_USE_I2C1 */
 
 /*===========================================================================*/
 /* Driver exported functions.                                                */
@@ -268,10 +262,6 @@ msg_t i2c_lld_master_transmit_timeout(I2CDriver *i2cp, i2caddr_t addr,
   return osalThreadSuspendTimeoutS(&i2cp->thread, TIME_INFINITE);
 }
 
-#endif /* HAL_USE_I2C */
-
-#if (HAL_USE_I2C == TRUE) || defined(__DOXYGEN__)
-
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
 /*===========================================================================*/
@@ -315,14 +305,6 @@ void i2cObjectInit(I2CDriver *i2cp) {
 
   i2cp->state  = I2C_STOP;
   i2cp->config = NULL;
-
-#if I2C_USE_MUTUAL_EXCLUSION == TRUE
-  osalMutexObjectInit(&i2cp->mutex);
-#endif
-
-#if defined(I2C_DRIVER_EXT_INIT_HOOK)
-  I2C_DRIVER_EXT_INIT_HOOK(i2cp);
-#endif
 }
 
 /**
@@ -464,43 +446,5 @@ msg_t i2cMasterReceiveTimeout(I2CDriver *i2cp,
   osalSysUnlock();
   return rdymsg;
 }
-
-#if (I2C_USE_MUTUAL_EXCLUSION == TRUE) || defined(__DOXYGEN__)
-/**
- * @brief   Gains exclusive access to the I2C bus.
- * @details This function tries to gain ownership to the I2C bus, if the bus
- *          is already being used then the invoking thread is queued.
- * @pre     In order to use this function the option @p I2C_USE_MUTUAL_EXCLUSION
- *          must be enabled.
- *
- * @param[in] i2cp      pointer to the @p I2CDriver object
- *
- * @api
- */
-void i2cAcquireBus(I2CDriver *i2cp) {
-
-  osalDbgCheck(i2cp != NULL);
-
-  osalMutexLock(&i2cp->mutex);
-}
-
-/**
- * @brief   Releases exclusive access to the I2C bus.
- * @pre     In order to use this function the option @p I2C_USE_MUTUAL_EXCLUSION
- *          must be enabled.
- *
- * @param[in] i2cp      pointer to the @p I2CDriver object
- *
- * @api
- */
-void i2cReleaseBus(I2CDriver *i2cp) {
-
-  osalDbgCheck(i2cp != NULL);
-
-  osalMutexUnlock(&i2cp->mutex);
-}
-#endif /* I2C_USE_MUTUAL_EXCLUSION == TRUE */
-
-#endif /* HAL_USE_I2C == TRUE */
 
 /** @} */

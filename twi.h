@@ -29,8 +29,6 @@
 #ifndef HAL_I2C_H
 #define HAL_I2C_H
 
-#if (HAL_USE_I2C == TRUE) || defined(__DOXYGEN__)
-
 /*===========================================================================*/
 /* Driver constants.                                                         */
 /*===========================================================================*/
@@ -55,13 +53,6 @@
 /* Driver pre-compile time settings.                                         */
 /*===========================================================================*/
 
-/**
- * @brief   Enables the mutual exclusion APIs on the I2C bus.
- */
-#if !defined(I2C_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
-#define I2C_USE_MUTUAL_EXCLUSION    TRUE
-#endif
-
 /*===========================================================================*/
 /* Derived constants and error checks.                                       */
 /*===========================================================================*/
@@ -82,8 +73,6 @@ typedef enum {
   I2C_LOCKED = 5                            /**> Bus or driver locked.      */
 } i2cstate_t;
 
-
-#if HAL_USE_I2C || defined(__DOXYGEN__)
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -119,20 +108,6 @@ typedef enum {
 /*===========================================================================*/
 /* Driver pre-compile time settings.                                         */
 /*===========================================================================*/
-
-/**
- * @name    Configuration options
- * @{
- */
-/**
- * @brief     I2C driver enable switch.
- * @details   If set to @p TRUE the support for I2C is included.
- * @note      The default is @p FALSE.
- */
-#if !defined(AVR_I2C_USE_I2C1) || defined(__DOXYGEN__)
-#define AVR_I2C_USE_I2C1           FALSE
-#endif
-/** @} */
 
 /*===========================================================================*/
 /* Derived constants and error checks.                                       */
@@ -182,15 +157,6 @@ struct I2CDriver {
    * @brief   Error flags.
    */
   i2cflags_t                errors;
-#if I2C_USE_MUTUAL_EXCLUSION || defined(__DOXYGEN__)
-  /**
-   * @brief   Mutex protecting the bus.
-   */
-  mutex_t                   mutex;
-#endif /* I2C_USE_MUTUAL_EXCLUSION */
-#if defined(I2C_DRIVER_EXT_FIELDS)
-  I2C_DRIVER_EXT_FIELDS
-#endif
   /* End of the mandatory fields.*/
   /**
    * @brief   Thread waiting for I/O completion.
@@ -248,11 +214,7 @@ typedef struct I2CDriver I2CDriver;
 /* External declarations.                                                    */
 /*===========================================================================*/
 
-#if !defined(__DOXYGEN__)
-#if AVR_I2C_USE_I2C1
 extern I2CDriver I2CD1;
-#endif
-#endif /* !defined(__DOXYGEN__) */
 
 #ifdef __cplusplus
 extern "C" {
@@ -270,8 +232,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* HAL_USE_I2C */
 
 /*===========================================================================*/
 /* Driver macros.                                                            */
@@ -339,16 +299,10 @@ extern "C" {
                                 i2caddr_t addr,
                                 uint8_t *rxbuf, size_t rxbytes,
                                 systime_t timeout);
-#if I2C_USE_MUTUAL_EXCLUSION == TRUE
-  void i2cAcquireBus(I2CDriver *i2cp);
-  void i2cReleaseBus(I2CDriver *i2cp);
-#endif
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* HAL_USE_I2C == TRUE */
 
 #endif /* HAL_I2C_H */
 
