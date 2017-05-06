@@ -51,10 +51,10 @@ LAYOUT(
         NO_ACTION, NO_ACTION, K(US_SC(NK('7'))), K(US_SC(NK('8'))), K(US_SC(NK('9'))), K(US_SC(NK('+'))), NO_ACTION,
                    NO_ACTION, K(US_SC(NK('4'))), K(US_SC(NK('5'))), K(US_SC(NK('6'))), K(US_SC(NK('+'))), NO_ACTION,
         L(GOTO, 0), NO_ACTION, K(US_SC(NK('1'))), K(US_SC(NK('2'))), K(US_SC(NK('3'))), K(US_SC(NK(ENTER))), NO_ACTION,
-                              NO_ACTION, NO_ACTION, K(US_SC(NK('.'))), K(US_SC(NK(ENTER))), NO_ACTION,
+                              K(US_SC(NK('0'))), K(US_SC(NK('0'))), K(US_SC(NK('.'))), K(US_SC(NK(ENTER))), NO_ACTION,
         NO_ACTION, NO_ACTION,
         NO_ACTION,
-        NO_ACTION, NO_ACTION, K(US_SC(NK('0')))
+        NO_ACTION, NO_ACTION, NO_ACTION
     ),
 #if 0
     LAYER(
