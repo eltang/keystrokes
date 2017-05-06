@@ -194,13 +194,13 @@ void SetupHardware()
     PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
 #endif
     /* Hardware Initialization */
+    USB_Init();
     power_init();
     timer_init();
 #ifdef USING_TWI
     i2c_init();
 #endif
     matrix_init();
-    USB_Init();
 }
 
 /** Event handler for the library USB Connection event. */
