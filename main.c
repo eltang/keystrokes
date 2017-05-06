@@ -38,7 +38,7 @@
 #include "keys.h"
 #include "modifiers.h"
 #include "matrix.h"
-#include "i2cmaster/i2cmaster.h"
+#include "twi.h"
 #include "timer.h"
 #include "keystrokes.h"
 #include "power.h"
@@ -153,12 +153,12 @@ FILE USBSerialStream;
  */
 int main(void)
 {
+    GlobalInterruptEnable();
+
     SetupHardware();
 
     /* Create a regular character stream for the interface so that it can be used with the stdio.h functions */
 	CDC_Device_CreateStream(&VirtualSerial_CDC_Interface, &USBSerialStream);
-
-    GlobalInterruptEnable();
 
     for (;;)
     {
@@ -176,6 +176,9 @@ int main(void)
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
 void SetupHardware()
 {
+#ifdef USING_TWI
+    static const I2CConfig i2cconfig = { 400000 };
+#endif
 #if (ARCH == ARCH_AVR8)
     /* Disable clock division */
     clock_prescale_set(clock_div_1);
@@ -198,7 +201,7 @@ void SetupHardware()
     power_init();
     timer_init();
 #ifdef USING_TWI
-    i2c_init();
+    i2cStart(&i2cconfig);
 #endif
     matrix_init();
 }

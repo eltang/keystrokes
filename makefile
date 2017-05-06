@@ -24,7 +24,6 @@ SRC          = $(TARGET).c \
                $(LUFA_SRC_USB) \
                $(LUFA_SRC_USBCLASS) \
 			   keys.c \
-			   i2cmaster/twimaster.c \
 			   actions.c \
 			   matrix.c \
 			   modifiers.c \
@@ -35,11 +34,12 @@ SRC          = $(TARGET).c \
 			   keystrokes.c \
 			   leader_key.c \
 			   power.c \
-			   pins.c
+			   pins.c \
+			   twi.c
 
 
 LUFA_PATH    = lufa/LUFA
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -Ii2cmaster -include config.h -flto
+CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I. -include config.h -flto
 LD_FLAGS     =
 
 # Default target
