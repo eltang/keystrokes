@@ -7,31 +7,31 @@
 #include "matrix.h"
 
 #define MCP23018_ADDR 0b0100000
-#define IODIRA 0x00
-#define IODIRB 0x01
-#define IPOLA 0x02
-#define IPOLB 0x03
-#define GPINTENA 0x04
-#define GPINTENB 0x05
-#define DEFVALA 0x06
-#define DEFVALB 0x07
-#define INTCONA 0x08
-#define INTCONB 0x09
-#define IOCON 0x0A
-#define GPPUA 0x0C
-#define GPPUB 0x0D
-#define INTFA 0x0E
-#define INTFB 0x0F
-#define INTCAPA 0x10
-#define INTCAPB 0x11
-#define GPIOA 0x12
-#define GPIOB 0x13
-#define OLATA 0x14
-#define OLATB 0x15
+#define IODIRA_ADDR 0x00
+#define IODIRB_ADDR 0x01
+#define IPOLA_ADDR 0x02
+#define IPOLB_ADDR 0x03
+#define GPINTENA_ADDR 0x04
+#define GPINTENB_ADDR 0x05
+#define DEFVALA_ADDR 0x06
+#define DEFVALB_ADDR 0x07
+#define INTCONA_ADDR 0x08
+#define INTCONB_ADDR 0x09
+#define IOCON_ADDR 0x0A
+#define GPPUA_ADDR 0x0C
+#define GPPUB_ADDR 0x0D
+#define INTFA_ADDR 0x0E
+#define INTFB_ADDR 0x0F
+#define INTCAPA_ADDR 0x10
+#define INTCAPB_ADDR 0x11
+#define GPIOA_ADDR 0x12
+#define GPIOB_ADDR 0x13
+#define OLATA_ADDR 0x14
+#define OLATB_ADDR 0x15
 
-#define LEFT_LED_1_SHIFT        7       // in MCP23018 port B
-#define LEFT_LED_2_SHIFT        6       // in MCP23018 port B
-#define LEFT_LED_3_SHIFT        7       // in MCP23018 port A
+#define LEFT_LED_1 7 // MCP23018 Port B
+#define LEFT_LED_2 6 // MCP23018 Port B
+#define LEFT_LED_3 7 // MCP23018 Port A
 // The address of the slave which controls the left LED strip is 0x42.
 // There are 15 leds connected to pin D7.
 
@@ -41,12 +41,12 @@ void matrix_init(void)
 {
     PORTF |= ~(1 << 3 | 1 << 2);
     i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
-    i2c_write(IODIRA);
+    i2c_write(IODIRA_ADDR);
     i2c_write((uint8_t)~(1 << 7));
     i2c_write((uint8_t)~(1 << 6 | 1 << 7));
     i2c_stop();
     i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
-    i2c_write(GPPUB);
+    i2c_write(GPPUB_ADDR);
     i2c_write((uint8_t)~(1 << 6 | 1 << 7));
     i2c_stop();
 }
@@ -97,11 +97,11 @@ void matrix_activate_output(uint8_t output)
         break;
     default:
         i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
-        i2c_write(IODIRA);
+        i2c_write(IODIRA_ADDR);
         i2c_write(~(1 << 7 | 1 << output));
         i2c_stop();
         i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
-        i2c_write(GPIOB);
+        i2c_write(GPIOB_ADDR);
         i2c_start(MCP23018_ADDR << 1 | I2C_READ);
         GPIOB_state = i2c_readNak();
         i2c_stop();
@@ -114,8 +114,8 @@ void matrix_deactivate_output(uint8_t output)
     switch (output) {
     case 0:
         i2c_start(MCP23018_ADDR << 1 | I2C_WRITE);
-        i2c_write(IODIRA);
-        i2c_write(~(1 << 7));
+        i2c_write(IODIRA_ADDR);
+        i2c_write((uint8_t)~(1 << 7));
         i2c_stop();
         break;
     case 7 ... 10:
