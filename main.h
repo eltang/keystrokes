@@ -70,7 +70,7 @@
 
         void SendKeyboardReport(void);
         void SendMouseReport(void);
-        void SendEnhancedKeyboardReport(void);
+        void SendEnhancedKeyboardReport(uint8_t ReportID);
 
         extern FILE USBSerialStream;
 

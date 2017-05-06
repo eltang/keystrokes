@@ -52,7 +52,7 @@
         #define ENHANCEDKEYBOARD_EPADDR        (ENDPOINT_DIR_IN  | 3)
 
         /** Size in bytes of the HID reporting IN endpoint. */
-        #define HID_EPSIZE                     8
+        #define HID_EPSIZE                     32
 
         /** Endpoint address of the CDC device-to-host notification IN endpoint. */
         #define CDC_NOTIFICATION_EPADDR        (ENDPOINT_DIR_IN  | 4)
@@ -110,9 +110,14 @@
         } USB_Descriptor_Configuration_t;
 
         typedef struct {
+            uint8_t Modifier;
+            uint8_t KeyCode[27];
+        } USB_NKROKeyboardReport_Data_t;
+
+        typedef struct {
             uint16_t ConsumerControlCode;
             uint8_t SystemControlCode;
-        } USB_EnhancedKeyboardReport_Data_t;
+        } USB_ConsumerSystemControlReport_Data_t;
 
         /** Enum for the device interface descriptor IDs within the device. Each interface descriptor
          *  should have a unique ID index associated with it, which can be used to refer to the
@@ -137,6 +142,13 @@
             STRING_ID_Manufacturer = 1, /**< Manufacturer string ID */
             STRING_ID_Product      = 2, /**< Product string ID */
         };
+
+        /** Enum for the HID report IDs used in the device. */
+        enum
+        {
+            HID_REPORTID_NKROKeyboardReport          = 0x01, /**< Report ID for the NKRO Keyboard report within the device. */
+            HID_REPORTID_ConsumerSystemControlReport = 0x02, /**< Report ID for the Enhanced Keyboard report within the device. */
+        } HID_Report_IDs;
 
     /* Function Prototypes: */
         uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,

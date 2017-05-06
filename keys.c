@@ -60,11 +60,11 @@ void keys_add_power_management(uint8_t code)
         if (power_management_code != code)
             break;
         power_management_code = 0;
-        SendEnhancedKeyboardReport();
+        SendEnhancedKeyboardReport(HID_REPORTID_ConsumerSystemControlReport);
     case 0:
         power_management_code = code;
         ++power_management_code_activations;
-        SendEnhancedKeyboardReport();
+        SendEnhancedKeyboardReport(HID_REPORTID_ConsumerSystemControlReport);
         break;
     }
 }
@@ -73,11 +73,10 @@ void keys_delete_power_management(uint8_t code)
 {
     if (!code)
         return;
-    if (power_management_code == code)
-        if (!--power_management_code_activations) {
-            power_management_code = 0;
-            SendEnhancedKeyboardReport();
-        }
+    if (power_management_code != code || --power_management_code_activations)
+        return;
+    power_management_code = 0;
+    SendEnhancedKeyboardReport(HID_REPORTID_ConsumerSystemControlReport);
 }
 
 uint8_t keys_get_power_management(void)
@@ -95,11 +94,11 @@ void keys_add_multimedia(uint16_t code)
         if (multimedia_code != code)
             break;
         multimedia_code = 0;
-        SendEnhancedKeyboardReport();
+        SendEnhancedKeyboardReport(HID_REPORTID_ConsumerSystemControlReport);
     case 0:
         multimedia_code = code;
         ++multimedia_code_activations;
-        SendEnhancedKeyboardReport();
+        SendEnhancedKeyboardReport(HID_REPORTID_ConsumerSystemControlReport);
         break;
     }
 }
@@ -110,7 +109,7 @@ void keys_delete_multimedia(uint16_t code)
         return;
     if (multimedia_code == code && !--multimedia_code_activations) {
         multimedia_code = 0;
-        SendEnhancedKeyboardReport();
+        SendEnhancedKeyboardReport(HID_REPORTID_ConsumerSystemControlReport);
     }
 }
 
