@@ -72,4 +72,6 @@
         void SendMouseReport(void);
         void SendEnhancedKeyboardReport(void);
 
+        extern FILE USBSerialStream;
+
 #endif

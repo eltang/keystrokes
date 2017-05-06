@@ -143,12 +143,20 @@ USB_ClassInfo_HID_Device_t EnhancedKeyboard_HID_Interface =
             },
     };
 
+/** Standard file stream for the CDC interface when set up, so that the virtual CDC COM port can be
+ *  used like any regular character stream in the C APIs.
+ */
+FILE USBSerialStream;
+
 /** Main program entry point. This routine contains the overall program flow, including initial
  *  setup of all components and the main program loop.
  */
 int main(void)
 {
     SetupHardware();
+
+    /* Create a regular character stream for the interface so that it can be used with the stdio.h functions */
+	CDC_Device_CreateStream(&VirtualSerial_CDC_Interface, &USBSerialStream);
 
     GlobalInterruptEnable();
 
