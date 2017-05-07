@@ -265,7 +265,7 @@ uint8_t i2cGetErrors(void) {
  *
  * @api
  */
-void i2cMasterTransmit(uint8_t addr,
+uint8_t i2cMasterTransmit(uint8_t addr,
                        const uint8_t *txbuf,
                        size_t txbytes,
                        uint8_t *rxbuf,
@@ -281,6 +281,9 @@ void i2cMasterTransmit(uint8_t addr,
   I2CDriver.rxidx = 0;
 
   TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
+  while (TWCR & 1 << TWIE)
+    ;
+  return I2CDriver.errors;
 }
 
 /**
@@ -303,7 +306,7 @@ void i2cMasterTransmit(uint8_t addr,
  *
  * @api
  */
-void i2cMasterReceive(uint8_t addr, uint8_t *rxbuf, size_t rxbytes) {
+uint8_t i2cMasterReceive(uint8_t addr, uint8_t *rxbuf, size_t rxbytes) {
 
   I2CDriver.errors = I2C_NO_ERROR;
   I2CDriver.addr = addr;
@@ -316,6 +319,9 @@ void i2cMasterReceive(uint8_t addr, uint8_t *rxbuf, size_t rxbytes) {
 
   /* Send START */
   TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
+  while (TWCR & 1 << TWIE)
+    ;
+  return I2CDriver.errors;
 }
 
 /** @} */

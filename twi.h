@@ -123,10 +123,10 @@ extern "C" {
   void i2cStart(const I2CConfig *config);
   void i2cStop(void);
   uint8_t i2cGetErrors(void);
-  void i2cMasterTransmit(uint8_t addr,
+  uint8_t i2cMasterTransmit(uint8_t addr,
                                  const uint8_t *txbuf, size_t txbytes,
                                  uint8_t *rxbuf, size_t rxbytes);
-  void i2cMasterReceive(uint8_t addr,
+  uint8_t i2cMasterReceive(uint8_t addr,
                                 uint8_t *rxbuf, size_t rxbytes);
 
 #ifdef __cplusplus

@@ -46,13 +46,9 @@ void matrix_init(void)
     transmission[1] = (uint8_t)~(1 << 7);
     transmission[2] = (uint8_t)~(1 << 6 | 1 << 7);
     i2cMasterTransmit(MCP23018_ADDR, transmission, 3, 0, 0);
-    while (TWCR & 1 << TWIE)
-        ;
     transmission[0] = GPPUB_ADDR;
     transmission[1] = (uint8_t)~(1 << 6 | 1 << 7);
     i2cMasterTransmit(MCP23018_ADDR, transmission, 2, 0, 0);
-    while (TWCR & 1 << TWIE)
-        ;
 }
 
 bool matrix_read_input(uint8_t input, uint8_t output)
@@ -105,12 +101,8 @@ void matrix_activate_output(uint8_t output)
         transmission[0] = IODIRA_ADDR;
         transmission[1] = ~(1 << 7 | 1 << output);
         i2cMasterTransmit(MCP23018_ADDR, transmission, 2, 0, 0);
-        while (TWCR & 1 << TWIE)
-            ;
         transmission[0] = GPIOB_ADDR;
         i2cMasterTransmit(MCP23018_ADDR, transmission, 1, &GPIOB_state, 1);
-        while (TWCR & 1 << TWIE)
-            ;
         break;
     }
 }
@@ -124,8 +116,6 @@ void matrix_deactivate_output(uint8_t output)
         transmission[0] = IODIRA_ADDR;
         transmission[1] = (uint8_t)~(1 << 7);
         i2cMasterTransmit(MCP23018_ADDR, transmission, 2, 0, 0);
-        while (TWCR & 1 << TWIE)
-            ;
         break;
     case 7 ... 10:
         DDRB &= ~(1 << 3 | 1 << 2 | 1 << 1 | 1);
