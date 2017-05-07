@@ -43,7 +43,7 @@
 #include "keystrokes.h"
 #include "power.h"
 
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
 /** LUFA CDC Class driver interface configuration and state information. This structure is
  *  passed to all CDC Class driver functions, so that multiple instances of the same class
  *  within a device can be differentiated from one another.
@@ -162,7 +162,7 @@ int main(void)
 
     for (;;)
     {
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
         /* Must throw away unused bytes from the host, or it will lock up while waiting for the device */
         CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
         CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
@@ -179,7 +179,7 @@ int main(void)
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
 void SetupHardware()
 {
-#ifdef USING_TWI
+#ifdef USE_TWI
     static const I2CConfig i2cconfig = { 400000 };
 #endif
 #if (ARCH == ARCH_AVR8)
@@ -203,7 +203,7 @@ void SetupHardware()
     USB_Init();
     power_init();
     timer_init();
-#ifdef USING_TWI
+#ifdef USE_TWI
     i2cStart(&i2cconfig);
 #endif
     matrix_init();
@@ -227,7 +227,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
     ConfigSuccess &= HID_Device_ConfigureEndpoints(&Keyboard_HID_Interface);
     ConfigSuccess &= HID_Device_ConfigureEndpoints(&Mouse_HID_Interface);
     ConfigSuccess &= HID_Device_ConfigureEndpoints(&EnhancedKeyboard_HID_Interface);
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
     ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 #endif
 
@@ -237,7 +237,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 /** Event handler for the library USB Control Request reception event. */
 void EVENT_USB_Device_ControlRequest(void)
 {
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
     CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
 #endif
     HID_Device_ProcessControlRequest(&Keyboard_HID_Interface);

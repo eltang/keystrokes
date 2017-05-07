@@ -93,7 +93,7 @@
             USB_HID_Descriptor_HID_t                 HID3_EnhancedKeyboardHID;
             USB_Descriptor_Endpoint_t                HID3_ReportINEndpoint;
 
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
             // CDC Control Interface
             USB_Descriptor_Interface_Association_t   CDC_IAD;
             USB_Descriptor_Interface_t               CDC_CCI_Interface;

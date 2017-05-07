@@ -14,10 +14,10 @@ void power_init(void)
 
         *pin.registers[PORT] |= pin.mask;
     }
-#ifndef USING_TWI
+#ifndef USE_TWI
     temp |= 1 << PRTWI;
 #endif
-#ifndef USING_BACKLIGHT
+#ifndef USE_BACKLIGHT
     temp |= 1 << PRTIM1;
 #endif
     temp |= 1 << PRSPI;

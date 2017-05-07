@@ -100,7 +100,7 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
     .Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
     .USBSpecification       = VERSION_BCD(1,1,0),
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
     .Class                  = USB_CSCP_IADDeviceClass,
     .SubClass               = USB_CSCP_IADDeviceSubclass,
     .Protocol               = USB_CSCP_IADDeviceProtocol,
@@ -118,7 +118,7 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
     .ManufacturerStrIndex   = STRING_ID_Manufacturer,
     .ProductStrIndex        = STRING_ID_Product,
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
     .SerialNumStrIndex      = USE_INTERNAL_SERIAL,
 #else
     .SerialNumStrIndex      = NO_DESCRIPTOR,
@@ -139,7 +139,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
             .Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
 
             .TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
             .TotalInterfaces        = 5,
 #else
             .TotalInterfaces        = 3,
@@ -264,7 +264,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
             .PollingIntervalMS      = 0x01
         },
 
-#ifdef VIRTUAL_SERIAL_ENABLE
+#ifdef USE_VIRTUAL_SERIAL
     .CDC_IAD =
         {
             .Header                 = {.Size = sizeof(USB_Descriptor_Interface_Association_t), .Type = DTYPE_InterfaceAssociation},

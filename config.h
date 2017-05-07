@@ -1,4 +1,4 @@
-// #define USING_TWI
+// #define USE_TWI
 
 // #define BACKWARDS_DIODES
 // #define ROWS 6
@@ -15,4 +15,4 @@
 #define BOOTLOADER_SEC_SIZE_BYTES 4096
 // #define BOOTLOADER_SEC_SIZE_BYTES 512
 
-#define VIRTUAL_SERIAL_ENABLE
+#define USE_VIRTUAL_SERIAL
