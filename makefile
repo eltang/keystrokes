@@ -35,7 +35,8 @@ SRC          = $(TARGET).c \
 			   leader_key.c \
 			   power.c \
 			   twi.c \
-			   leds.c
+			   leds.c \
+			   commands.c
 
 
 LUFA_PATH    = lufa/LUFA
