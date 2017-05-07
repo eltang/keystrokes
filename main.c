@@ -165,9 +165,12 @@ int main(void)
 #ifdef VIRTUAL_SERIAL_ENABLE
         /* Must throw away unused bytes from the host, or it will lock up while waiting for the device */
         CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
-
         CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
 #endif
+
+        HID_Device_USBTask(&Keyboard_HID_Interface);
+        HID_Device_USBTask(&Mouse_HID_Interface);
+        HID_Device_USBTask(&EnhancedKeyboard_HID_Interface);
 
         keystrokes_task();
     }
