@@ -318,9 +318,15 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
                                           const void* ReportData,
                                           const uint16_t ReportSize)
 {
+    static uint8_t PrevLEDReport;
+    uint8_t LEDReport;
+
     if (HIDInterfaceInfo == &Keyboard_HID_Interface)
     {
-        leds_process_led_report_change(*(uint8_t *)ReportData);
+        LEDReport = *(uint8_t*)ReportData;
+        if (LEDReport == PrevLEDReport)
+            return;
+        leds_process_led_report_change(PrevLEDReport = LEDReport);
     }
 }
 
