@@ -42,6 +42,7 @@
 #include "timer.h"
 #include "keystrokes.h"
 #include "power.h"
+#include "leds.h"
 
 #ifdef USE_VIRTUAL_SERIAL
 /** LUFA CDC Class driver interface configuration and state information. This structure is
@@ -202,6 +203,7 @@ void SetupHardware()
     /* Hardware Initialization */
     USB_Init();
     power_init();
+    leds_init();
     timer_init();
 #ifdef USE_TWI
     i2cStart(&i2cconfig);
@@ -318,7 +320,7 @@ void CALLBACK_HID_Device_ProcessHIDReport(USB_ClassInfo_HID_Device_t* const HIDI
 {
     if (HIDInterfaceInfo == &Keyboard_HID_Interface)
     {
-        uint8_t* LEDReport = (uint8_t*)ReportData;
+        leds_process_led_report_change(*(uint8_t *)ReportData);
     }
 }
 
