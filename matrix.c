@@ -38,7 +38,7 @@ void matrix_activate_output(uint8_t output)
 {
     struct pin pin = output_pins[output];
 
-    *pin.registers[DDR] |= pin.mask;
+    *pins_addr_to_reg(pin.addr, DDR) |= pin.mask;
 }
 
 __attribute__((weak))
@@ -46,7 +46,7 @@ void matrix_deactivate_output(uint8_t output)
 {
     struct pin pin = output_pins[output];
 
-    *pin.registers[DDR] &= ~pin.mask;
+    *pins_addr_to_reg(pin.addr, DDR) &= ~pin.mask;
 }
 
 __attribute__((weak))
@@ -54,7 +54,7 @@ bool matrix_read_input(uint8_t input, uint8_t output)
 {
     struct pin pin = input_pins[input];
 
-    return *pin.registers[PIN] & pin.mask;
+    return *pins_addr_to_reg(pin.addr, PIN) & pin.mask;
 }
 
 __attribute__((weak))
@@ -64,7 +64,7 @@ void matrix_init(void)
 
     for (uint8_t i = INPUTS; i--;) {
          pin = input_pins[i];
-         *pin.registers[PORT] |= pin.mask;
+         *pins_addr_to_reg(pin.addr, PORT) |= pin.mask;
     }
 }
 

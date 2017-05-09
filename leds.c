@@ -7,9 +7,9 @@ static const __flash struct led_config led_config[] = LED_CONFIG;
 static void leds_update_led(const __flash struct pin *pin, bool state)
 {
     if (state)
-        *pin->registers[PORT] |= pin->mask;
+        *pins_addr_to_reg(pin->addr, PORT) |= pin->mask;
     else
-        *pin->registers[PORT] &= ~pin->mask;
+        *pins_addr_to_reg(pin->addr, PORT) &= ~pin->mask;
 }
 
 void leds_init(void)
@@ -18,7 +18,7 @@ void leds_init(void)
 
     for (uint8_t i = LED_COUNT; i--;) {
         pin = led_config[i].pin;
-        *pin.registers[DDR] |= pin.mask;
+        *pins_addr_to_reg(pin.addr, DDR) |= pin.mask;
     }
 }
 

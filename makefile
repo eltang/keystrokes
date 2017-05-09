@@ -34,7 +34,6 @@ SRC          = $(TARGET).c \
 			   keystrokes.c \
 			   leader_key.c \
 			   power.c \
-			   pins.c \
 			   twi.c \
 			   leds.c
 

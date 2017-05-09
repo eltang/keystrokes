@@ -12,7 +12,7 @@ void power_init(void)
     for (uint8_t i = sizeof(unused_pins) / sizeof(unused_pins[0]); i--;) {
         pin = unused_pins[i];
 
-        *pin.registers[PORT] |= pin.mask;
+        *pins_addr_to_reg(pin.addr, PORT) |= pin.mask;
     }
 #ifndef USE_TWI
     temp |= 1 << PRTWI;

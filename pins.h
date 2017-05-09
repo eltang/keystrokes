@@ -4,21 +4,7 @@
 #include <stdint.h>
 #include <avr/io.h>
 
-#define PIN(letter, number) { PORT_IO_REGISTERS(letter), 1 << number }
-
-#define PORT_IO_REGISTERS(letter) \
-(letter == A ? port_a_io_registers : \
-letter == B ? port_b_io_registers : \
-letter == C ? port_c_io_registers : \
-letter == D ? port_d_io_registers : \
-letter == E ? port_e_io_registers : \
-letter == F ? port_f_io_registers : \
-letter == G ? port_f_io_registers : \
-letter == H ? port_f_io_registers : \
-letter == I ? port_f_io_registers : \
-letter == J ? port_f_io_registers : \
-letter == K ? port_f_io_registers : \
-letter == L ? port_f_io_registers : 0)
+#define PIN(letter, number) { &PIN ## letter, 1 << number }
 
 enum {
     PIN,
@@ -26,37 +12,20 @@ enum {
     PORT
 };
 
-enum {
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L
-};
-
 struct pin {
-    volatile uint8_t *const __flash *registers;
+    volatile uint8_t *addr;
     uint8_t mask;
 };
+__attribute__((always_inline))
+static inline volatile uint8_t *pins_addr_to_reg(volatile uint8_t *addr, uint8_t reg);
 
-extern volatile uint8_t *const __flash port_a_io_registers[3];
-extern volatile uint8_t *const __flash port_b_io_registers[3];
-extern volatile uint8_t *const __flash port_c_io_registers[3];
-extern volatile uint8_t *const __flash port_d_io_registers[3];
-extern volatile uint8_t *const __flash port_e_io_registers[3];
-extern volatile uint8_t *const __flash port_f_io_registers[3];
-extern volatile uint8_t *const __flash port_g_io_registers[3];
-extern volatile uint8_t *const __flash port_h_io_registers[3];
-extern volatile uint8_t *const __flash port_i_io_registers[3];
-extern volatile uint8_t *const __flash port_j_io_registers[3];
-extern volatile uint8_t *const __flash port_k_io_registers[3];
-extern volatile uint8_t *const __flash port_l_io_registers[3];
+static inline volatile uint8_t *pins_addr_to_reg(volatile uint8_t *addr, uint8_t reg)
+{
+#ifdef __AVR_ATmega128__
+    if (addr == &PINF && reg != PIN)
+        return &DDRF - 1 + reg;
+#endif
+    return addr + reg;
+}
 
 #endif
