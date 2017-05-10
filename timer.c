@@ -23,6 +23,11 @@ uint32_t timer_read(void)
     return ret;
 }
 
+void timer_increment(void)
+{
+    ++count;
+}
+
 ISR(TIMER0_COMPA_vect)
 {
     ++count;

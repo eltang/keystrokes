@@ -158,6 +158,8 @@ int main(void)
 
     SetupHardware();
 
+    USB_Device_EnableSOFEvents();
+
     /* Create a regular character stream for the interface so that it can be used with the stdio.h functions */
 	CDC_Device_CreateStream(&VirtualSerial_CDC_Interface, &USBSerialStream);
 
@@ -201,10 +203,10 @@ void SetupHardware()
     PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
 #endif
     /* Hardware Initialization */
+    timer_init();
     USB_Init();
     power_init();
     leds_init();
-    timer_init();
 #ifdef USE_TWI
     i2cStart(&i2cconfig);
 #endif
@@ -214,11 +216,13 @@ void SetupHardware()
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void)
 {
+    timer_disable();
 }
 
 /** Event handler for the library USB Disconnection event. */
 void EVENT_USB_Device_Disconnect(void)
 {
+    timer_enable();
 }
 
 /** Event handler for the library USB Configuration Changed event. */
@@ -232,8 +236,6 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 #ifdef USE_VIRTUAL_SERIAL
     ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 #endif
-
-    USB_Device_EnableSOFEvents();
 }
 
 /** Event handler for the library USB Control Request reception event. */
@@ -253,6 +255,17 @@ void EVENT_USB_Device_StartOfFrame(void)
     HID_Device_MillisecondElapsed(&Keyboard_HID_Interface);
     HID_Device_MillisecondElapsed(&Mouse_HID_Interface);
     HID_Device_MillisecondElapsed(&EnhancedKeyboard_HID_Interface);
+    timer_increment();
+}
+
+void EVENT_USB_Device_Suspend(void)
+{
+    timer_enable();
+}
+
+void EVENT_USB_Device_WakeUp(void)
+{
+    timer_disable();
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
