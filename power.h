@@ -1,7 +1,8 @@
 #ifndef POWER_H
 #define POWER_H
 
-void power_init(void);
+__attribute__((always_inline))
+static inline void power_init(void);
 
 #ifdef USE_TWI
 #define PRTWI_VALUE 0
@@ -21,5 +22,11 @@ void power_init(void);
 
 #define PRR0_VALUE (PRTWI_VALUE | PRTIM1_VALUE | PRSPI_VALUE | PRADC_VALUE)
 #define PRR1_VALUE (PRTIM4_VALUE | PRTIM3_VALUE | PRUSART1_VALUE)
+
+static inline void power_init(void)
+{
+    PRR0 = PRR0_VALUE;
+    PRR1 = PRR1_VALUE;
+}
 
 #endif

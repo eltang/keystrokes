@@ -33,7 +33,6 @@ SRC          = $(TARGET).c \
 			   layers.c \
 			   keystrokes.c \
 			   leader_key.c \
-			   power.c \
 			   twi.c \
 			   leds.c
 
