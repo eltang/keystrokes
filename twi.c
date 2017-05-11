@@ -26,6 +26,7 @@
  * @{
  */
 #include "twi.h"
+#include <avr/sleep.h>
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -281,8 +282,14 @@ uint8_t i2cMasterTransmit(uint8_t addr,
   I2CDriver.rxidx = 0;
 
   TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
-  while (TWCR & 1 << TWIE)
-    ;
+  while (TWCR & 1 << TWIE) {
+    set_sleep_mode(SLEEP_MODE_IDLE);
+    cli();
+    sleep_enable();
+    sei();
+    sleep_cpu();
+    sleep_disable();
+  }
   return I2CDriver.errors;
 }
 
@@ -319,8 +326,14 @@ uint8_t i2cMasterReceive(uint8_t addr, uint8_t *rxbuf, size_t rxbytes) {
 
   /* Send START */
   TWCR = ((1 << TWSTA) | (1 << TWINT) | (1 << TWEN) | (1 << TWIE));
-  while (TWCR & 1 << TWIE)
-    ;
+  while (TWCR & 1 << TWIE) {
+    set_sleep_mode(SLEEP_MODE_IDLE);
+    cli();
+    sleep_enable();
+    sei();
+    sleep_cpu();
+    sleep_disable();
+  }
   return I2CDriver.errors;
 }
 
