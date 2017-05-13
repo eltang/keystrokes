@@ -43,6 +43,7 @@
 #include "keystrokes.h"
 #include "power.h"
 #include "leds.h"
+#include "avr/sleep.h"
 
 bool HostReady;
 
@@ -171,6 +172,18 @@ int main(void)
 
     for (;;)
     {
+        if (USB_DeviceState == DEVICE_STATE_Suspended) {
+            set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+            cli();
+            sleep_enable();
+            sei();
+            sleep_cpu();
+            sleep_disable();
+            if (matrix_switches_closed() && USB_Device_RemoteWakeupEnabled) {
+                USB_Device_SendRemoteWakeup();
+                while (USB_DeviceState == DEVICE_STATE_Suspended);
+            }
+        }
 #ifdef USE_VIRTUAL_SERIAL
         /* Must throw away unused bytes from the host, or it will lock up while waiting for the device */
         CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
@@ -209,7 +222,6 @@ void SetupHardware()
     PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
 #endif
     /* Hardware Initialization */
-    timer_init();
     USB_Init();
     power_init();
     leds_init();
@@ -222,13 +234,11 @@ void SetupHardware()
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void)
 {
-    timer_disable();
 }
 
 /** Event handler for the library USB Disconnection event. */
 void EVENT_USB_Device_Disconnect(void)
 {
-    timer_enable();
 }
 
 /** Event handler for the library USB Configuration Changed event. */
@@ -266,12 +276,17 @@ void EVENT_USB_Device_StartOfFrame(void)
 
 void EVENT_USB_Device_Suspend(void)
 {
-    timer_enable();
+    WDTCSR |= 1 << WDCE | 1 << WDE;
+    WDTCSR = 1 << WDIE;
+}
+
+ISR(WDT_vect)
+{
 }
 
 void EVENT_USB_Device_WakeUp(void)
 {
-    timer_disable();
+    wdt_disable();
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.

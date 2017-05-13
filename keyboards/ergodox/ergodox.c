@@ -51,6 +51,28 @@ void matrix_init(void)
     i2cMasterTransmit(MCP23018_ADDR, transmission, 2, 0, 0);
 }
 
+bool matrix_switches_closed(void)
+{
+    uint8_t transmission[2];
+    bool switches_closed = 0;
+
+    transmission[0] = IODIRA_ADDR;
+    transmission[1] = 0;
+    i2cMasterTransmit(MCP23018_ADDR, transmission, 2, 0, 0);
+    DDRB |= 1 << 3 | 1 << 2 | 1 << 1 | 1;
+    DDRD |= 1 << 3 | 1 << 2;
+    DDRC |= 1 << 6;
+    transmission[0] = GPIOB_ADDR;
+    i2cMasterTransmit(MCP23018_ADDR, transmission, 1, &GPIOB_state, 1);
+    if ((uint8_t)~PINF & ~(1 << 3 | 1 << 2) || (uint8_t)~GPIOB_state & ~(1 << 6 | 1 << 7))
+        switches_closed = 1;
+    matrix_deactivate_output(0);
+    DDRB &= ~(1 << 3 | 1 << 2 | 1 << 1 | 1);
+    DDRD &= ~(1 << 3 | 1 << 2);
+    DDRC &= ~(1 << 6);
+    return switches_closed;
+}
+
 bool matrix_read_input(uint8_t input, uint8_t output)
 {
     if (output > 6)

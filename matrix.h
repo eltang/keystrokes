@@ -16,5 +16,6 @@ void matrix_deactivate_output(uint8_t output);
 bool matrix_read_input(uint8_t input, uint8_t output);
 void matrix_init(void);
 void matrix_scan(void);
+bool matrix_switches_closed(void);
 
 #endif
