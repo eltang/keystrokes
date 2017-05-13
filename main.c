@@ -44,6 +44,8 @@
 #include "power.h"
 #include "leds.h"
 
+bool HostReady;
+
 #ifdef USE_VIRTUAL_SERIAL
 /** LUFA CDC Class driver interface configuration and state information. This structure is
  *  passed to all CDC Class driver functions, so that multiple instances of the same class
@@ -360,7 +362,7 @@ void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const C
        application blocking while waiting for a host to become ready and read
        in the pending data from the USB endpoints.
     */
-    bool HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
+    HostReady = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) != 0;
 }
 
 void SendKeyboardReport(void)

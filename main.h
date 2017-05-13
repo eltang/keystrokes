@@ -75,5 +75,6 @@
 #ifdef USE_VIRTUAL_SERIAL
         extern FILE USBSerialStream;
 #endif
+        extern bool HostReady;
 
 #endif
