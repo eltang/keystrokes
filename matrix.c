@@ -34,23 +34,6 @@ static const __flash struct pin output_pins[OUTPUTS] = OUTPUT_PINS;
 static const __flash struct pin input_pins[INPUTS] = INPUT_PINS;
 
 __attribute__((weak))
-bool matrix_switches_closed(void)
-{
-    bool switches_closed = 0;
-
-    for (uint8_t i = OUTPUTS; i--;)
-        matrix_activate_output(i);
-    for (uint8_t i = INPUTS; i--;)
-        if (!matrix_read_input(i, 0)) {
-            switches_closed = 1;
-            break;
-        }
-    for (uint8_t i = OUTPUTS; i--;)
-        matrix_deactivate_output(i);
-    return switches_closed;
-}
-
-__attribute__((weak))
 void matrix_activate_output(uint8_t output)
 {
     struct pin pin = output_pins[output];
@@ -85,10 +68,11 @@ void matrix_init(void)
     }
 }
 
-void matrix_scan(void)
+bool matrix_scan(void)
 {
     struct keystroke keystroke;
     struct keyswitch_state *keyswitch_state;
+    bool switches_closed = 0;
 
     for (uint8_t i = OUTPUTS; i--;) {
         matrix_activate_output(i);
@@ -123,6 +107,10 @@ void matrix_scan(void)
                 }
                 break;
             }
-            keyswitch_state->state &= ~KEYSWITCH_IS_CLOSED;
+            if (keyswitch_state->state & KEYSWITCH_IS_CLOSED) {
+                keyswitch_state->state &= ~KEYSWITCH_IS_CLOSED;
+                switches_closed = 1;
+            }
         }
+    return switches_closed;
 }

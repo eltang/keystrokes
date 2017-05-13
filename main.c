@@ -179,10 +179,11 @@ int main(void)
             sei();
             sleep_cpu();
             sleep_disable();
-            if (matrix_switches_closed() && USB_Device_RemoteWakeupEnabled) {
+            if (matrix_scan() && USB_Device_RemoteWakeupEnabled) {
                 USB_Device_SendRemoteWakeup();
                 while (USB_DeviceState == DEVICE_STATE_Suspended);
             }
+            continue;
         }
 #ifdef USE_VIRTUAL_SERIAL
         /* Must throw away unused bytes from the host, or it will lock up while waiting for the device */
