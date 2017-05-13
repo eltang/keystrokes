@@ -72,6 +72,8 @@
         void SendMouseReport(void);
         void SendEnhancedKeyboardReport(void);
 
+#ifdef USE_VIRTUAL_SERIAL
         extern FILE USBSerialStream;
+#endif
 
 #endif
