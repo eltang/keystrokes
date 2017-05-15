@@ -385,25 +385,49 @@ void SendKeyboardReport(void)
 {
     uint8_t Temp = KeyboardReportCounter;
 
-    do
+    while (1) {
         HID_Device_USBTask(&Keyboard_HID_Interface);
-    while (Temp == KeyboardReportCounter);
+        if (Temp != KeyboardReportCounter)
+            break;
+        set_sleep_mode(SLEEP_MODE_IDLE);
+        cli();
+        sleep_enable();
+        sei();
+        sleep_cpu();
+        sleep_disable();
+    }
 }
 
 void SendMouseReport(void)
 {
     uint8_t Temp = MouseReportCounter;
 
-    do
+    while (1) {
         HID_Device_USBTask(&Mouse_HID_Interface);
-    while (Temp == MouseReportCounter);
+        if (Temp != MouseReportCounter)
+            break;
+        set_sleep_mode(SLEEP_MODE_IDLE);
+        cli();
+        sleep_enable();
+        sei();
+        sleep_cpu();
+        sleep_disable();
+    }
 }
 
 void SendEnhancedKeyboardReport(void)
 {
     uint8_t Temp = EnhancedKeyboardReportCounter;
 
-    do
+    while (1) {
         HID_Device_USBTask(&EnhancedKeyboard_HID_Interface);
-    while (Temp == EnhancedKeyboardReportCounter);
+        if (Temp != EnhancedKeyboardReportCounter)
+            break;
+        set_sleep_mode(SLEEP_MODE_IDLE);
+        cli();
+        sleep_enable();
+        sei();
+        sleep_cpu();
+        sleep_disable();
+    }
 }
