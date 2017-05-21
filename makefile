@@ -28,7 +28,8 @@ SRC          = $(TARGET).c \
 			   matrix.c \
 			   modifiers.c \
 			   timer.c \
-			   keyboards/planck/layouts/default.c \
+			   keyboards/red_scarf_ii/red_scarf_ii.c \
+			   keyboards/red_scarf_ii/layouts/default.c \
 			   reset.c \
 			   layers.c \
 			   keystrokes.c \
