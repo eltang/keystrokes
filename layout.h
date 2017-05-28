@@ -427,29 +427,11 @@ US_CODE_TO_SCANCODE(code)) | ((code) & ~(uint64_t)0xFFFFFFFFFF))
 ((code) & 0xFFFFFFFFFF) == 'y' ? HID_KEYBOARD_SC_O : \
 US_CODE_TO_SCANCODE(code)) | ((code) & ~(uint64_t)0xFFFFFFFFFF))
 
-#define K_CREATE_FCN(code) \
-((code) >> 8 && (code) & 0xFF ? actions_modifiers_and_scancode : \
-(code) & 0xFF ? actions_scancode : \
-(code) >> 8 ? actions_modifiers : 0)
-
-#define PM_CREATE_FCN(code) \
-((code) & 0xFF00 ? actions_modifiers_and_power_management : \
-actions_power_management)
-
-#define M_CREATE_FCN(code) \
-((code) & 0xFF0000 ? actions_modifiers_and_multimedia : actions_multimedia)
+#define K_CREATE_FCN(code) ((code) & 0xFF ? actions_scancode : actions_modifiers)
 
 #define K_CREATE_ARG(code) \
-((code) & 0xFF00 && (code) & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ (code) } : \
-(code) & 0xFF ? &(const __flash uint8_t){ (code) & 0xFF } : &(const __flash uint8_t){ (code) >> 8 })
-
-#define PM_CREATE_ARG(code) \
-((code) & 0xFF00 && (code) & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ (code) & 0xFFFF } : \
-&(const __flash uint8_t){ (code) & 0xFF })
-
-#define M_CREATE_ARG(code) \
-((code) & 0xFF0000 && (code) & 0xFFFF ? (const __flash uint8_t []){ (code) & 0xFF, (code) >> 8 & 0xFF, (code) >> 16 & 0xFF } : \
-(const __flash uint8_t *)&(const __flash uint16_t){ (code) & 0xFFFF })
+((code) & 0xFF ? (const __flash uint8_t *)&(const __flash uint16_t){ code } : \
+&(const __flash uint8_t){ (code) >> 8 })
 
 #define K(code) \
 { \
@@ -466,14 +448,14 @@ actions_power_management)
 
 #define PM(code) \
 { \
-    PM_CREATE_FCN(CODE_GET_MODIFIER(code) << 8 | ((code) & 0xFF)), \
-    PM_CREATE_ARG(CODE_GET_MODIFIER(code) << 8 | ((code) & 0xFF)) \
+    actions_power_management, \
+    &(const __flash uint16_t){ code } \
 }
 
 #define M(code) \
 { \
-    M_CREATE_FCN(CODE_GET_MODIFIER(code) << 16 | ((code) & 0xFFFF)), \
-    M_CREATE_ARG(CODE_GET_MODIFIER(code) << 16 | ((code) & 0xFFFF)) \
+    actions_multimedia, \
+    (const __flash uint8_t []){ (code) & 0xFF, (code) >> 8 & 0xFF, (uint32_t)(code) >> 16 & 0xFF } \
 }
 
 #endif

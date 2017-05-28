@@ -8,7 +8,7 @@
 #include "leader_key.h"
 #include "timer.h"
 
-void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     uint8_t code = ((const __flash uint8_t *)source_action->data)[0];
     uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[1];
@@ -37,21 +37,6 @@ void actions_modifiers(struct keystroke *keystroke, const __flash struct action 
     case KEYSTROKE_END:
         modifiers_delete(modifiers);
         modifiers_remove_disguise(modifiers);
-        break;
-    }
-}
-
-void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action)
-{
-    uint8_t code = *(const __flash uint8_t *)source_action->data;
-
-    switch (keystroke->execution_mode) {
-    case KEYSTROKE_BEGIN:
-        modifiers_set_disguise(0);
-        keys_add_scancode(code);
-        break;
-    case KEYSTROKE_END:
-        keys_delete_scancode(code);
         break;
     }
 }
@@ -303,7 +288,7 @@ void actions_leader_key(struct keystroke *keystroke, const __flash struct action
         leader_key_start(keystroke);
 }
 
-void actions_modifiers_and_power_management(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_power_management(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     uint8_t code = ((const __flash uint8_t *)source_action->data)[0];
     uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[1];
@@ -320,22 +305,7 @@ void actions_modifiers_and_power_management(struct keystroke *keystroke, const _
     }
 }
 
-void actions_power_management(struct keystroke *keystroke, const __flash struct action *source_action)
-{
-    uint8_t code = *(const __flash uint8_t *)source_action->data;
-
-    switch (keystroke->execution_mode) {
-    case KEYSTROKE_BEGIN:
-        modifiers_set_disguise(0);
-        keys_add_power_management(code);
-        break;
-    case KEYSTROKE_END:
-        keys_delete_power_management(code);
-        break;
-    }
-}
-
-void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash struct action *source_action)
+void actions_multimedia(struct keystroke *keystroke, const __flash struct action *source_action)
 {
     uint8_t code = ((const __flash uint16_t *)source_action->data)[0];
     uint8_t modifiers = ((const __flash uint8_t *)source_action->data)[2];
@@ -348,21 +318,6 @@ void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash
     case KEYSTROKE_END:
         keys_delete_multimedia(code);
         modifiers_remove_disguise(modifiers);
-        break;
-    }
-}
-
-void actions_multimedia(struct keystroke *keystroke, const __flash struct action *source_action)
-{
-    uint8_t code = *(const __flash uint16_t *)source_action->data;
-
-    switch (keystroke->execution_mode) {
-    case KEYSTROKE_BEGIN:
-        modifiers_set_disguise(0);
-        keys_add_multimedia(code);
-        break;
-    case KEYSTROKE_END:
-        keys_delete_multimedia(code);
         break;
     }
 }

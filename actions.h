@@ -66,7 +66,6 @@ struct actions_shift_switch_actions_data {
     struct actions_shift_switch_actions_storage *storage;
 };
 
-void actions_modifiers_and_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_modifiers(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_scancode(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_sequential_actions(struct keystroke *keystroke, const __flash struct action *source_action);
@@ -79,9 +78,7 @@ void actions_reset(struct keystroke *keystroke, const __flash struct action *sou
 void actions_none(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_tap_hold_actions(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_leader_key(struct keystroke *keystroke, const __flash struct action *source_action);
-void actions_modifiers_and_power_management(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_power_management(struct keystroke *keystroke, const __flash struct action *source_action);
-void actions_modifiers_and_multimedia(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_multimedia(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_oneshot_action(struct keystroke *keystroke, const __flash struct action *source_action);
 void actions_shift_switch_actions(struct keystroke *keystroke, const __flash struct action *source_action);
