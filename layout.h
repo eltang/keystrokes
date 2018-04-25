@@ -257,6 +257,19 @@ extern const __flash uint8_t leader_key_dictionary_length;
 #define MEDIA_RELOAD HID_KEYBOARD_SC_MEDIA_RELOAD
 #define MEDIA_CALCULATOR HID_KEYBOARD_SC_MEDIA_CALCULATOR
 
+#define MUTE       0xE2
+#define VOL_UP     0xE9
+#define VOL_DOWN   0xEA
+#define NEXT_TRACK 0xB5
+#define PREV_TRACK 0xB6
+#define STOP       0xB7
+#define STOP_EJECT 0xCC
+#define PLAY_PAUSE 0xCD
+
+#define POWER_DOWN 0x81
+#define SLEEP      0x82
+#define WAKE_UP    0x83
+
 #define NO_ACTION { actions_none }
 #define LAYOUT(...) \
 const __flash struct action layout[][ROWS * COLUMNS] = { __VA_ARGS__ }
